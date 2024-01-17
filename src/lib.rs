@@ -104,11 +104,13 @@ impl DeviceCode {
 
 
 
-/// Authentification Data once done.
+/// Defines the Authentification Data that you will recive.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AuthData {
-    /// The access token.
+    /// The bearer token that you recive
     pub access_token: String,
-    /// The Optional UUID.
-    pub uuid: Option<String>,
+    /// NOT THE PLAYERS UUID! This UUID Is Useful for launching.
+    pub uuid: String,
+    /// The expiry date of the token.
+    pub expires_in: i32,
 }
