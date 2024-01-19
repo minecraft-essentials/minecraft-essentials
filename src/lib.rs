@@ -30,6 +30,9 @@ use rand::Rng;
 // Local Imports
 pub use server::Info as ServerInfo;
 
+/// Xbox Live Authentification Scope.
+pub const SCOPE: &str = "XboxLive.signin";
+
 /// Minecraft OAuth Authentification Method.
 pub struct Oauth {
     url: String,
@@ -44,7 +47,7 @@ impl Oauth {
         let mut rng = rand::thread_rng();
         let port = rng.gen_range(25535..=65535);
 
-        let url = format!("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id={}&response_type=code&redirect_uri=http://localhost:{}&response_mode=query&scope=openid%20offline_access%20https%3A%2F%2Fgraph.microsoft.com%2Fmail.read&state=12345", clientid, port);
+        let url = format!("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?client_id={}&response_type=code&redirect_uri=http://localhost:{}&response_mode=query&scope={}&state=12345", clientid, port, SCOPE);
 
         // Returns the port and url as self.
         Self { url, port }
