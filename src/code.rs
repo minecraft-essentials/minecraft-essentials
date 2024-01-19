@@ -15,13 +15,12 @@
  * along with this program.
  */
 
-
 #![forbid(unsafe_code)]
 #![warn(clippy::pedantic)]
 
+use crate::SCOPE;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use crate::SCOPE;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CodeResponse {
@@ -39,12 +38,15 @@ pub struct AuthenticationResponse {
     access_token: String,
 }
 
+pub struct Info {
+    pub expires_in: u16,
+    pub token: String,
+}
 
 pub async fn device_authentication_code(client_id: &str) -> Result<CodeResponse, reqwest::Error> {
     let request_url = format!(
         "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode?client_id={}&scope={}",
-        client_id,
-        SCOPE
+        client_id, SCOPE
     );
 
     let client = Client::new();
@@ -62,7 +64,7 @@ pub async fn device_authentication_code(client_id: &str) -> Result<CodeResponse,
 pub async fn authenticate_device(
     device_code: &str,
     client_id: &str,
-) -> Result<(u16, String), reqwest::Error> {
+) -> Result<Info, reqwest::Error> {
     let client = Client::new();
     let request_url = format!(
         "https://login.microsoftonline.com/common/consumers/v2.0/token?grant_type=urn:ietf:params:oauth:grant-type:device_code&client_id={}&device_code={}",
@@ -81,5 +83,5 @@ pub async fn authenticate_device(
     let expires_in = response_data.expires_in;
     let token = response_data.access_token;
 
-    Ok((expires_in, token))
+    Ok(Info { expires_in, token })
 }
