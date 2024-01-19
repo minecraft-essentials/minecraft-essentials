@@ -74,5 +74,5 @@ let code_info = code.launch().await?;
 
 # Licensing
 
-This library is licensed under the [GPL-3.0 Licence](./LICENSE)
+This library is licensed under the [Affero-GPL-3.0 Licence](./LICENSE)
 For the templates see the [README](./templates/README.md)
