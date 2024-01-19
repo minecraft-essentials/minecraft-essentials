@@ -19,11 +19,11 @@
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
+mod code;
 mod server;
 mod token;
 mod xbox;
 mod xts;
-mod code;
 
 // External Imports
 use rand::Rng;
@@ -31,13 +31,11 @@ use rand::Rng;
 // Local Imports
 pub use server::Info as ServerInfo;
 
-/// Minecraft OAuth Authentification Method. 
+/// Minecraft OAuth Authentification Method.
 pub struct Oauth {
     url: String,
     port: u16,
 }
-
-
 
 /// Implemation of the oauth.
 impl Oauth {
@@ -59,50 +57,60 @@ impl Oauth {
     }
 
     /// The launch function
-    pub async fn launch(&self) -> std::io::Result<ServerInfo> {
+    pub async fn launch(&self, bedrockrelm: bool) -> std::io::Result<ServerInfo> {
         // Launches the temporary http server.
         server::launch(self.port).await
+        // Runs the xbox function with the code and state.
     }
 }
 
-/// Minecraft Device Code Authentification Method. 
+/// Minecraft Device Code Authentification Method.
 pub struct DeviceCode {
-    url: String,
-    message: String,
-    expires_in: u32,
-    user_code: String,
-    device_code: String,
+    /// Returns the url
+    pub url: String,
+    /// Returns the instuctions
+    pub message: String,
+    /// Provides expires
+    pub expires_in: u32,
+    /// The code you give to the user
+    pub user_code: String,
+    /// Device code for the Code:authenticate_device Proccess
+    pub device_code: String,
 }
-
 
 /// Implemation of the device code.
 impl DeviceCode {
     /// Proccess to get the code.
     pub async fn new(client_id: &str) -> Result<Self, reqwest::Error> {
-        pub const CONTENT_TYPE: &str = "application/x-www-form-urlencoded";
-        let response_data = code::code(client_id, CONTENT_TYPE).await?;
-     
-        Ok(Self {
-            url: response_data.verification_uri,
-            message: response_data.message,
-            expires_in: response_data.expires_in,
-            user_code: response_data.user_code,
-            device_code: response_data.device_code,
-        })
-     }
+        let response_data = code::device_authentication_code(client_id).await?;
 
-    /// The prelaunch stuff. 
+        // Defines all of the outputs.
+        let url = response_data.verification_uri;
+        let message = response_data.message;
+        let expires_in = response_data.expires_in;
+        let user_code = response_data.user_code;
+        let device_code = response_data.device_code;
+
+        // Returns the outputs as self.
+        Ok(Self {
+            url,
+            message,
+            expires_in,
+            user_code,
+            device_code,
+        })
+    }
+
+    /// The prelaunch stuff.
     pub fn prelaunch(&self) -> (&str, &str, u32, &str) {
         (&self.url, &self.message, self.expires_in, &self.user_code)
     }
 
     /// The launch function
-    pub async fn launch(&self, client_id: &str) {
-        let _ = code::auth(&self.device_code, client_id).await;
+    pub async fn launch(&self, client_id: &str, bedrockrelm: bool) {
+        let _ = code::authenticate_device(&self.device_code, client_id).await;
     }
 }
-
-
 
 /// Defines the Authentification Data that you will recive.
 #[derive(Debug, Clone, PartialEq, Eq)]
