@@ -18,25 +18,20 @@
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
-
-
 use reqwest::Client;
-use std::error::Error as Error;
 use serde::Deserialize;
 use serde_json::json;
-
+use std::error::Error;
 
 use crate::AuthData;
 
 #[derive(Debug, Deserialize)]
 struct MojangResponse {
-   username: String,
-   access_token: String,
-   token_type: String,
-   expires_in: i32,
+    username: String,
+    access_token: String,
+    token_type: String,
+    expires_in: i32,
 }
-
-
 
 pub async fn mojang(userhash: &str, xsts_token: &str) -> Result<AuthData, Box<dyn Error>> {
     let client = Client::new();
@@ -44,22 +39,27 @@ pub async fn mojang(userhash: &str, xsts_token: &str) -> Result<AuthData, Box<dy
     let body = json!({
         "identityToken": identity_token
     });
-    
-    let res = client.post("https://api.minecraftservices.com/authentication/login_with_xbox")
+
+    let res = client
+        .post("https://api.minecraftservices.com/authentication/login_with_xbox")
         .json(&body)
         .send()
         .await?;
-    
+
     let response: MojangResponse = res.json().await?;
-    
+
     if response.token_type != "Bearer" {
         println!("Sorry, we ran into an error in authentication.");
         return Err("Invalid token type".into());
     }
- 
+
     let access_token = response.access_token;
     let uuid = response.username;
     let expires_in = response.expires_in;
- 
-    Ok(AuthData { uuid, access_token, expires_in })
- }
+
+    Ok(AuthData {
+        uuid,
+        access_token,
+        expires_in,
+    })
+}
