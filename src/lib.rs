@@ -28,6 +28,7 @@ mod xbox;
 use rand::Rng;
 
 // Local Imports
+pub use code::Info as CodeInfo;
 pub use server::Info as ServerInfo;
 
 /// Xbox Live Authentification Scope.
@@ -109,8 +110,8 @@ impl DeviceCode {
     }
 
     /// The launch function
-    pub async fn launch(&self, client_id: &str, bedrockrelm: bool) {
-        let _ = code::authenticate_device(&self.device_code, client_id).await;
+    pub async fn launch(&self, client_id: &str, bedrockrelm: bool) -> std::io::Result<CodeInfo> {
+        code::authenticate_device(&self.device_code, client_id).await
     }
 }
 
