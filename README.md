@@ -27,9 +27,9 @@ A Package that gives all Minecraft client launchers essentials.
 
 - Essential - functionality for Minecraft Client Launchers
 - Simplifies - Minecraft Client Launcher Building.
-- Fast - proforms better than other frameworks in authentification and launching
-- Safe - Forbids UnSafe code `#![forbid(unsafe_code)]`
-- Beginner Friendly - Full documentation and examples.
+- Fast - performs better than other frameworks in authentification and launching
+- Safe - Forbids Unsafe Code `#![forbid(unsafe_code)]`
+- Beginner Friendly - Full [documentation](https://docs.rs/minecraft-eEssentials) and [examples](./templates/).
 
 ## Templates
 
@@ -63,19 +63,16 @@ let oauth_info = oauth.launch().await?;
 ```rust,ignore
 use minecraft_essentials::*;
 let client_id = "111231209837123098712";
-let oauth = Oauth::new(client_id);
-println!("Login here: {}", oauth.url());
+let code = device_code::new(client_id);
+println!("Stuff Here: {}", code.prelaunch());
 
-let oauth_info = oauth.launch().await?;
+let code_info = code.launch().await?;
 ```
 
 
-**More usages comming soon.**
+**More usages coming soon.**
 
+# Licensing
 
-
-
-## Licencing
-
-This library is licenced under the [GPL-3.0 Licence](./LICENSE)
+This library is licensed under the [GPL-3.0 Licence](./LICENSE)
 For the templates see the [README](./templates/README.md)
