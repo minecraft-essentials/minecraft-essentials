@@ -15,104 +15,114 @@
  * along with this program.
  */
 
-
- #![forbid(unsafe_code, missing_docs)]
+#![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
-use reqwest::{Client, header, Error};
+use reqwest::{header, Client, Error};
 use serde::Deserialize;
 use serde_json::json;
 
 #[derive(Deserialize)]
 pub struct Xui {
     pub uhs: String,
- }
+}
 
- #[derive(Deserialize)]
- pub struct DisplayClaims {
+#[derive(Deserialize)]
+pub struct DisplayClaims {
     pub xui: Vec<Xui>,
- }
+}
 
- #[derive(Deserialize)]
- pub struct XblOutput {
+#[derive(Deserialize)]
+pub struct XblOutput {
     pub token: String,
     pub display_claims: DisplayClaims,
- }
- 
+}
 
 pub async fn xbl(code: &str) -> Result<XblOutput, Error> {
     let url = format!("https://user.auth.xboxlive.com/user/authenticate");
     let client = Client::new();
     let rps_ticket = format!("d={}", code);
     let mut headers = header::HeaderMap::new();
-    headers.insert("Content-Type", header::HeaderValue::from_static("application/json"));
-    headers.insert("Accept", header::HeaderValue::from_static("application/json"));
+    headers.insert(
+        "Content-Type",
+        header::HeaderValue::from_static("application/json"),
+    );
+    headers.insert(
+        "Accept",
+        header::HeaderValue::from_static("application/json"),
+    );
     let body = json!({
-        "Properties": {
-            "AuthMethod": "RPS",
-            "SiteName": "user.auth.xboxlive.com",
-            "RpsTicket": rps_ticket,
-        },
-        "RelyingParty": "http://auth.xboxlive.com",
-        "TokenType": "JWT"
-     });
-     let response = client.post(url)
-     .body(body.to_string())
-     .headers(headers)
-     .send()
-     .await?;
-  
-  let launch_output: XblOutput = response.json().await?;
-  Ok(launch_output)
+       "Properties": {
+           "AuthMethod": "RPS",
+           "SiteName": "user.auth.xboxlive.com",
+           "RpsTicket": rps_ticket,
+       },
+       "RelyingParty": "http://auth.xboxlive.com",
+       "TokenType": "JWT"
+    });
+    let response = client
+        .post(url)
+        .body(body.to_string())
+        .headers(headers)
+        .send()
+        .await?;
 
+    let launch_output: XblOutput = response.json().await?;
+    Ok(launch_output)
 }
-
 
 #[derive(Deserialize)]
 pub struct XtsOutput {
-   pub token: String,
-   pub display_claims: DisplayClaims,
+    pub token: String,
+    pub display_claims: DisplayClaims,
 }
 
-
-
-
-pub async fn xsts_token(xblToken: &str, userhash: &str, bedrockRel: bool) -> Result<XtsOutput, Error> {
+pub async fn xsts_token(
+    xblToken: &str,
+    userhash: &str,
+    bedrockRel: bool,
+) -> Result<XtsOutput, Error> {
     let url = format!("https://user.auth.xboxlive.com/user/authenticate");
     let bedrock_party = "https://pocket.realms.minecraft.net/";
     let java_party = "rp://api.minecraftservices.com/";
     let party = if bedrockRel == true {
         bedrock_party
-     } else {
+    } else {
         java_party
-     };
+    };
 
     let client = Client::new();
     let mut headers = header::HeaderMap::new();
-    headers.insert("Content-Type", header::HeaderValue::from_static("application/json"));
-    headers.insert("Accept", header::HeaderValue::from_static("application/json"));
+    headers.insert(
+        "Content-Type",
+        header::HeaderValue::from_static("application/json"),
+    );
+    headers.insert(
+        "Accept",
+        header::HeaderValue::from_static("application/json"),
+    );
     let body = json!({
-        "Properties": {
-            "SandboxId": "RETAIL",
-            "UserTokens": [
-              xblToken
-            ]
-        },
-        "RelyingParty": party,
-        "TokenType": "JWT"
-     });
-     let response = client.post(url)
-     .body(body.to_string())
-     .headers(headers)
-     .send()
-     .await?;
+       "Properties": {
+           "SandboxId": "RETAIL",
+           "UserTokens": [
+             xblToken
+           ]
+       },
+       "RelyingParty": party,
+       "TokenType": "JWT"
+    });
+    let response = client
+        .post(url)
+        .body(body.to_string())
+        .headers(headers)
+        .send()
+        .await?;
 
-  let launch_output: XtsOutput = response.json().await?;
+    let launch_output: XtsOutput = response.json().await?;
 
-  if !launch_output.display_claims.xui[0].uhs.contains(userhash) {
-    panic!("An error may have hapened at xts token.");
-  } else {
-   Ok(launch_output) 
-  }
+    if !launch_output.display_claims.xui[0].uhs.contains(userhash) {
+        panic!("An error may have hapened at xts token.");
+    } else {
+        Ok(launch_output)
+    }
 }
-
