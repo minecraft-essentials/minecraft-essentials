@@ -42,7 +42,7 @@ pub async fn mojang(userhash: &str, xsts_token: &str) -> Result<AuthData, Box<dy
 
     let res = client
         .post("https://api.minecraftservices.com/authentication/login_with_xbox")
-        .json(&body)
+        .body(body.to_string())
         .send()
         .await?;
 
