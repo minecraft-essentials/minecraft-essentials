@@ -23,7 +23,6 @@ mod code;
 mod server;
 mod token;
 mod xbox;
-mod xts;
 
 // External Imports
 use rand::Rng;
