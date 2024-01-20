@@ -38,7 +38,7 @@ pub async fn launch(port: u16) -> std::io::Result<Info> {
 
     let server = tokio::spawn(
         HttpServer::new(move || {
-            App::new().app_data(tx.clone()).route(
+            App::new().app_data(actix_web::web::Data::new(tx.clone())).route(
                 "/",
                 web::get().to(|web::Query(info): web::Query<Info>, tx: web::Data<mpsc::Sender<Info>>| async move {
                     tx.try_send(info).unwrap();
