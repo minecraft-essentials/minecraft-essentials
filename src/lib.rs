@@ -1,19 +1,20 @@
-/* Minecraft-Essentials
- * Copyright (C) 2024 minecraft-essentials
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License v3.0
- * along with this program.
- */
+/*
+* Copyright (C) 2024 Mincraft-essnetials 
+
+* This program is free software: you can redistribute it and/or modify it
+* under the terms of the GNU Affero General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or (at your
+* option) any later version.
+
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public
+* License for more details.
+
+* You should have received a copy of the GNU Affero General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 
 #![doc = include_str!("../README.md")]
 #![forbid(unsafe_code, missing_docs)]
@@ -62,7 +63,7 @@ impl Oauth {
     /// The launch function
     pub async fn launch(&self, bedrockrelm: bool) -> std::io::Result<ServerInfo> {
         // Launches the temporary http server.
-        server::launch(self.port).await
+        server::launch(self.port).await;
         // Runs the xbox function with the code and state.
     }
 }
@@ -110,7 +111,7 @@ impl DeviceCode {
     }
 
     /// The launch function
-    pub async fn launch(&self, client_id: &str, bedrockrelm: bool) -> std::io::Result<CodeInfo> {
+    pub async fn launch(&self, client_id: &str, bedrockrelm: bool) -> Result<CodeInfo, reqwest::Error> {
         code::authenticate_device(&self.device_code, client_id).await
     }
 }
