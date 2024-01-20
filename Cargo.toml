@@ -13,7 +13,8 @@
 #* along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
+[workspace]
+members = ["./temp"]
 [package]
 name = "minecraft-essentials"
 version = "0.1.0"

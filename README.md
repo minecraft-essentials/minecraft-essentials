@@ -31,9 +31,6 @@ A Package that gives all Minecraft client launchers essentials.
 - Safe - Forbids Unsafe Code `#![forbid(unsafe_code)]`
 - Beginner Friendly - Full [documentation](https://docs.rs/minecraft-eEssentials) and [examples](./templates/).
 
-## Templates
-
-All templates included in this package are free to use at any time. However, please note that copying the library code is subject to the terms of the GNU General Public License 3.0. For more details, refer to our [License](../LICENSE).
 
 ## Notice
 
