@@ -63,7 +63,7 @@ impl Oauth {
     /// The launch function
     pub async fn launch(&self, bedrockrelm: bool) -> std::io::Result<ServerInfo> {
         // Launches the temporary http server.
-        server::launch(self.port).await;
+        server::launch(self.port).await
         // Runs the xbox function with the code and state.
     }
 }
