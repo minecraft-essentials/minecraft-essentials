@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2024 Mincraft-essnetials 
+* Copyright (C) 2024 Mincraft-essnetials
 
 * This program is free software: you can redistribute it and/or modify it
 * under the terms of the GNU Affero General Public License as published by
@@ -39,7 +39,7 @@ pub struct AuthenticationResponse {
 }
 
 /// Defines expiry and token
-pub struct Info {
+pub struct CodeInfo {
     /// Provides expiry
     pub expires_in: u16,
     /// Provides token
@@ -67,7 +67,7 @@ pub async fn device_authentication_code(client_id: &str) -> Result<CodeResponse,
 pub async fn authenticate_device(
     device_code: &str,
     client_id: &str,
-) -> Result<Info, reqwest::Error> {
+) -> Result<CodeInfo, reqwest::Error> {
     let client = Client::new();
     let request_url = format!(
         "https://login.microsoftonline.com/common/consumers/v2.0/token?grant_type=urn:ietf:params:oauth:grant-type:device_code&client_id={}&device_code={}",
@@ -86,5 +86,5 @@ pub async fn authenticate_device(
     let expires_in = response_data.expires_in;
     let token = response_data.access_token;
 
-    Ok(Info { expires_in, token })
+    Ok(CodeInfo { expires_in, token })
 }

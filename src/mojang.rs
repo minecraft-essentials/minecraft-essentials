@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2024 Mincraft-essnetials 
+* Copyright (C) 2024 Mincraft-essnetials
 
 * This program is free software: you can redistribute it and/or modify it
 * under the terms of the GNU Affero General Public License as published by
@@ -15,7 +15,6 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
@@ -24,7 +23,18 @@ use serde::Deserialize;
 use serde_json::json;
 use std::error::Error;
 
-use crate::AuthData;
+/// Defines the Authentification Data that you will recive.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AuthInfo {
+    /// The bearer token that you recive
+    pub access_token: String,
+    /// NOT THE PLAYERS UUID! This UUID Is Useful for launching.
+    pub uuid: String,
+    /// The expiry date of the token.
+    pub expires_in: i32,
+    /// The xts token that you will be return if bedrockrelm is true.
+    pub xts_token: Option<String>,
+}
 
 #[derive(Debug, Deserialize)]
 struct MojangResponse {
@@ -34,7 +44,7 @@ struct MojangResponse {
     expires_in: i32,
 }
 
-pub async fn mojang(userhash: &str, xsts_token: &str) -> Result<AuthData, Box<dyn Error>> {
+pub async fn token(userhash: &str, xsts_token: &str) -> Result<AuthInfo, Box<dyn Error>> {
     let client = Client::new();
     let identity_token = format!("XBL3.0 x={};{}", userhash, xsts_token);
     let body = json!({
@@ -58,9 +68,10 @@ pub async fn mojang(userhash: &str, xsts_token: &str) -> Result<AuthData, Box<dy
     let uuid = response.username;
     let expires_in = response.expires_in;
 
-    Ok(AuthData {
-        uuid,
-        access_token,
-        expires_in,
+    Ok(AuthInfo {
+        uuid: uuid,
+        access_token: access_token,
+        expires_in: expires_in,
+        xts_token: None,
     })
 }

@@ -14,7 +14,7 @@
 
 
 [workspace]
-members = ["./temp"]
+members = ["./bin/temp"]
 [package]
 name = "minecraft-essentials"
 version = "0.1.0"
@@ -24,8 +24,13 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4.4.1"
+anyhow = "1.0.79"
+base64 = "0.21.7"
+colored = "2.1.0"
 rand = "0.8.5"
 reqwest = { version = "0.11.23", features = ["json"] }
+ring = "0.17.7"
 serde = { version = "1.0.195", features = ["derive"] }
 serde_json = "1.0.111"
+sha2 = "0.10.8"
 tokio = { version = "1.35.1", features = ["full"] }

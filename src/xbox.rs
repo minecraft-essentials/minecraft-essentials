@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2024 Mincraft-essnetials 
+* Copyright (C) 2024 Mincraft-essnetials
 
 * This program is free software: you can redistribute it and/or modify it
 * under the terms of the GNU Affero General Public License as published by
@@ -15,10 +15,10 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
+use anyhow::{anyhow, Result};
 use reqwest::{header, Client, Error};
 use serde::Deserialize;
 use serde_json::json;
@@ -39,19 +39,10 @@ pub struct XblOutput {
     pub display_claims: DisplayClaims,
 }
 
-pub async fn xbl(code: &str) -> Result<XblOutput, Error> {
+pub async fn xbl(code: &str) -> Result<XblOutput, Box<dyn std::error::Error>> {
     let url = format!("https://user.auth.xboxlive.com/user/authenticate");
     let client = Client::new();
     let rps_ticket = format!("d={}", code);
-    let mut headers = header::HeaderMap::new();
-    headers.insert(
-        "Content-Type",
-        header::HeaderValue::from_static("application/json"),
-    );
-    headers.insert(
-        "Accept",
-        header::HeaderValue::from_static("application/json"),
-    );
     let body = json!({
        "Properties": {
            "AuthMethod": "RPS",
@@ -63,13 +54,23 @@ pub async fn xbl(code: &str) -> Result<XblOutput, Error> {
     });
     let response = client
         .post(url)
+        .header("Content-Type", "application/json")
+        .header("Accept", "application/json")
         .body(body.to_string())
-        .headers(headers)
         .send()
         .await?;
 
-    let launch_output: XblOutput = response.json().await?;
-    Ok(launch_output)
+    let status = response.status();
+    let response_text = response.text().await?;
+    if status.is_success() && !response_text.trim().is_empty() {
+        let launch_output: XblOutput = serde_json::from_str(&response_text)?;
+        Ok(launch_output)
+    } else {
+        let err = format!("\x1b[33mFailed to authentificate.\x1b[0m").to_string();
+        return Err(anyhow!("Response: \x1b[31m {}\x1b[0m", status)
+            .context(err)
+            .into());
+    }
 }
 
 #[derive(Deserialize)]
@@ -123,7 +124,6 @@ pub async fn xsts_token(
 
     if !launch_output.display_claims.xui[0].uhs.contains(userhash) {
         panic!("An error may have hapened at xts token.");
-    } else {
-        Ok(launch_output)
     }
+    Ok(launch_output)
 }

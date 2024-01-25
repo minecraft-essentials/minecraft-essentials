@@ -31,6 +31,7 @@ A Package that gives all Minecraft client launchers essentials.
 - Safe - Forbids Unsafe Code `#![forbid(unsafe_code)]`
 - Beginner Friendly - Full [documentation](https://docs.rs/minecraft-eEssentials) and [examples](./templates/).
 
+**This package/library is not a virus/stealer and all of the code is easily shown. We take extra procautions for viruses and stealers in the code.**
 
 ## Notice
 
@@ -72,4 +73,5 @@ let code_info = code.launch().await?;
 # Licensing
 
 This library is licensed under the [Affero-GPL-3.0 Licence](./LICENSE)
+With the licence above the header is provided [here](./HEADER)
 For the templates see the [README](./templates/README.md)
