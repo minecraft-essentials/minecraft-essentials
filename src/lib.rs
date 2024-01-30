@@ -25,17 +25,13 @@ mod oauth;
 mod pkce;
 mod xbox;
 
-use std::io::SeekFrom;
 
 // Imports
-use base64::Engine;
 pub use code::CodeInfo;
 pub use mojang::AuthInfo as AuthData;
-use rand::{thread_rng, Rng};
-use sha2::{Digest, Sha256};
 
 /// Scopes Required for Xbox Live And Minecraft Authentcation.
-pub const SCOPE: &str = "XboxLive.signin offline_access";
+pub const SCOPE: &str = "XboxLive.signin%20offline_access";
 
 /// Minecraft OAuth Authentification Method.
 pub struct Oauth {
@@ -93,10 +89,11 @@ impl Oauth {
         let http_server = oauth::server(self.port).await?;
         let code_verify_str = String::from_utf8(self.code_verify.clone()).unwrap();
         let token = oauth::token( http_server.code.expect("\x1b[31mXbox Expected code.\x1b[0m").as_str(),&self.client_id,self.port,&code_verify_str,&client_secret,
-        ).await?;
+        ).await;
+
 
         // Launches the Xbox UserHash And Xbl Token Process.
-        let xbox = xbox::xbl(&token.access_token).await?;
+        let xbox = xbox::xbl("Null").await?;
         // Launches the Xsts Token Process.
         let xts = xbox::xsts_token(
             // Gets the token from the xbox struct.

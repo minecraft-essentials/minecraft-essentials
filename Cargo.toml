@@ -14,7 +14,7 @@
 
 
 [workspace]
-members = ["./bin/temp"]
+members = ["./bin/temp", "bin/temp"]
 [package]
 name = "minecraft-essentials"
 version = "0.1.0"

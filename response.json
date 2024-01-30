@@ -1,0 +1,8 @@
+{ url: Url { scheme: "https", cannot_be_a_base: false, username: "", password: None, host: Some(Domain("login.microsoftonline.com")), port: None, path: "/consumers/oauth2/v2.0/token", query: Some("client_id=6a6bf548-5a82-41f5-9451-88b334cdc77f&scope=XboxLive.signin%20offline_access&code=M.C104_BAY.2.2797c9fe-1652-867c-b5f5-f2a10c161efd&redirect_uri=https://localhost:8000&grant_type=authorization_code&code_verifier=bNHJL77.J2ZRg32z4.VuVXG0v-qm3Rfm0xpP5rlq.6d0~sJWBTsrgssyj8_x5arrrnw6G6G-8fKUau5BzSQsXG64d4Javr5Or6VwCAtRFh7~dA61aicz-lzusWEI4zSI&client_secret=JQ18Q~ECZHP~QlcN1MBc.GPA~gFED9NNCJrvYcE"), fragment: None
+    }, status: 400, headers: {
+        "content-type": "text/html; charset=us-ascii",
+        "date": "Tue, 30 Jan 2024 16:46:36 GMT",
+        "connection": "close",
+        "content-length": "334"
+    }
+}

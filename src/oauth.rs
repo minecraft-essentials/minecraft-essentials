@@ -21,7 +21,7 @@
 
 use actix_web::{web, App, HttpResponse, HttpServer};
 use anyhow::anyhow;
-use reqwest::Client;
+use reqwest::{header::{HeaderName, HeaderValue, HeaderMap}, Client};
 use serde::Deserialize;
 use std::str;
 use tokio::sync::mpsc;
@@ -41,7 +41,7 @@ pub struct Info {
     error_description: Option<String>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct TokenInfo {
     pub access_token: String
 }
@@ -65,7 +65,7 @@ pub async fn server(port: u16) -> Result<Info, anyhow::Error> {
                 "/",
                 web::get().to(|web::Query(info): web::Query<Info>, tx: web::Data<mpsc::Sender<Info>>| async move {
                     tx.try_send(info).unwrap();
-                    HttpResponse::Ok()
+                    HttpResponse::Ok().body("If you see this the authentification has ran into an error.")
                 }),
             )
         })
@@ -96,23 +96,34 @@ pub async fn server(port: u16) -> Result<Info, anyhow::Error> {
     Ok(info)
 }
 
+
+
 pub async fn token(
     code: &str,
     client_id: &str,
     port: u16,
     code_verify: &str,
     client_secret: &str,
-) -> Result<TokenInfo, reqwest::Error> {
-    let url = format!("https://login.microsoftonline.com/consumers/oauth2/v2.0/token?client_id={}&scope={}&code={}&redirect_uri=https://localhost:{}&grant_type=authorization_code&code_verifier={}&client_secret={}", client_id, SCOPE, code, port, code_verify, client_secret);
+) -> Result<(), reqwest::Error> {
+    let url = format!("https://login.microsoftonline.com/consumers/oauth2/v2.0/token");
     let client = Client::new();
+    let mut headers = HeaderMap::new();
+    headers.insert(HeaderName::from_static("host"), HeaderValue::from_static("https://login.microsoftonline.com"));
+    headers.insert(HeaderName::from_static("content-type"), HeaderValue::from_static("application/x-www-form-urlencoded"));
+    
+    let body = format!("client_id={}&scope={}&code={}&redirect_uri=https://localhost:{}&grant_type=authorization_code&code_verifier={}&client_secret={}", client_id, SCOPE, code, port, code_verify, client_secret);
+    
     let response = client
         .post(url)
-        .header("Host", "https://login.microsoftonline.com")
-        .header("Content-Type", "application/x-www-form-urlencoded")
+        .headers(headers)
+        .body(body)
         .send()
         .await?;
 
-    let response_str: Token = response.json().await?;
-    let access_token = response_str.access_token;
-    Ok(TokenInfo {access_token})
+    println!("{:?}", response);
+    let response_str = response.json::<TokenInfo>().await?;
+
+    println!("Access Token: {}", response_str.access_token);
+
+    Ok(())
 }
