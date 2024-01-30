@@ -37,7 +37,7 @@ pub const SCOPE: &str = "XboxLive.signin%20offline_access";
 pub struct Oauth {
     url: String,
     port: u16,
-    code_verify: Vec<u8>,
+    // code_verify: Vec<u8>,
     client_id: String,
 }
 
@@ -57,7 +57,7 @@ impl Oauth {
         let code_challange = pkce::code_challenge(&code_verify);
 
         // Creates the url with the params that microsoft needs.
-        let params = format!("client_id={}&response_type={}&redirect_uri=http://localhost:{}&response_mode={}&scope={}&state=12345&code_challenge={}&code_challenge_method=S256", clientid, REQUEST_TYPE, port, REQUEST_MODE, SCOPE, code_challange);
+        let params = format!("client_id={}&response_type={}&redirect_uri=http://localhost:{}&response_mode={}&scope={}&state=12345", clientid, REQUEST_TYPE, port, REQUEST_MODE, SCOPE);
         // Create the url for microsoft authentcation.
         let url = format!(
             "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize/?{}",
@@ -68,7 +68,6 @@ impl Oauth {
         Self {
             url,
             port,
-            code_verify,
             client_id: clientid.to_string(),
         }
     }
@@ -87,8 +86,7 @@ impl Oauth {
     ) -> Result<AuthData, Box<dyn std::error::Error>> {
         // Launches the temporary http server.
         let http_server = oauth::server(self.port).await?;
-        let code_verify_str = String::from_utf8(self.code_verify.clone()).unwrap();
-        let token = oauth::token( http_server.code.expect("\x1b[31mXbox Expected code.\x1b[0m").as_str(),&self.client_id,self.port,&code_verify_str,&client_secret,
+        let token = oauth::token( http_server.code.expect("\x1b[31mXbox Expected code.\x1b[0m").as_str(),&self.client_id,self.port,&client_secret,
         ).await;
 
 

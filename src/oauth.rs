@@ -21,7 +21,7 @@
 
 use actix_web::{web, App, HttpResponse, HttpServer};
 use anyhow::anyhow;
-use reqwest::{header::{HeaderName, HeaderValue, HeaderMap}, Client};
+use reqwest::{header::{HeaderMap, HeaderValue, CONTENT_TYPE, HOST}, Client};
 use serde::Deserialize;
 use std::str;
 use tokio::sync::mpsc;
@@ -102,16 +102,15 @@ pub async fn token(
     code: &str,
     client_id: &str,
     port: u16,
-    code_verify: &str,
     client_secret: &str,
 ) -> Result<(), reqwest::Error> {
     let url = format!("https://login.microsoftonline.com/consumers/oauth2/v2.0/token");
     let client = Client::new();
     let mut headers = HeaderMap::new();
-    headers.insert(HeaderName::from_static("host"), HeaderValue::from_static("https://login.microsoftonline.com"));
-    headers.insert(HeaderName::from_static("content-type"), HeaderValue::from_static("application/x-www-form-urlencoded"));
+    headers.insert(HOST, HeaderValue::from_static("https://login.microsoftonline.com"));
+    headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/x-www-form-urlencoded"));
     
-    let body = format!("client_id={}&scope={}&code={}&redirect_uri=https://localhost:{}&grant_type=authorization_code&code_verifier={}&client_secret={}", client_id, SCOPE, code, port, code_verify, client_secret);
+    let body = format!("client_id={}&scope={}&code={}&redirect_uri=https://localhost:{}&grant_type=authorization_code&client_secret={}", client_id, SCOPE, code, port, client_secret);
     
     let response = client
         .post(url)
