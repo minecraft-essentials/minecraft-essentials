@@ -104,25 +104,20 @@ pub async fn token(
     port: u16,
     client_secret: &str,
 ) -> Result<(), reqwest::Error> {
-    let url = format!("https://login.microsoftonline.com/consumers/oauth2/v2.0/token");
+    let url = format!("https://login.microsoftonline.com/consumers/oauth2/v2.0/token?client_id={}&scope={}&code={}&redirect_uri=https://localhost:{}&grant_type=authorization_code&client_secret={}", client_id, SCOPE, code, port, client_secret);
     let client = Client::new();
     let mut headers = HeaderMap::new();
     headers.insert(HOST, HeaderValue::from_static("https://login.microsoftonline.com"));
-    headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/x-www-form-urlencoded"));
-    
-    let body = format!("client_id={}&scope={}&code={}&redirect_uri=https://localhost:{}&grant_type=authorization_code&client_secret={}", client_id, SCOPE, code, port, client_secret);
-    
+    headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+   
     let response = client
         .post(url)
         .headers(headers)
-        .body(body)
         .send()
         .await?;
 
-    println!("{:?}", response);
-    let response_str = response.json::<TokenInfo>().await?;
-
-    println!("Access Token: {}", response_str.access_token);
+    let text = response.text().await?;
+        println!("{:?}", text);
 
     Ok(())
 }

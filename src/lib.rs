@@ -22,7 +22,6 @@
 mod code;
 mod mojang;
 mod oauth;
-mod pkce;
 mod xbox;
 
 
@@ -31,13 +30,12 @@ pub use code::CodeInfo;
 pub use mojang::AuthInfo as AuthData;
 
 /// Scopes Required for Xbox Live And Minecraft Authentcation.
-pub const SCOPE: &str = "XboxLive.signin%20offline_access";
+pub const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
 
 /// Minecraft OAuth Authentification Method.
 pub struct Oauth {
     url: String,
     port: u16,
-    // code_verify: Vec<u8>,
     client_id: String,
 }
 
@@ -52,9 +50,6 @@ impl Oauth {
         const REQUEST_MODE: &str = "query";
         // Request Type for params.
         const REQUEST_TYPE: &str = "code";
-
-        let code_verify = pkce::verifier(128);
-        let code_challange = pkce::code_challenge(&code_verify);
 
         // Creates the url with the params that microsoft needs.
         let params = format!("client_id={}&response_type={}&redirect_uri=http://localhost:{}&response_mode={}&scope={}&state=12345", clientid, REQUEST_TYPE, port, REQUEST_MODE, SCOPE);
