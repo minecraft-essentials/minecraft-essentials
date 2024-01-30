@@ -84,6 +84,8 @@ impl Oauth {
         let token = oauth::token( http_server.code.expect("\x1b[31mXbox Expected code.\x1b[0m").as_str(),&self.client_id,self.port,&client_secret,
         ).await;
 
+        println!("{:?}", token);
+
 
         // Launches the Xbox UserHash And Xbl Token Process.
         let xbox = xbox::xbl("Null").await?;

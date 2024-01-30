@@ -20,10 +20,14 @@
 //! The server for OAauth login Server.
 
 use actix_web::{web, App, HttpResponse, HttpServer};
-use anyhow::anyhow;
-use reqwest::{header::{HeaderMap, HeaderValue, CONTENT_TYPE, HOST}, Client};
+use anyhow::{anyhow, Ok};
+use core::fmt;
+use reqwest::{
+    header::{HeaderMap, HeaderValue, CONTENT_TYPE, HOST},
+    Client,
+};
 use serde::Deserialize;
-use std::str;
+use std::fmt::Display;
 use tokio::sync::mpsc;
 
 use crate::SCOPE;
@@ -43,18 +47,27 @@ pub struct Info {
 
 #[derive(Deserialize, Debug)]
 pub struct TokenInfo {
-    pub access_token: String
+    pub access_token: String,
 }
 
 #[derive(Deserialize, Debug)]
-struct Token {
-    access_token: String,
-    expires_in: u16,
-    refresh_token: String,
-    id_token: String,
+pub struct Token {
+    pub access_token: String,
+    pub expires_in: u16,
+    pub refresh_token: String,
+    pub id_token: String,
 }
 
+#[derive(Debug)]
+pub struct TokenError {}
 
+impl std::error::Error for TokenError {}
+
+impl Display for TokenError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Token Error")
+    }
+}
 
 pub async fn server(port: u16) -> Result<Info, anyhow::Error> {
     let (tx, mut rx) = mpsc::channel::<Info>(1);
@@ -96,28 +109,26 @@ pub async fn server(port: u16) -> Result<Info, anyhow::Error> {
     Ok(info)
 }
 
-
-
 pub async fn token(
     code: &str,
     client_id: &str,
     port: u16,
     client_secret: &str,
-) -> Result<(), reqwest::Error> {
-    let url = format!("https://login.microsoftonline.com/consumers/oauth2/v2.0/token?client_id={}&scope={}&code={}&redirect_uri=https://localhost:{}&grant_type=authorization_code&client_secret={}", client_id, SCOPE, code, port, client_secret);
+) -> Result<Token, TokenError> {
+    let url = format!("https://login.microsoftonline.com/consumers/oauth2/v2.0/token");
     let client = Client::new();
-    let mut headers = HeaderMap::new();
-    headers.insert(HOST, HeaderValue::from_static("https://login.microsoftonline.com"));
-    headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-   
-    let response = client
-        .post(url)
-        .headers(headers)
-        .send()
-        .await?;
 
-    let text = response.text().await?;
-        println!("{:?}", text);
+    let body = format!("client_id={}&scope={}&redirect_uri=http://localhost:{}&grant_type=authorization_code&code={}&client_secret={}", client_id, SCOPE, port, code, client_secret);
 
-    Ok(())
+    let result = client.post(url).body(body).send().await;
+    if let std::result::Result::Ok(response) = result {
+        let text = response.text().await.map_err( |_| TokenError {})?;
+        if let std::result::Result::Ok(token) = serde_json::from_str::<Token>(&text) {
+            std::result::Result::Ok(token)
+        } else {
+            Err(TokenError {})
+        }
+    } else {
+        Err(TokenError {})
+    }
 }

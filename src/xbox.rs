@@ -123,7 +123,7 @@ pub async fn xsts_token(
     let launch_output: XtsOutput = response.json().await?;
 
     if !launch_output.display_claims.xui[0].uhs.contains(userhash) {
-        panic!("An error may have hapened at xts token.");
+        panic!("An error may have happened at xts token.");
     }
     Ok(launch_output)
 }
