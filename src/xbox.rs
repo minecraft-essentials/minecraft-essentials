@@ -79,14 +79,13 @@ pub struct XtsOutput {
 }
 
 pub async fn xsts_token(
-    xblToken: &str,
-    userhash: &str,
-    bedrockRel: bool,
+    xbl_token: &str,
+    bedrock_rel: bool,
 ) -> Result<XtsOutput, XTSError> {
     let url = format!("https://xsts.auth.xboxlive.com/xsts/authorize");
     let bedrock_party = "https://pocket.realms.minecraft.net/";
     let java_party = "rp://api.minecraftservices.com/";
-    let party = if bedrockRel == true {
+    let party = if bedrock_rel == true {
         bedrock_party
     } else {
         java_party
@@ -106,7 +105,7 @@ pub async fn xsts_token(
        "Properties": {
            "SandboxId": "RETAIL",
            "UserTokens": [
-            format!("{}",xblToken)
+            format!("{}",xbl_token)
            ]
        },
        "RelyingParty": party,

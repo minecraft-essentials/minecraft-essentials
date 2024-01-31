@@ -26,11 +26,12 @@ mod xbox;
 mod errors;
 
 // Imports
-pub use code::CodeInfo;
 pub use mojang::AuthInfo as AuthData;
 
 /// Scopes Required for Xbox Live And Minecraft Authentcation.
 pub const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
+/// A Message for experimental Features.
+pub const MESSAGE: &'static str = "\x1b[33mNOTICE: You are using and Experiemntal Feature.\x1b[0m";
 
 /// Minecraft OAuth Authentification Method.
 pub struct Oauth {
@@ -115,8 +116,6 @@ impl Oauth {
         let xts = xbox::xsts_token(
             // Gets the token from the xbox struct.
             &xbox.token,
-            // Gets the userhash from the xbox struct.
-            &xbox.display_claims.xui[0].uhs,
             // Gets the bedrockRelm from input.
             bedrockrelm,
         )
@@ -145,6 +144,8 @@ impl Oauth {
 impl DeviceCode {
     /// Proccess to get the code.
     pub async fn new(client_id: &str) -> Result<Self, reqwest::Error> {
+        println!("{}", MESSAGE);
+        println!("-------");
         // Function to start a new device code.
         let response_data = code::device_authentication_code(client_id).await?;
         let client_id_str = client_id.to_string();
@@ -166,8 +167,21 @@ impl DeviceCode {
     }
 
     /// Launches the device code authentifcation.
-    pub async fn launch(&self, bedrockrelm: bool) -> Result<CodeInfo, reqwest::Error> {
-        code::authenticate_device(&self.device_code, &self.client_id).await
+    pub async fn launch(&self, bedrockrelm: bool) -> Result<AuthData, Box<dyn std::error::Error>> {
+        let token = code::authenticate_device(&self.device_code, &self.client_id).await?;
+        let xbox = xbox::xbl(&token.token).await?;
+        let xts = xbox::xsts_token(&xbox.token,  bedrockrelm).await?;
+        if bedrockrelm == true {
+            return Ok(AuthData {
+                access_token: "null".to_string(),
+                uuid: "null".to_string(),
+                expires_in: 0,
+                // Sets the xts token to the xts token.
+                xts_token: Some(xts.token),
+            });
+        } else {
+            return Ok(mojang::token(&xbox.display_claims.xui[0].uhs, &xts.token).await?);
+        }
     }
 }
 

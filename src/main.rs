@@ -37,6 +37,6 @@ async fn launch_gradle() {}
 
 #[tokio::main]
 async fn main() {
-    oauth().await;
-    // device().await;
+    // oauth().await;
+    device().await;
 }
