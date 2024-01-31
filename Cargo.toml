@@ -18,11 +18,17 @@
 
 
 [package]
+authors = ["Eveeifyeve <eveeg1971@gmail.com>"]
 name = "minecraft-essentials"
+keywords = ["Minecraft", "MinecraftClient"]
 description = "A Package that gives all Minecraft client launchers essentials."
 license-file = "LICENSE"
+documentation = "https://docs.rs/minecraft-essentials"
 version = "0.2.5"
 edition = "2021"
+homepage = "https://minecraft-essentials.github.io"
+readme = "README.md"
+repository = "https://github.com/minecraft-essentials/minecraft-essentials"
 
 
 [[bin]]
@@ -43,3 +49,6 @@ serde = { version = "1.0.195", features = ["derive"] }
 serde_json = "1.0.111"
 sha2 = "0.10.8"
 tokio = { version = "1.35.1", features = ["full"] }
+
+[lints.rust]
+unsafe_code = { level = "forbid", priority = 0 }
