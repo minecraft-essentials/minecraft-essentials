@@ -820,6 +820,7 @@ dependencies = [
  "anyhow",
  "base64",
  "colored",
+ "dotenv",
  "rand",
  "reqwest",
  "ring",
@@ -1364,15 +1365,6 @@ checksum = "a75fb188eb626b924683e3b95e3a48e63551fcfb51949de2f06a9d91dbee93c9"
 dependencies = [
  "core-foundation-sys",
  "libc",
-]
-
-[[package]]
-name = "temp"
-version = "0.1.0"
-dependencies = [
- "dotenv",
- "minecraft-essentials",
- "tokio",
 ]
 
 [[package]]

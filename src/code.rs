@@ -39,6 +39,7 @@ pub struct AuthenticationResponse {
 }
 
 /// Defines expiry and token
+#[derive(Debug)]
 pub struct CodeInfo {
     /// Provides expiry
     pub expires_in: u16,
@@ -48,14 +49,15 @@ pub struct CodeInfo {
 
 pub async fn device_authentication_code(client_id: &str) -> Result<CodeResponse, reqwest::Error> {
     let request_url = format!(
-        "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode?client_id={}&scope={}",
-        client_id, SCOPE
+        "https://login.microsoftonline.com/consumers/oauth2/v2.0/devicecode",
     );
+
+    let body = format!("client_id={}&scope={}", client_id, SCOPE);
 
     let client = Client::new();
     let response = client
         .post(request_url)
-        .header("Content-Type", "application/x-www-form-urlencoded")
+        .body(body)
         .send()
         .await?;
 

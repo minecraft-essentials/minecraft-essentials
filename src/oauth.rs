@@ -22,10 +22,7 @@
 use actix_web::{web, App, HttpResponse, HttpServer};
 use anyhow::{anyhow, Ok};
 use core::fmt;
-use reqwest::{
-    header::{HeaderMap, HeaderValue, CONTENT_TYPE, HOST},
-    Client,
-};
+use reqwest::Client;
 use serde::Deserialize;
 use std::fmt::Display;
 use tokio::sync::mpsc;
@@ -122,7 +119,7 @@ pub async fn token(
 
     let result = client.post(url).body(body).send().await;
     if let std::result::Result::Ok(response) = result {
-        let text = response.text().await.map_err( |_| TokenError {})?;
+        let text = response.text().await.map_err(|_| TokenError {})?;
         if let std::result::Result::Ok(token) = serde_json::from_str::<Token>(&text) {
             std::result::Result::Ok(token)
         } else {
