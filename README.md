@@ -35,7 +35,7 @@ A Package that gives all Minecraft client launchers essentials.
 
 ## Notice
 
-**Some packages/libraries had to be split up into separate repositories. The list is provided below.**
+**Some packages/libraries had to be split up into separate repositories. The list is provided below. This is future versions will be combined with packages.**
 
 - [NPM (Node)](https://github.com/minecraft-essentials/npm)
 

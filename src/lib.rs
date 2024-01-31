@@ -23,6 +23,7 @@ mod code;
 mod mojang;
 mod oauth;
 mod xbox;
+mod errors;
 
 // Imports
 pub use code::CodeInfo;
@@ -105,16 +106,15 @@ impl Oauth {
             self.port,
             &client_secret,
         )
-        .await;
+        .await?;
 
-        println!("{:?}", token);
 
         // Launches the Xbox UserHash And Xbl Token Process.
-        let xbox = xbox::xbl("Null").await?;
+        let xbox = xbox::xbl(&token.access_token).await?;
         // Launches the Xsts Token Process.
         let xts = xbox::xsts_token(
             // Gets the token from the xbox struct.
-            xbox.token.as_str(),
+            &xbox.token,
             // Gets the userhash from the xbox struct.
             &xbox.display_claims.xui[0].uhs,
             // Gets the bedrockRelm from input.

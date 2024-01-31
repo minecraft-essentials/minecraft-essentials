@@ -18,31 +18,39 @@
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
-use anyhow::{anyhow, Result};
-use reqwest::{header, Client, Error};
+use reqwest::{header::{self, HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE}, Client};
 use serde::Deserialize;
 use serde_json::json;
 
-#[derive(Deserialize)]
+use crate::errors::{XboxError, XTSError};
+#[derive(Deserialize, Debug)]
 pub struct Xui {
     pub uhs: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct DisplayClaims {
     pub xui: Vec<Xui>,
 }
 
-#[derive(Deserialize)]
+
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
 pub struct XblOutput {
+    pub issue_instant: String,
+    pub not_after: String,
     pub token: String,
     pub display_claims: DisplayClaims,
 }
 
-pub async fn xbl(code: &str) -> Result<XblOutput, Box<dyn std::error::Error>> {
-    let url = format!("https://user.auth.xboxlive.com/user/authenticate");
+pub async fn xbl(token: &str) -> Result<XblOutput, XboxError> {
     let client = Client::new();
-    let rps_ticket = format!("d={}", code);
+    let url = format!("https://user.auth.xboxlive.com/user/authenticate");
+    let rps_ticket = format!("d={}", token);
+    let mut headers = HeaderMap::new();
+    headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+    headers.insert(ACCEPT, HeaderValue::from_static("application/json"));
+
     let body = json!({
        "Properties": {
            "AuthMethod": "RPS",
@@ -52,29 +60,20 @@ pub async fn xbl(code: &str) -> Result<XblOutput, Box<dyn std::error::Error>> {
        "RelyingParty": "http://auth.xboxlive.com",
        "TokenType": "JWT"
     });
-    let response = client
-        .post(url)
-        .header("Content-Type", "application/json")
-        .header("Accept", "application/json")
-        .body(body.to_string())
-        .send()
-        .await?;
+    let result = client.post(url).headers(headers).body(body.to_string()).send().await;
 
-    let status = response.status();
-    let response_text = response.text().await?;
-    if status.is_success() && !response_text.trim().is_empty() {
-        let launch_output: XblOutput = serde_json::from_str(&response_text)?;
-        Ok(launch_output)
-    } else {
-        let err = format!("\x1b[33mFailed to authentificate.\x1b[0m").to_string();
-        return Err(anyhow!("Response: \x1b[31m {}\x1b[0m", status)
-            .context(err)
-            .into());
-    }
+    let std::result::Result::Ok(response) = result else { println!("Part 1"); return Err(XboxError {})};
+    let text = response.text().await.map_err(|_| XboxError {})?;
+
+    let std::result::Result::Ok(token) = serde_json::from_str::<XblOutput>(&text) else { println!("Part 2"); return Err(XboxError {})};
+    std::result::Result::Ok(token)
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "PascalCase")]
 pub struct XtsOutput {
+    pub issue_instant: String,
+    pub not_after: String,
     pub token: String,
     pub display_claims: DisplayClaims,
 }
@@ -83,8 +82,8 @@ pub async fn xsts_token(
     xblToken: &str,
     userhash: &str,
     bedrockRel: bool,
-) -> Result<XtsOutput, Error> {
-    let url = format!("https://user.auth.xboxlive.com/user/authenticate");
+) -> Result<XtsOutput, XTSError> {
+    let url = format!("https://xsts.auth.xboxlive.com/xsts/authorize");
     let bedrock_party = "https://pocket.realms.minecraft.net/";
     let java_party = "rp://api.minecraftservices.com/";
     let party = if bedrockRel == true {
@@ -107,23 +106,15 @@ pub async fn xsts_token(
        "Properties": {
            "SandboxId": "RETAIL",
            "UserTokens": [
-             xblToken
+            format!("{}",xblToken)
            ]
        },
        "RelyingParty": party,
        "TokenType": "JWT"
     });
-    let response = client
-        .post(url)
-        .body(body.to_string())
-        .headers(headers)
-        .send()
-        .await?;
-
-    let launch_output: XtsOutput = response.json().await?;
-
-    if !launch_output.display_claims.xui[0].uhs.contains(userhash) {
-        panic!("An error may have happened at xts token.");
-    }
-    Ok(launch_output)
+    let result = client.post(url).body(body.to_string()).headers(headers).send().await;
+    let std::result::Result::Ok(response) = result else { println!("Part 1"); return Err(XTSError {})};
+    let text = response.text().await.map_err(|_| XTSError {})?;
+    let std::result::Result::Ok(token) = serde_json::from_str::<XtsOutput>(&text) else { println!("Part 2"); return Err(XTSError {})};
+    Ok(token)
 }

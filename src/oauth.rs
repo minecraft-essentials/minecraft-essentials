@@ -21,13 +21,11 @@
 
 use actix_web::{web, App, HttpResponse, HttpServer};
 use anyhow::{anyhow, Ok};
-use core::fmt;
 use reqwest::Client;
 use serde::Deserialize;
-use std::fmt::Display;
 use tokio::sync::mpsc;
 
-use crate::SCOPE;
+use crate::{errors::TokenError, SCOPE};
 
 /// Infomation from the temporary http server.
 #[derive(Deserialize, Debug)]
@@ -42,29 +40,17 @@ pub struct Info {
     error_description: Option<String>,
 }
 
-#[derive(Deserialize, Debug)]
-pub struct TokenInfo {
-    pub access_token: String,
-}
 
 #[derive(Deserialize, Debug)]
 pub struct Token {
-    pub access_token: String,
+    pub token_type: String,
+    pub scope: String,
     pub expires_in: u16,
+    pub ext_expires_in: u16,
+    pub access_token: String,
     pub refresh_token: String,
-    pub id_token: String,
 }
 
-#[derive(Debug)]
-pub struct TokenError {}
-
-impl std::error::Error for TokenError {}
-
-impl Display for TokenError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Token Error")
-    }
-}
 
 pub async fn server(port: u16) -> Result<Info, anyhow::Error> {
     let (tx, mut rx) = mpsc::channel::<Info>(1);
@@ -114,18 +100,15 @@ pub async fn token(
 ) -> Result<Token, TokenError> {
     let url = format!("https://login.microsoftonline.com/consumers/oauth2/v2.0/token");
     let client = Client::new();
-
     let body = format!("client_id={}&scope={}&redirect_uri=http://localhost:{}&grant_type=authorization_code&code={}&client_secret={}", client_id, SCOPE, port, code, client_secret);
 
+
     let result = client.post(url).body(body).send().await;
-    if let std::result::Result::Ok(response) = result {
-        let text = response.text().await.map_err(|_| TokenError {})?;
-        if let std::result::Result::Ok(token) = serde_json::from_str::<Token>(&text) {
-            std::result::Result::Ok(token)
-        } else {
-            Err(TokenError {})
-        }
-    } else {
-        Err(TokenError {})
-    }
+
+
+    let std::result::Result::Ok(response) = result else { println!("Part 1"); return Err(TokenError {})}; 
+        
+    let text = response.text().await.map_err(|_| TokenError {})?;
+    let std::result::Result::Ok(token) = serde_json::from_str::<Token>(&text) else { println!("Part 2"); return Err(TokenError {})};
+    std::result::Result::Ok(token)
 }
