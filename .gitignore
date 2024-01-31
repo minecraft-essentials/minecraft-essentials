@@ -19,6 +19,8 @@
 
 
 ### ENVIROMENT VIRABLES ###
-.env
-.env.dev
-.env.local
+.env*
+.flaskenv*
+!.env.project
+.env.vault
+!.env.vault
