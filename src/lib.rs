@@ -16,7 +16,7 @@
 */
 
 #![doc = include_str!("../README.md")]
-#![forbid(unsafe_code, missing_docs)]
+#![forbid(unsafe_code, missing_docs, rustdoc::all)]
 #![warn(clippy::pedantic)]
 
 mod code;
@@ -175,12 +175,12 @@ impl DeviceCode {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dotenv::dotenv;
+    use dotenv_vault::dotenv;
     use std::env;
 
     #[tokio::test]
     async fn test_oauth_url() {
-        dotenv().ok();
+        let _ = dotenv();
         let client_id = env::var("Client_ID").expect("Expected Client ID");
         let oauth = Oauth::new(&client_id, None);
         let params = format!("client_id={}&response_type=code&redirect_uri=http://localhost:8000&response_mode=query&scope={}&state=12345", client_id, SCOPE);
@@ -193,7 +193,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_device_code_prelaunch() {
-        dotenv().ok();
+        let _ = dotenv();
         let client_id = env::var("Client_ID").expect("Expected Client ID.");
         let device_code = DeviceCode::new(&client_id).await.unwrap();
 
