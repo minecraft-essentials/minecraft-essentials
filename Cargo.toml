@@ -20,7 +20,7 @@
 [package]
 name = "minecraft-essentials"
 description = "A Package that gives all Minecraft client launchers essentials."
-license-file = "LICENSE.txt"
+license-file = "LICENSE"
 version = "0.2.5"
 edition = "2021"
 
