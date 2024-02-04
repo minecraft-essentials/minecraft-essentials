@@ -19,7 +19,7 @@
 #![warn(clippy::pedantic)]
 
 use reqwest::Client;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::error::Error;
 
@@ -36,7 +36,7 @@ pub struct AuthInfo {
     pub xts_token: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 struct MojangResponse {
     username: String,
     access_token: String,
