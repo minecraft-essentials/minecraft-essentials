@@ -1,10 +1,14 @@
 {
-    "extends": ["config:base"],
-    "packageRules": [
-       {
-         "matchDatasources": ["crates"],
-         "matchPackagePatterns": ["^.*$"],
+  "extends": ["config:base"],
+  "packageRules": [
+     {
+       "matchDatasources": ["crates"],
+       "matchPackagePatterns": ["^.*$"],
+       "enabled": true,
+       "commitMessages": {
          "enabled": true
-       }
-    ]
-   }
+       },
+       "commitConvention": "conventional"
+     }
+  ]
+ }
