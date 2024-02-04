@@ -24,7 +24,7 @@ use serde_json::json;
 use std::error::Error;
 
 /// Defines the Authentification Data that you will recive.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 pub struct AuthInfo {
     /// The bearer token that you recive
     pub access_token: String,
