@@ -52,11 +52,15 @@ Prerequisites:
 ### Oauth BearToken:
 ```rust
 use minecraft_essentials::*;
+
+
 let client_id = "";
 let client_secret = "";
 let port = None;
+
 let bedrockrel = false;
 let auth = Oauth::new(client_id, port);
+
 println!("{}", auth.url());
 
 let auth_info = auth.launch(bedrockrel, client_secret).await;
@@ -68,10 +72,14 @@ println!("{:?}", auth_info)
 ### Oauth Bedrock Relm:
 ```rust
 use minecraft_essentials::*;
+
+
 let client_id = "";
 let client_secret = "";
+
 let port = None;
 let bedrockrel = true;
+
 let auth = Oauth::new(client_id, port);
 println!("{}", auth.url());
 
