@@ -24,7 +24,7 @@ use serde_json::json;
 use std::error::Error;
 
 /// Defines the Authentification Data that you will recive.
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct AuthInfo {
     /// The bearer token that you recive
     pub access_token: String,
@@ -36,7 +36,7 @@ pub struct AuthInfo {
     pub xts_token: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize)]
 struct MojangResponse {
     username: String,
     access_token: String,
