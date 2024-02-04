@@ -16,10 +16,7 @@ Copyright (C) 2024 Mincraft-essnetials
  -->
 
 
-
-
-
-# Minecraft Essentials
+# Minecraft-Essentials
 
 A Package that gives all Minecraft client launchers essentials.
 
@@ -29,15 +26,19 @@ A Package that gives all Minecraft client launchers essentials.
 - Simplifies - Minecraft Client Launcher Building.
 - Fast - performs better than other frameworks in authentification and launching
 - Safe - Forbids Unsafe Code `#![forbid(unsafe_code)]`
-- Beginner Friendly - Full [documentation](https://docs.rs/minecraft-eEssentials) and [examples](./templates/).
+- Beginner Friendly - Full [documentation](https://docs.rs/minecraft-Essentials) and examples/template avalible on github.
+
+
+
+## Notices
 
 **This package/library is not a virus/stealer and all of the code is easily shown. We take extra procautions for viruses and stealers in the code.**
-
-## Notice
 
 **Some packages/libraries had to be split up into separate repositories. The list is provided below. This is future versions will be combined with packages.**
 
 - [NPM (Node)](https://github.com/minecraft-essentials/npm)
+
+---
 
 ## Installation
 
@@ -48,17 +49,42 @@ Prerequisites:
 
 ## Usage:
 
-### Oauth:
-```rust,ignore
+### Oauth BearToken:
+```rust
 use minecraft_essentials::*;
-let client_id = "111231209837123098712";
-let oauth = Oauth::new(client_id);
-println!("Login here: {}", oauth.url());
-let oauth_info = oauth.launch().await?;
+let client_id = "";
+let client_secret = "";
+let port = None;
+let bedrockrel = false;
+let auth = Oauth::new(client_id, port);
+println!("{}", auth.url());
+
+let auth_info = auth.launch(bedrockrel, client_secret).await;
+
+println!("{:?}", auth_info)
 ```
 
+
+### Oauth Bedrock Relm:
+```rust
+use minecraft_essentials::*;
+let client_id = "";
+let client_secret = "";
+let port = None;
+let bedrockrel = true;
+let auth = Oauth::new(client_id, port);
+println!("{}", auth.url());
+
+let auth_info = auth.launch(bedrockrel, client_secret).await;
+
+println!("{:?}", auth_info)
+```
+
+---
+
+
 ### Device_Code
-```rust,ignore
+```rust, ignore
 use minecraft_essentials::*;
 let client_id = "111231209837123098712";
 let code = device_code::new(client_id);
@@ -68,7 +94,9 @@ let code_info = code.launch().await?;
 ```
 
 
+
 **More usages coming soon.**
+
 
 # Licensing
 

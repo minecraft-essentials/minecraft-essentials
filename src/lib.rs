@@ -16,7 +16,7 @@
 */
 
 #![doc = include_str!("../README.md")]
-#![forbid(unsafe_code, missing_docs, rustdoc::all)]
+#![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
 mod code;
