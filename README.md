@@ -1,20 +1,3 @@
-<!-- 
-Copyright (C) 2024 Mincraft-essnetials 
-
-* This program is free software: you can redistribute it and/or modify it
-* under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or (at your
-* option) any later version.
-* 
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public
-* License for more details.
-* 
-* You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
- -->
-
 
 # Minecraft-Essentials
 
@@ -30,13 +13,11 @@ A Package that gives all Minecraft client launchers essentials.
 
 
 
-## Notices
+## Where is the Other Packages???
 
-**This package/library is not a virus/stealer and all of the code is easily shown. We take extra procautions for viruses and stealers in the code.**
-
-**Some packages/libraries had to be split up into separate repositories. The list is provided below. This is future versions will be combined with packages.**
-
+Some of the packages had to be split up for reasons they are located here:
 - [NPM (Node)](https://github.com/minecraft-essentials/npm)
+- [PyPi (Coming soon!)](https://github.com/minecraft-essentials/pypi)
 
 ---
 
@@ -100,7 +81,6 @@ println!("Stuff Here: {}", code.prelaunch());
 
 let code_info = code.launch().await?;
 ```
-
 
 
 **More usages coming soon.**
