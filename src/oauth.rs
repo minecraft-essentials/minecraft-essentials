@@ -1,4 +1,3 @@
-
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
@@ -9,7 +8,11 @@ use reqwest::Client;
 use serde::Deserialize;
 use tokio::sync::mpsc;
 
-use crate::{errors::{OAuthError, TokenError}, SCOPE};
+use crate::{
+    async_trait_alias::*,
+    errors::{OAuthError, TokenError},
+    SCOPE,
+};
 
 /// Infomation from the temporary http server.
 #[derive(Deserialize, Debug)]
@@ -24,9 +27,6 @@ pub struct Info {
     error_description: Option<String>,
 }
 
-
-
-
 #[derive(Deserialize, Debug)]
 pub struct Token {
     pub token_type: String,
@@ -37,8 +37,7 @@ pub struct Token {
     pub refresh_token: String,
 }
 
-
-pub async fn server(port: u16) -> Result<Info, OAuthError> {
+pub fn server(port: u16) -> Result<impl AsyncSendSync<Result<Info, OAuthError>>, OAuthError> {
     let (tx, mut rx) = mpsc::channel::<Info>(1);
 
     let server = tokio::spawn(
@@ -56,40 +55,58 @@ pub async fn server(port: u16) -> Result<Info, OAuthError> {
         .run(),
     );
 
-    let info = rx.recv().await.expect("server did not recive params");
+    Ok(async move {
+        let info = rx.recv().await.expect("server did not recive params");
 
-    if info.error.as_ref().map_or(false, |s| !s.is_empty())
-    && info
-        .error_description
-        .as_ref()
-        .map_or(false, |s| !s.is_empty())
-{
-    let err = OAuthError::AuthenticationFailure(info.error_description.unwrap());
-    return Err(err);
+        if info.error.as_ref().map_or(false, |s| !s.is_empty())
+            && info
+                .error_description
+                .as_ref()
+                .map_or(false, |s| !s.is_empty())
+        {
+            let err = OAuthError::AuthenticationFailure(info.error_description.unwrap());
+            Err(err)
+        } else {
+            server.abort();
+
+            Ok(info)
+        }
+    })
 }
 
-    server.abort();
-
-    Ok(info)
-}
-
-pub async fn token(
+pub fn token(
     code: &str,
     client_id: &str,
     port: u16,
     client_secret: &str,
-) -> Result<Token, TokenError> {
+) -> impl AsyncSendSync<Result<Token, TokenError>> {
     let url = format!("https://login.microsoftonline.com/consumers/oauth2/v2.0/token");
     let client = Client::new();
-    let body = format!("client_id={}&scope={}&redirect_uri=http://localhost:{}&grant_type=authorization_code&code={}&client_secret={}", client_id, SCOPE, port, code, client_secret);
+    let body = format!(
+      "client_id={}&scope={}&redirect_uri=http://localhost:{}&grant_type=authorization_code&code={}&client_secret={}", 
+      client_id, SCOPE, port, code, client_secret);
 
+    async move {
+        'out: {
+            let result = client.post(url).body(body).send().await;
 
-    let result = client.post(url).body(body).send().await;
+            let std::result::Result::Ok(response) = result else {
+                println!("Part 1");
+                break 'out Err(TokenError::ResponseError(
+                    "Failed to send request".to_string(),
+                ));
+            };
 
-
-    let std::result::Result::Ok(response) = result else { println!("Part 1"); return Err(TokenError::ResponseError("Failed to send request".to_string()))}; 
-        
-    let text = response.text().await.map_err(|_| TokenError::ResponseError("Failed to send request".to_string()))?;
-    let std::result::Result::Ok(token) = serde_json::from_str::<Token>(&text) else { return Err(TokenError::ResponseError("Failed to send request, Check your Client Secret.".to_string()))};
-    std::result::Result::Ok(token)
+            let text = response
+                .text()
+                .await
+                .map_err(|_| TokenError::ResponseError("Failed to send request".to_string()))?;
+            let std::result::Result::Ok(token) = serde_json::from_str::<Token>(&text) else {
+                break 'out Err(TokenError::ResponseError(
+                    "Failed to send request, Check your Client Secret.".to_string(),
+                ));
+            };
+            std::result::Result::Ok(token)
+        }
+    }
 }

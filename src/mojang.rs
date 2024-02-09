@@ -1,12 +1,12 @@
-
-
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
 use reqwest::Client;
-use serde::{Deserialize, Serialize};
-use serde_json::json;
-use std::error::Error;
+use serde::{de::value, Deserialize, Serialize};
+use serde_json::{json, Value};
+use std::{error::Error, future::Future};
+
+use crate::async_trait_alias::AsyncSendSync;
 
 /// Defines the Authentification Data that you will recive.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
@@ -29,13 +29,19 @@ struct MojangResponse {
     expires_in: i32,
 }
 
-pub async fn token(userhash: &str, xsts_token: &str) -> Result<AuthInfo, Box<dyn Error>> {
+pub fn token(
+    userhash: &str,
+    xsts_token: &str,
+) -> impl AsyncSendSync<Result<AuthInfo, Box<dyn Error>>> {
     let client = Client::new();
     let identity_token = format!("XBL3.0 x={};{}", userhash, xsts_token);
     let body = json!({
         "identityToken": identity_token
     });
+    tokeninternal(client, body)
+}
 
+async fn tokeninternal(client: Client, body: Value) -> Result<AuthInfo, Box<dyn Error>> {
     let res = client
         .post("https://api.minecraftservices.com/authentication/login_with_xbox")
         .body(body.to_string())

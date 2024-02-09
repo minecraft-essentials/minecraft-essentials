@@ -1,13 +1,13 @@
-
 #![doc = include_str!("../README.md")]
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
+pub(crate) mod async_trait_alias;
 mod code;
+mod errors;
 mod mojang;
 mod oauth;
 mod xbox;
-mod errors;
 
 // Imports
 pub use mojang::AuthInfo as AuthData;
@@ -79,7 +79,7 @@ impl Oauth {
         client_secret: &str,
     ) -> Result<AuthData, Box<dyn std::error::Error>> {
         // Launches the temporary http server.
-        let http_server = oauth::server(self.port).await?;
+        let http_server = oauth::server(self.port)?.await?;
         let token = oauth::token(
             http_server
                 .code
@@ -90,7 +90,6 @@ impl Oauth {
             &client_secret,
         )
         .await?;
-
 
         // Launches the Xbox UserHash And Xbl Token Process.
         let xbox = xbox::xbl(&token.access_token).await?;
@@ -125,21 +124,28 @@ impl Oauth {
 /// Implemation of the device code.
 impl DeviceCode {
     /// Proccess to get the code.
-    pub async fn new(client_id: &str) -> Result<Self, reqwest::Error> {
-        println!("{}", "\x1b[33mNOTICE: You are using and Experiemntal Feature.\x1b[0m");
+    pub fn new(
+        client_id: &str,
+    ) -> impl async_trait_alias::AsyncSendSync<Result<Self, reqwest::Error>> {
+        println!(
+            "{}",
+            "\x1b[33mNOTICE: You are using and Experiemntal Feature.\x1b[0m"
+        );
         // Function to start a new device code.
-        let response_data = code::device_authentication_code(client_id).await?;
         let client_id_str = client_id.to_string();
+        async move {
+            let response_data = code::device_authentication_code(&client_id_str).await?;
 
-        // Returns the outputs as self.
-        Ok(Self {
-            url: response_data.verification_uri,
-            message: response_data.message,
-            expires_in: response_data.expires_in,
-            user_code: response_data.user_code,
-            device_code: response_data.device_code,
-            client_id: client_id_str,
-        })
+            // Returns the outputs as self.
+            Ok(Self {
+                url: response_data.verification_uri,
+                message: response_data.message,
+                expires_in: response_data.expires_in,
+                user_code: response_data.user_code,
+                device_code: response_data.device_code,
+                client_id: client_id_str,
+            })
+        }
     }
 
     /// To Recive details for the device code.
@@ -151,7 +157,7 @@ impl DeviceCode {
     pub async fn launch(&self, bedrockrelm: bool) -> Result<AuthData, Box<dyn std::error::Error>> {
         let token = code::authenticate_device(&self.device_code, &self.client_id).await?;
         let xbox = xbox::xbl(&token.token).await?;
-        let xts = xbox::xsts_token(&xbox.token,  bedrockrelm).await?;
+        let xts = xbox::xsts_token(&xbox.token, bedrockrelm).await?;
         if bedrockrelm == true {
             return Ok(AuthData {
                 access_token: "null".to_string(),
