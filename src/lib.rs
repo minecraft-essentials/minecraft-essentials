@@ -14,8 +14,6 @@ pub use mojang::AuthInfo as AuthData;
 
 /// Scopes Required for Xbox Live And Minecraft Authentcation.
 pub const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
-/// A Message for experimental Features.
-pub const MESSAGE: &'static str = "\x1b[33mNOTICE: You are using and Experiemntal Feature.\x1b[0m";
 
 /// Minecraft OAuth Authentification Method.
 pub struct Oauth {
@@ -128,8 +126,7 @@ impl Oauth {
 impl DeviceCode {
     /// Proccess to get the code.
     pub async fn new(client_id: &str) -> Result<Self, reqwest::Error> {
-        println!("{}", MESSAGE);
-        println!("-------");
+        println!("{}", "\x1b[33mNOTICE: You are using and Experiemntal Feature.\x1b[0m");
         // Function to start a new device code.
         let response_data = code::device_authentication_code(client_id).await?;
         let client_id_str = client_id.to_string();

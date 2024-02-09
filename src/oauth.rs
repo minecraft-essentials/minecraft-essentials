@@ -5,12 +5,11 @@
 //! The server for OAauth login Server.
 
 use actix_web::{web, App, HttpResponse, HttpServer};
-use anyhow::{anyhow, Ok};
 use reqwest::Client;
 use serde::Deserialize;
 use tokio::sync::mpsc;
 
-use crate::{errors::TokenError, SCOPE};
+use crate::{errors::{OAuthError, TokenError}, SCOPE};
 
 /// Infomation from the temporary http server.
 #[derive(Deserialize, Debug)]
@@ -26,6 +25,8 @@ pub struct Info {
 }
 
 
+
+
 #[derive(Deserialize, Debug)]
 pub struct Token {
     pub token_type: String,
@@ -37,7 +38,7 @@ pub struct Token {
 }
 
 
-pub async fn server(port: u16) -> Result<Info, anyhow::Error> {
+pub async fn server(port: u16) -> Result<Info, OAuthError> {
     let (tx, mut rx) = mpsc::channel::<Info>(1);
 
     let server = tokio::spawn(
@@ -50,7 +51,7 @@ pub async fn server(port: u16) -> Result<Info, anyhow::Error> {
                 }),
             )
         })
-        .bind(format!("127.0.0.1:{}", port))?
+        .bind(format!("127.0.0.1:{}", port)).map_err(|e| OAuthError::BindError(e.to_string()))?
         .workers(1)
         .run(),
     );
@@ -58,19 +59,14 @@ pub async fn server(port: u16) -> Result<Info, anyhow::Error> {
     let info = rx.recv().await.expect("server did not recive params");
 
     if info.error.as_ref().map_or(false, |s| !s.is_empty())
-        && info
-            .error_description
-            .as_ref()
-            .map_or(false, |s| !s.is_empty())
-    {
-        let err = format!("\x1b[33mFailed to authenticate.\x1b[0m").to_string();
-        return Err(anyhow!(
-            "\x1b[31mResponse: {}\x1b[0m",
-            info.error_description.unwrap()
-        )
-        .context(err)
-        .into());
-    }
+    && info
+        .error_description
+        .as_ref()
+        .map_or(false, |s| !s.is_empty())
+{
+    let err = OAuthError::AuthenticationFailure(info.error_description.unwrap());
+    return Err(err);
+}
 
     server.abort();
 
@@ -91,9 +87,9 @@ pub async fn token(
     let result = client.post(url).body(body).send().await;
 
 
-    let std::result::Result::Ok(response) = result else { println!("Part 1"); return Err(TokenError {})}; 
+    let std::result::Result::Ok(response) = result else { println!("Part 1"); return Err(TokenError::ResponseError("Failed to send request".to_string()))}; 
         
-    let text = response.text().await.map_err(|_| TokenError {})?;
-    let std::result::Result::Ok(token) = serde_json::from_str::<Token>(&text) else { println!("Part 2"); return Err(TokenError {})};
+    let text = response.text().await.map_err(|_| TokenError::ResponseError("Failed to send request".to_string()))?;
+    let std::result::Result::Ok(token) = serde_json::from_str::<Token>(&text) else { return Err(TokenError::ResponseError("Failed to send request, Check your Client Secret.".to_string()))};
     std::result::Result::Ok(token)
 }

@@ -46,10 +46,10 @@ pub async fn xbl(token: &str) -> Result<XblOutput, XboxError> {
     });
     let result = client.post(url).headers(headers).body(body.to_string()).send().await;
 
-    let std::result::Result::Ok(response) = result else { println!("Part 1"); return Err(XboxError {})};
-    let text = response.text().await.map_err(|_| XboxError {})?;
+    let std::result::Result::Ok(response) = result else { println!("Part 1"); return Err(XboxError::ResponseError("Failed to send request".to_string()))};
+    let text = response.text().await.map_err(|_| XboxError::ResponseError("Failed to send request".to_string()))?;
 
-    let std::result::Result::Ok(token) = serde_json::from_str::<XblOutput>(&text) else { println!("Part 2"); return Err(XboxError {})};
+    let std::result::Result::Ok(token) = serde_json::from_str::<XblOutput>(&text) else { return Err(XboxError::ResponseError("Failed to send request".to_string()))};
     std::result::Result::Ok(token)
 }
 
@@ -96,8 +96,8 @@ pub async fn xsts_token(
        "TokenType": "JWT"
     });
     let result = client.post(url).body(body.to_string()).headers(headers).send().await;
-    let std::result::Result::Ok(response) = result else { println!("Part 1"); return Err(XTSError {})};
-    let text = response.text().await.map_err(|_| XTSError {})?;
-    let std::result::Result::Ok(token) = serde_json::from_str::<XtsOutput>(&text) else { println!("Part 2"); return Err(XTSError {})};
+    let std::result::Result::Ok(response) = result else { println!("Part  1"); return Err(XTSError::ResponseError("Failed to send request".to_string()))};
+    let text = response.text().await.map_err(|_| XTSError::ResponseError("Failed to read response text".to_string()))?;
+    let std::result::Result::Ok(token) = serde_json::from_str::<XtsOutput>(&text) else { println!("Part  2"); return Err(XTSError::ResponseError("Failed to parse response".to_string()))};
     Ok(token)
 }
