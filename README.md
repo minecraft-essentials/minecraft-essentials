@@ -108,6 +108,4 @@ let code_info = code.launch().await?;
 
 # Licensing
 
-This library is licensed under the [Affero-GPL-3.0 Licence](./LICENSE)
-With the licence above the header is provided [here](./HEADER)
-For the templates see the [README](./templates/README.md)
+This library is licensed under the [BSD 3.0 Licence](./LICENSE)
