@@ -35,3 +35,8 @@ tokio = { version = "1.36.0", features = ["full"] }
 
 [lints.rust]
 unsafe_code = { level = "forbid", priority = 0 }
+
+
+[features]
+discordrpc = []
+renew = []
