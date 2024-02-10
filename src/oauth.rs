@@ -1,31 +1,18 @@
-/*
-* Copyright (C) 2024 Mincraft-essnetials
-
-* This program is free software: you can redistribute it and/or modify it
-* under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or (at your
-* option) any later version.
-
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public
-* License for more details.
-
-* You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
 //! The server for OAauth login Server.
 
 use actix_web::{web, App, HttpResponse, HttpServer};
-use anyhow::{anyhow, Ok};
 use reqwest::Client;
 use serde::Deserialize;
 use tokio::sync::mpsc;
 
-use crate::{errors::TokenError, SCOPE};
+use crate::{
+    async_trait_alias::*,
+    errors::{OAuthError, TokenError},
+    SCOPE,
+};
 
 /// Infomation from the temporary http server.
 #[derive(Deserialize, Debug)]
@@ -40,7 +27,6 @@ pub struct Info {
     error_description: Option<String>,
 }
 
-
 #[derive(Deserialize, Debug)]
 pub struct Token {
     pub token_type: String,
@@ -51,8 +37,7 @@ pub struct Token {
     pub refresh_token: String,
 }
 
-
-pub async fn server(port: u16) -> Result<Info, anyhow::Error> {
+pub fn server(port: u16) -> Result<impl AsyncSendSync<Result<Info, OAuthError>>, OAuthError> {
     let (tx, mut rx) = mpsc::channel::<Info>(1);
 
     let server = tokio::spawn(
@@ -65,50 +50,63 @@ pub async fn server(port: u16) -> Result<Info, anyhow::Error> {
                 }),
             )
         })
-        .bind(format!("127.0.0.1:{}", port))?
+        .bind(format!("127.0.0.1:{}", port)).map_err(|e| OAuthError::BindError(e.to_string()))?
         .workers(1)
         .run(),
     );
 
-    let info = rx.recv().await.expect("server did not recive params");
+    Ok(async move {
+        let info = rx.recv().await.expect("server did not recive params");
 
-    if info.error.as_ref().map_or(false, |s| !s.is_empty())
-        && info
-            .error_description
-            .as_ref()
-            .map_or(false, |s| !s.is_empty())
-    {
-        let err = format!("\x1b[33mFailed to authenticate.\x1b[0m").to_string();
-        return Err(anyhow!(
-            "\x1b[31mResponse: {}\x1b[0m",
-            info.error_description.unwrap()
-        )
-        .context(err)
-        .into());
-    }
+        if info.error.as_ref().map_or(false, |s| !s.is_empty())
+            && info
+                .error_description
+                .as_ref()
+                .map_or(false, |s| !s.is_empty())
+        {
+            let err = OAuthError::AuthenticationFailure(info.error_description.unwrap());
+            Err(err)
+        } else {
+            server.abort();
 
-    server.abort();
-
-    Ok(info)
+            Ok(info)
+        }
+    })
 }
 
-pub async fn token(
+pub fn token(
     code: &str,
     client_id: &str,
     port: u16,
     client_secret: &str,
-) -> Result<Token, TokenError> {
+) -> impl AsyncSendSync<Result<Token, TokenError>> {
     let url = format!("https://login.microsoftonline.com/consumers/oauth2/v2.0/token");
     let client = Client::new();
-    let body = format!("client_id={}&scope={}&redirect_uri=http://localhost:{}&grant_type=authorization_code&code={}&client_secret={}", client_id, SCOPE, port, code, client_secret);
+    let body = format!(
+      "client_id={}&scope={}&redirect_uri=http://localhost:{}&grant_type=authorization_code&code={}&client_secret={}", 
+      client_id, SCOPE, port, code, client_secret);
 
+    async move {
+        'out: {
+            let result = client.post(url).body(body).send().await;
 
-    let result = client.post(url).body(body).send().await;
+            let std::result::Result::Ok(response) = result else {
+                println!("Part 1");
+                break 'out Err(TokenError::ResponseError(
+                    "Failed to send request".to_string(),
+                ));
+            };
 
-
-    let std::result::Result::Ok(response) = result else { println!("Part 1"); return Err(TokenError {})}; 
-        
-    let text = response.text().await.map_err(|_| TokenError {})?;
-    let std::result::Result::Ok(token) = serde_json::from_str::<Token>(&text) else { println!("Part 2"); return Err(TokenError {})};
-    std::result::Result::Ok(token)
+            let text = response
+                .text()
+                .await
+                .map_err(|_| TokenError::ResponseError("Failed to send request".to_string()))?;
+            let std::result::Result::Ok(token) = serde_json::from_str::<Token>(&text) else {
+                break 'out Err(TokenError::ResponseError(
+                    "Failed to send request, Check your Client Secret.".to_string(),
+                ));
+            };
+            std::result::Result::Ok(token)
+        }
+    }
 }

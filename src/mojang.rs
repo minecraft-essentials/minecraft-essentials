@@ -1,32 +1,17 @@
-/*
-* Copyright (C) 2024 Mincraft-essnetials
-
-* This program is free software: you can redistribute it and/or modify it
-* under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or (at your
-* option) any later version.
-
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public
-* License for more details.
-
-* You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
 use reqwest::Client;
-use serde::Deserialize;
-use serde_json::json;
+use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
 use std::error::Error;
 
-/// Defines the Authentification Data that you will recive.
-#[derive(Debug, Clone, PartialEq, Eq)]
+use crate::async_trait_alias::AsyncSendSync;
+
+/// Defines the Authentification Data that you will recive from mojang.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct AuthInfo {
-    /// The bearer token that you recive
+    /// The bearer token that you recive this is used in Launching, Apis.
     pub access_token: String,
     /// NOT THE PLAYERS UUID! This UUID Is Useful for launching.
     pub uuid: String,
@@ -44,13 +29,19 @@ struct MojangResponse {
     expires_in: i32,
 }
 
-pub async fn token(userhash: &str, xsts_token: &str) -> Result<AuthInfo, Box<dyn Error>> {
+pub fn token(
+    userhash: &str,
+    xsts_token: &str,
+) -> impl AsyncSendSync<Result<AuthInfo, Box<dyn Error>>> {
     let client = Client::new();
     let identity_token = format!("XBL3.0 x={};{}", userhash, xsts_token);
     let body = json!({
         "identityToken": identity_token
     });
+    tokeninternal(client, body)
+}
 
+async fn tokeninternal(client: Client, body: Value) -> Result<AuthInfo, Box<dyn Error>> {
     let res = client
         .post("https://api.minecraftservices.com/authentication/login_with_xbox")
         .body(body.to_string())

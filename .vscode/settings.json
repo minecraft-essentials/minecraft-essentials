@@ -1,6 +1,3 @@
 {
-    "editor.tokenColorCustomizations": {
-        "comments": "",
-        "textMateRules": []
-    }
+    "rust-analyzer.cargo.features": ["renew"]
 }

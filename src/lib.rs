@@ -1,37 +1,20 @@
-/*
-* Copyright (C) 2024 Mincraft-essnetials
-
-* This program is free software: you can redistribute it and/or modify it
-* under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or (at your
-* option) any later version.
-
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public
-* License for more details.
-
-* You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 #![doc = include_str!("../README.md")]
-#![forbid(unsafe_code, missing_docs, rustdoc::all)]
+#![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
+pub(crate) mod async_trait_alias;
 mod code;
+mod errors;
 mod mojang;
 mod oauth;
 mod xbox;
-mod errors;
 
 // Imports
 pub use mojang::AuthInfo as AuthData;
 
 /// Scopes Required for Xbox Live And Minecraft Authentcation.
-pub const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
-/// A Message for experimental Features.
-pub const MESSAGE: &'static str = "\x1b[33mNOTICE: You are using and Experiemntal Feature.\x1b[0m";
+pub(crate) const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
+pub(crate) const EXPERIEMNTAL_MESSAGE: &str = "\x1b[33mNOTICE: You are using and Experiemntal Feature.\x1b[0m";
 
 /// Minecraft OAuth Authentification Method.
 pub struct Oauth {
@@ -42,18 +25,22 @@ pub struct Oauth {
 
 /// Minecraft Device Code Authentification Method.
 pub struct DeviceCode {
-    /// Returns the url
-    pub url: String,
-    /// Returns the instuctions
-    pub message: String,
-    /// Provides expires
-    pub expires_in: u32,
-    /// The code you give to the user
-    pub user_code: String,
-    /// Device code for the Code:authenticate_device Proccess
-    pub device_code: String,
-
+    url: String,
+    message: String,
+    expires_in: u32,
+    user_code: String,
+    device_code: String,
     client_id: String,
+}
+
+
+/// The Method to refresh your mincraft bearer token.
+#[cfg(feature = "renew")]
+pub struct RefreshBearer {
+    refresh_token: String,
+    client_id: String,
+    port: u16,
+    client_secret: String,
 }
 
 /// Implemation of the oauth.
@@ -97,7 +84,7 @@ impl Oauth {
         client_secret: &str,
     ) -> Result<AuthData, Box<dyn std::error::Error>> {
         // Launches the temporary http server.
-        let http_server = oauth::server(self.port).await?;
+        let http_server = oauth::server(self.port)?.await?;
         let token = oauth::token(
             http_server
                 .code
@@ -108,7 +95,6 @@ impl Oauth {
             &client_secret,
         )
         .await?;
-
 
         // Launches the Xbox UserHash And Xbl Token Process.
         let xbox = xbox::xbl(&token.access_token).await?;
@@ -143,22 +129,28 @@ impl Oauth {
 /// Implemation of the device code.
 impl DeviceCode {
     /// Proccess to get the code.
-    pub async fn new(client_id: &str) -> Result<Self, reqwest::Error> {
-        println!("{}", MESSAGE);
-        println!("-------");
+    pub fn new(
+        client_id: &str,
+    ) -> impl async_trait_alias::AsyncSendSync<Result<Self, reqwest::Error>> {
+        println!(
+            "{}",
+            EXPERIEMNTAL_MESSAGE
+        );
         // Function to start a new device code.
-        let response_data = code::device_authentication_code(client_id).await?;
         let client_id_str = client_id.to_string();
+        async move {
+            let response_data = code::device_authentication_code(&client_id_str).await?;
 
-        // Returns the outputs as self.
-        Ok(Self {
-            url: response_data.verification_uri,
-            message: response_data.message,
-            expires_in: response_data.expires_in,
-            user_code: response_data.user_code,
-            device_code: response_data.device_code,
-            client_id: client_id_str,
-        })
+            // Returns the outputs as self.
+            Ok(Self {
+                url: response_data.verification_uri,
+                message: response_data.message,
+                expires_in: response_data.expires_in,
+                user_code: response_data.user_code,
+                device_code: response_data.device_code,
+                client_id: client_id_str,
+            })
+        }
     }
 
     /// To Recive details for the device code.
@@ -170,7 +162,7 @@ impl DeviceCode {
     pub async fn launch(&self, bedrockrelm: bool) -> Result<AuthData, Box<dyn std::error::Error>> {
         let token = code::authenticate_device(&self.device_code, &self.client_id).await?;
         let xbox = xbox::xbl(&token.token).await?;
-        let xts = xbox::xsts_token(&xbox.token,  bedrockrelm).await?;
+        let xts = xbox::xsts_token(&xbox.token, bedrockrelm).await?;
         if bedrockrelm == true {
             return Ok(AuthData {
                 access_token: "null".to_string(),
@@ -182,6 +174,34 @@ impl DeviceCode {
         } else {
             return Ok(mojang::token(&xbox.display_claims.xui[0].uhs, &xts.token).await?);
         }
+    }
+}
+
+#[cfg(feature = "renew")]
+impl RefreshBearer {
+    /// Creates a new instance of refreshing the bearer token.
+    pub fn new(refresh_token: &str, client_id: &str, port: Option<u16>, client_secret: &str) -> Self {
+        let port = port.unwrap_or(8000);
+        Self {
+           refresh_token: refresh_token.to_string(),
+           client_id: client_id.to_string(),
+           port: port,
+           client_secret: client_secret.to_string(),
+        }
+
+    }
+
+    /// Launches the new instance with the oauth metrhod from Previous Oauth Method Refresh Token
+    pub async fn launch_oauth(&self) {
+        let token = oauth::token(&self.refresh_token, &self.client_id, self.port, &self.client_secret);
+    }
+
+    /// Launches the new instance with the device code metrhod from Previous Device Code Method Refresh Token
+    pub async fn launch_devicecode(&self) {
+        println!(
+            "{}",
+            EXPERIEMNTAL_MESSAGE
+        );
     }
 }
 

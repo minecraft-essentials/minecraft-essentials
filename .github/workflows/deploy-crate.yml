@@ -1,0 +1,32 @@
+name: Deploy to Crates
+on:
+ push:
+    branches:
+      - main
+jobs:
+ test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        rust: [stable, nightly]
+    steps:
+      - uses: hecrj/setup-rust-action@v2
+        with:
+          rust-version: ${{ matrix.rust }}
+      - uses: actions/checkout@master
+      - name: Run tests
+        run: cargo test --verbose
+        env:
+          Client_ID: ${{secrets.ClientID}}
+          Client_Secret: ${{secrets.ClientSecret}}
+ publish:
+    needs: ["test"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hecrj/setup-rust-action@v2
+        with:
+          rust-version: stable
+      - uses: actions/checkout@master    
+      - name: Cargo Publish
+        run: cargo publish --token ${{secrets.CRATESIO_TOKEN}}

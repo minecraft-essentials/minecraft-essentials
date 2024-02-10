@@ -1,28 +1,15 @@
-/*
-* Copyright (C) 2024 Mincraft-essnetials
-
-* This program is free software: you can redistribute it and/or modify it
-* under the terms of the GNU Affero General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or (at your
-* option) any later version.
-
-* This program is distributed in the hope that it will be useful, but WITHOUT
-* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-* FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public
-* License for more details.
-
-* You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
-use reqwest::{header::{self, HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE}, Client};
+use crate::async_trait_alias::*;
+use reqwest::{
+    header::{self, HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE},
+    Client,
+};
 use serde::Deserialize;
-use serde_json::json;
+use serde_json::{json, Value};
 
-use crate::errors::{XboxError, XTSError};
+use crate::errors::{XTSError, XboxError};
 #[derive(Deserialize, Debug)]
 pub struct Xui {
     pub uhs: String,
@@ -33,7 +20,6 @@ pub struct DisplayClaims {
     pub xui: Vec<Xui>,
 }
 
-
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct XblOutput {
@@ -43,7 +29,7 @@ pub struct XblOutput {
     pub display_claims: DisplayClaims,
 }
 
-pub async fn xbl(token: &str) -> Result<XblOutput, XboxError> {
+pub fn xbl(token: &str) -> impl AsyncSendSync<Result<XblOutput, XboxError>> {
     let client = Client::new();
     let url = format!("https://user.auth.xboxlive.com/user/authenticate");
     let rps_ticket = format!("d={}", token);
@@ -60,12 +46,39 @@ pub async fn xbl(token: &str) -> Result<XblOutput, XboxError> {
        "RelyingParty": "http://auth.xboxlive.com",
        "TokenType": "JWT"
     });
-    let result = client.post(url).headers(headers).body(body.to_string()).send().await;
 
-    let std::result::Result::Ok(response) = result else { println!("Part 1"); return Err(XboxError {})};
-    let text = response.text().await.map_err(|_| XboxError {})?;
+    xbl_internal(client, url, headers, body)
+}
 
-    let std::result::Result::Ok(token) = serde_json::from_str::<XblOutput>(&text) else { println!("Part 2"); return Err(XboxError {})};
+async fn xbl_internal(
+    client: Client,
+    url: String,
+    headers: HeaderMap,
+    body: Value,
+) -> Result<XblOutput, XboxError> {
+    let result = client
+        .post(url)
+        .headers(headers)
+        .body(body.to_string())
+        .send()
+        .await;
+
+    let std::result::Result::Ok(response) = result else {
+        println!("Part 1");
+        return Err(XboxError::ResponseError(
+            "Failed to send request".to_string(),
+        ));
+    };
+    let text = response
+        .text()
+        .await
+        .map_err(|_| XboxError::ResponseError("Failed to send request".to_string()))?;
+
+    let std::result::Result::Ok(token) = serde_json::from_str::<XblOutput>(&text) else {
+        return Err(XboxError::ResponseError(
+            "Failed to send request".to_string(),
+        ));
+    };
     std::result::Result::Ok(token)
 }
 
@@ -78,10 +91,10 @@ pub struct XtsOutput {
     pub display_claims: DisplayClaims,
 }
 
-pub async fn xsts_token(
+pub fn xsts_token(
     xbl_token: &str,
     bedrock_rel: bool,
-) -> Result<XtsOutput, XTSError> {
+) -> impl AsyncSendSync<Result<XtsOutput, XTSError>> {
     let url = format!("https://xsts.auth.xboxlive.com/xsts/authorize");
     let bedrock_party = "https://pocket.realms.minecraft.net/";
     let java_party = "rp://api.minecraftservices.com/";
@@ -111,9 +124,37 @@ pub async fn xsts_token(
        "RelyingParty": party,
        "TokenType": "JWT"
     });
-    let result = client.post(url).body(body.to_string()).headers(headers).send().await;
-    let std::result::Result::Ok(response) = result else { println!("Part 1"); return Err(XTSError {})};
-    let text = response.text().await.map_err(|_| XTSError {})?;
-    let std::result::Result::Ok(token) = serde_json::from_str::<XtsOutput>(&text) else { println!("Part 2"); return Err(XTSError {})};
+
+    xsts_internal(client, url, body, headers)
+}
+
+async fn xsts_internal(
+    client: Client,
+    url: String,
+    body: Value,
+    headers: HeaderMap,
+) -> Result<XtsOutput, XTSError> {
+    let result = client
+        .post(url)
+        .body(body.to_string())
+        .headers(headers)
+        .send()
+        .await;
+    let std::result::Result::Ok(response) = result else {
+        println!("Part  1");
+        return Err(XTSError::ResponseError(
+            "Failed to send request".to_string(),
+        ));
+    };
+    let text = response
+        .text()
+        .await
+        .map_err(|_| XTSError::ResponseError("Failed to read response text".to_string()))?;
+    let std::result::Result::Ok(token) = serde_json::from_str::<XtsOutput>(&text) else {
+        println!("Part  2");
+        return Err(XTSError::ResponseError(
+            "Failed to parse response".to_string(),
+        ));
+    };
     Ok(token)
 }

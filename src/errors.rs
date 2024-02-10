@@ -1,44 +1,27 @@
-use std::fmt::Display;
-use std::error::Error;
-use core::fmt;
+use thiserror::Error;
 
-
-/// OAuth Token Error
-#[derive(Debug)]
-pub struct TokenError {}
-
-impl Error for TokenError {}
-
-impl Display for TokenError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Token Error")
-    }
+#[derive(Error, Debug)]
+pub enum TokenError {
+    #[error("Response Failed: {0}")]
+    ResponseError(String),
 }
 
-
-/// Xbox Error
-#[derive(Debug)]
-pub struct XboxError {}
-
-impl Error for XboxError {}
-
-impl Display for XboxError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Xbox Error")
-    }
+#[derive(Error, Debug)]
+pub enum XboxError {
+    #[error("Response Failed: {0}")]
+    ResponseError(String),
 }
 
-
-/// XTSError
-#[derive(Debug)]
-pub struct XTSError {}
-
-impl Error for XTSError {}
-
-impl Display for XTSError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "XTS Error")
-    }
+#[derive(Error, Debug)]
+pub enum XTSError {
+    #[error("Response Failed: {0}")]
+    ResponseError(String),
 }
 
-
+#[derive(Error, Debug)]
+pub enum OAuthError {
+    #[error("Failed to authenticate: Response: {0}")]
+    AuthenticationFailure(String),
+    #[error("Binding error: {0}")]
+    BindError(String),
+}

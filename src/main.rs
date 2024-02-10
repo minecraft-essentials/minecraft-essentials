@@ -20,7 +20,9 @@ async fn oauth() {
 async fn device() {
     let _ = dotenv();
     let client_id = env::var("Client_ID").expect("Expected Client ID");
-    let auth = DeviceCode::new(&client_id).await.expect("Failed to create device code");
+    let auth = DeviceCode::new(&client_id)
+        .await
+        .expect("Failed to create device code");
 
     println!("{:?}", auth.prelaunch());
 
@@ -33,7 +35,6 @@ async fn device() {
 async fn launch_maven() {}
 #[allow(dead_code)]
 async fn launch_gradle() {}
-
 
 #[tokio::main]
 async fn main() {

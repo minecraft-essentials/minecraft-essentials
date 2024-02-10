@@ -1,20 +1,6 @@
-# Copyright (C) 2024 Mincraft-essnetials 
-#* This program is free software: you can redistribute it and/or modify it
-#* under the terms of the GNU Affero General Public License as published by
-#* the Free Software Foundation, either version 3 of the License, or (at your
-#* option) any later version.
-#* 
-#* This program is distributed in the hope that it will be useful, but WITHOUT
-#* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#* FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public
-#* License for more details.
-#* 
-#* You should have received a copy of the GNU Affero General Public License
-#* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 
 [build]
-# Anything for build
+rustdocflags = ["--theme=ayu"]
 
 
 [package]
@@ -24,7 +10,7 @@ keywords = ["Minecraft", "MinecraftClient"]
 description = "A Package that gives all Minecraft client launchers essentials."
 license-file = "LICENSE"
 documentation = "https://docs.rs/minecraft-essentials"
-version = "0.2.6"
+version = "0.2.7"
 edition = "2021"
 homepage = "https://minecraft-essentials.github.io"
 readme = "README.md"
@@ -37,18 +23,20 @@ path = "src/main.rs"
 
 
 [dependencies]
-actix-web = "4.4.1"
-anyhow = "1.0.79"
+actix-web = "4.5.1"
 base64 = "0.21.7"
-colored = "2.1.0"
 dotenv-vault = "0.1.1"
 rand = "0.8.5"
-reqwest = { version = "0.11.23", features = ["json"] }
-ring = "0.17.7"
-serde = { version = "1.0.195", features = ["derive"] }
-serde_json = "1.0.111"
-sha2 = "0.10.8"
-tokio = { version = "1.35.1", features = ["full"] }
+reqwest = { version = "0.11.24", features = ["json"] }
+serde = { version = "1.0.196", features = ["derive"] }
+serde_json = "1.0.113"
+thiserror = "1.0.56"
+tokio = { version = "1.36.0", features = ["full"] }
 
 [lints.rust]
 unsafe_code = { level = "forbid", priority = 0 }
+
+
+[features]
+discordrpc = []
+renew = []
