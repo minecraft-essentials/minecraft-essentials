@@ -1,6 +1,6 @@
 
 [build]
-# Anything for build
+rustdocflags = ["--theme=ayu"]
 
 
 [package]
