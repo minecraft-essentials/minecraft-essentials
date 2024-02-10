@@ -14,7 +14,7 @@
 
 
 
-**Note: The bearer Token can take month/years to get.**
+**Note: The bearer Token API can take month/years to get.**
 
 
 
@@ -26,7 +26,7 @@ First you want to get started by creating a `.env` and copy and paste the `.env.
 The Client_ID is the client id from your [Azure/EntraId App](https://entra.microsoft.com/)
 The Client_Secret is the client Secret from your [Azure/EntraId App](https://entra.microsoft.com/)
 
-Note in your [Azure/EntraId App](https://entra.microsoft.com/) you need to set the redirect url to `http://localhost:PORT` The Port is `PORT`. Useally you want to set it to the port that you specifyed but if you haven't set it yet the deafult port is 8000, `http://localhost:8000`. 
+Note in your [Azure/EntraId App](https://entra.microsoft.com/) you need to set the redirect url to `http://localhost:PORT` The Port is `PORT`. Useally you want to set it to the port that you specifyed but if you haven't set it yet the deafult port is 8000 or `http://localhost:8000`. 
 
 
 
@@ -36,17 +36,8 @@ In `lib.rs` there is built in tests for testing the library using the `cargo tes
 
 If you want to just try out things you can play around with stuff in `main.rs` then to run it just do a simple `cargo run` to run the main.rs for playaround stuff and testing.
 
-To benchmark you must write a test in `lib.rs` based on [cargo-bench](https://doc.rust-lang.org/cargo/commands/cargo-bench.html) and it will tell you in seconds how long your change takes
+To benchmark you must write a test in `lib.rs` based on [cargo-bench](https://doc.rust-lang.org/cargo/commands/cargo-bench.html) and it will tell you in seconds how long your change takes.
 
-
-
-## Checklist before submiting A PR
-
-- I have used the [conventional commit specification](https://www.conventionalcommits.org/en/v1.0.0/)
-
-- I have tested/benchmark my code to prove it better than other solutions
-
-- My solution hasn't been done by someone else prior to me making a PR
 
 
 
