@@ -86,6 +86,10 @@ let code_info = code.launch().await?;
 **More usages coming soon.**
 
 
-# Licensing
+## Want to contribute?
+If you want to contrubute to this rust/main version package/library check this out [here](./contributing.md)
+
+
+## Licensing
 
 This library is licensed under the [BSD 3.0 Licence](./LICENSE)
