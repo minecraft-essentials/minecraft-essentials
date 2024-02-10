@@ -15,3 +15,6 @@ jobs:
       - uses: actions/checkout@master
       - name: Run tests
         run: cargo test --verbose
+        env:
+          Client_ID: ${{secrets.ClientID}}
+          Client_Secret: ${{secrets.ClientSecret}}
