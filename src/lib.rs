@@ -40,7 +40,7 @@ pub struct RefreshBearer {
     refresh_token: String,
     client_id: String,
     port: u16,
-    client_secret: String
+    client_secret: String,
 }
 
 /// Implemation of the oauth.

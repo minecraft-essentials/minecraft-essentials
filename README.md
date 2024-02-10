@@ -31,7 +31,7 @@ Prerequisites:
 ## Usage:
 
 ### Oauth BearToken:
-```rust
+```rust, ignore
 use minecraft_essentials::*;
 
 
@@ -51,7 +51,7 @@ println!("{:?}", auth_info)
 
 
 ### Oauth Bedrock Relm:
-```rust
+```rust, ignore
 use minecraft_essentials::*;
 
 
@@ -88,7 +88,6 @@ let code_info = code.launch().await?;
 
 ## Want to contribute?
 If you want to contrubute to this rust/main version package/library check this out [here](./contributing.md)
-
 
 ## Licensing
 
