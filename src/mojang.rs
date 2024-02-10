@@ -2,16 +2,16 @@
 #![warn(clippy::pedantic)]
 
 use reqwest::Client;
-use serde::{de::value, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use std::{error::Error, future::Future};
+use std::error::Error;
 
 use crate::async_trait_alias::AsyncSendSync;
 
-/// Defines the Authentification Data that you will recive.
+/// Defines the Authentification Data that you will recive from mojang.
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct AuthInfo {
-    /// The bearer token that you recive
+    /// The bearer token that you recive this is used in Launching, Apis.
     pub access_token: String,
     /// NOT THE PLAYERS UUID! This UUID Is Useful for launching.
     pub uuid: String,

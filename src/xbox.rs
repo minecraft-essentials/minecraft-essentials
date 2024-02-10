@@ -2,7 +2,6 @@
 #![warn(clippy::pedantic)]
 
 use crate::async_trait_alias::*;
-use actix_web::body;
 use reqwest::{
     header::{self, HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE},
     Client,
