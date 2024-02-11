@@ -4,7 +4,8 @@
 
 pub(crate) mod async_trait_alias;
 mod code;
-mod errors;
+/// Contains definitions for error types used throughout the crate.
+pub mod errors;
 mod mojang;
 mod oauth;
 mod xbox;
