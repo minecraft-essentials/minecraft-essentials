@@ -56,5 +56,16 @@ async fn handle_oauth(oauth_args: &OauthArgs) {
 }
 
 async fn handle_device_code(device_code_args: &DeviceCodeArgs) {
-    // Implement the logic for handling DeviceCodeArgs here
+   let auth = DeviceCode::new(&device_code_args.client_id).await;
+   match auth {
+    Ok(device_code) => {
+        let (url, message, expires_in, user_code) = device_code.preinfo();
+        println!("Info: URL: {}, Message: {}, Expires in: {}, User Code: {} \nWaiting for Login........", url, message, expires_in, user_code);
+
+        let authinfo = device_code.launch(device_code_args.bedrockrelm);
+    },
+    Err(e) => {
+        eprintln!("Failed to create DeviceCode: {}", e);
+    }
+}
 }
