@@ -13,8 +13,6 @@ pub(crate) mod async_trait_alias;
 #[cfg(feature = "minecraft-auth")]
 mod minecraft;
 
-#[cfg(feature = "minecraft-auth")]
-use minecraft::hashes;
 
 #[cfg(any(feature = "oauth", feature = "devicecode"))]
 mod custom;
