@@ -27,7 +27,7 @@ pub enum XTSError {
 /// The `OAuthError` enum represents potential errors that can occur during OAuth authentication.
 #[derive(Display, Error, Debug)]
 pub enum OAuthError {
-    /// Failed to authenticate: Response: {0}
+    /// Authentcation Failed: {0}
     AuthenticationFailure(String),
     /// Binding error: {0}
     BindError(String),
