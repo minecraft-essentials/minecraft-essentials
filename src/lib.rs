@@ -240,7 +240,7 @@ mod tests {
 /// The Method to refresh your mincraft bearer token.
 #[cfg(feature = "renew")]
 #[deprecated(
-    since = "0.2.7",
+    since = "0.2.8",
     note = "This functionality has been deprecated. Please use the `oauth::refresh` or `devicecode::refresh` functions for refreshing tokens in the future. This feature will be removed in a future release."
 )]
 pub struct RefreshBearer {
@@ -252,7 +252,7 @@ pub struct RefreshBearer {
 
 #[cfg(feature = "renew")]
 #[deprecated(
-    since = "0.2.7",
+    since = "0.2.8",
     note = "This functionality has been deprecated. Please use the `oauth::refresh` or `devicecode::refresh` functions for refreshing tokens in the future. This feature will be removed in a future release."
 )]
 impl RefreshBearer {
