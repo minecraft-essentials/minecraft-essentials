@@ -24,3 +24,7 @@
 !.env.project
 .env.vault
 !.env.vault
+
+
+### OPERATING SYSTEM ###
+.DS_STORE

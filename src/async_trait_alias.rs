@@ -1,3 +1,6 @@
+#![forbid(unsafe_code, missing_docs)]
+#![warn(clippy::pedantic)]
+
 use std::future::Future;
 
 pub trait Async<O>: Future<Output = O> {}

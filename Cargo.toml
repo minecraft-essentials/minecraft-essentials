@@ -17,26 +17,21 @@ readme = "README.md"
 repository = "https://github.com/minecraft-essentials/minecraft-essentials"
 
 
-[[bin]]
-name = "minecraft-essentials"
-path = "src/main.rs"
-
-
 [dependencies]
 actix-web = "4.5.1"
 base64 = "0.21.7"
-dotenv-vault = "0.1.1"
+displaydoc = "0.2.4"
+dotenv = "0.15.0"
 rand = "0.8.5"
 reqwest = { version = "0.11.24", features = ["json"] }
 serde = { version = "1.0.196", features = ["derive"] }
 serde_json = "1.0.113"
 thiserror = "1.0.56"
-tokio = { version = "1.36.0", features = ["full"] }
-
-[lints.rust]
-unsafe_code = { level = "forbid", priority = 0 }
-
+tokio = { version = "1.36.0", features = ["rt-multi-thread", "macros", "sync"] }
 
 [features]
+default = ["oauth", "devicecode"]
+devicecode = []
 discordrpc = []
 renew = []
+oauth = []

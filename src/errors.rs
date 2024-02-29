@@ -1,27 +1,34 @@
+#![forbid(unsafe_code, missing_docs)]
+#![warn(clippy::pedantic)]
+
+use displaydoc::Display;
 use thiserror::Error;
-
-#[derive(Error, Debug)]
+/// The `TokenError` enum represents potential errors that can occur during token operations.
+#[derive(Display, Error, Debug)]
 pub enum TokenError {
-    #[error("Response Failed: {0}")]
+    /// Response Failed: {0}
     ResponseError(String),
 }
 
-#[derive(Error, Debug)]
+/// The `XboxError` enum represents potential errors that can occur during Xbox-related operations.
+#[derive(Display, Error, Debug)]
 pub enum XboxError {
-    #[error("Response Failed: {0}")]
+    /// Response Failed: {0}
     ResponseError(String),
 }
 
-#[derive(Error, Debug)]
+/// The `XTSError` enum represents potential errors that can occur during XTS-related operations.
+#[derive(Display, Error, Debug)]
 pub enum XTSError {
-    #[error("Response Failed: {0}")]
+    /// Response Failed: {0}
     ResponseError(String),
 }
 
-#[derive(Error, Debug)]
+/// The `OAuthError` enum represents potential errors that can occur during OAuth authentication.
+#[derive(Display, Error, Debug)]
 pub enum OAuthError {
-    #[error("Failed to authenticate: Response: {0}")]
+    /// Failed to authenticate: Response: {0}
     AuthenticationFailure(String),
-    #[error("Binding error: {0}")]
+    /// Binding error: {0}
     BindError(String),
 }

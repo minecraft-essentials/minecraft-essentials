@@ -4,7 +4,8 @@
 
 pub(crate) mod async_trait_alias;
 mod code;
-mod errors;
+/// Contains definitions for error types used throughout the crate.
+pub mod errors;
 mod mojang;
 mod oauth;
 mod xbox;
@@ -14,9 +15,11 @@ pub use mojang::AuthInfo as AuthData;
 
 /// Scopes Required for Xbox Live And Minecraft Authentcation.
 pub(crate) const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
-pub(crate) const EXPERIEMNTAL_MESSAGE: &str = "\x1b[33mNOTICE: You are using and Experiemntal Feature.\x1b[0m";
+pub(crate) const EXPERIEMNTAL_MESSAGE: &str =
+    "\x1b[33mNOTICE: You are using and Experiemntal Feature.\x1b[0m";
 
 /// Minecraft OAuth Authentification Method.
+#[cfg(feature = "oauth")]
 pub struct Oauth {
     url: String,
     port: u16,
@@ -24,6 +27,7 @@ pub struct Oauth {
 }
 
 /// Minecraft Device Code Authentification Method.
+#[cfg(feature = "devicecode")]
 pub struct DeviceCode {
     url: String,
     message: String,
@@ -33,17 +37,7 @@ pub struct DeviceCode {
     client_id: String,
 }
 
-
-/// The Method to refresh your mincraft bearer token.
-#[cfg(feature = "renew")]
-pub struct RefreshBearer {
-    refresh_token: String,
-    client_id: String,
-    port: u16,
-    client_secret: String,
-}
-
-/// Implemation of the oauth.
+#[cfg(feature = "oauth")]
 impl Oauth {
     /// Creates a new instance of Oauth.
     pub fn new(clientid: &str, port: Option<u16>) -> Self {
@@ -124,18 +118,33 @@ impl Oauth {
             return Ok(mojang::token(&xbox.display_claims.xui[0].uhs, &xts.token).await?);
         }
     }
+
+    /// Refreshes the OAuth token using the refresh token.
+    #[cfg(feature = "refresh")]
+    pub async fn refresh(
+        &self,
+        refresh_token: &str,
+        client_id: &str,
+        port: Option<u16>,
+        client_secret: &str,
+    ) -> Result<AuthData, Box<dyn std::error::Error>> {
+        let port = port.unwrap_or(8000);
+        let token = oauth::token(refresh_token, client_id, port, client_secret).await?;
+        // Assuming oauth::token returns an AuthData struct or similar, you might need to adjust this part
+        Ok(token)
+    }
 }
 
+// -------------------------------------------------------
+
 /// Implemation of the device code.
+#[cfg(feature = "devicecode")]
 impl DeviceCode {
     /// Proccess to get the code.
     pub fn new(
         client_id: &str,
     ) -> impl async_trait_alias::AsyncSendSync<Result<Self, reqwest::Error>> {
-        println!(
-            "{}",
-            EXPERIEMNTAL_MESSAGE
-        );
+        println!("{}", EXPERIEMNTAL_MESSAGE);
         // Function to start a new device code.
         let client_id_str = client_id.to_string();
         async move {
@@ -154,7 +163,7 @@ impl DeviceCode {
     }
 
     /// To Recive details for the device code.
-    pub fn prelaunch(&self) -> (&str, &str, u32, &str) {
+    pub fn preinfo(&self) -> (&str, &str, u32, &str) {
         (&self.url, &self.message, self.expires_in, &self.user_code)
     }
 
@@ -175,33 +184,11 @@ impl DeviceCode {
             return Ok(mojang::token(&xbox.display_claims.xui[0].uhs, &xts.token).await?);
         }
     }
-}
 
-#[cfg(feature = "renew")]
-impl RefreshBearer {
-    /// Creates a new instance of refreshing the bearer token.
-    pub fn new(refresh_token: &str, client_id: &str, port: Option<u16>, client_secret: &str) -> Self {
-        let port = port.unwrap_or(8000);
-        Self {
-           refresh_token: refresh_token.to_string(),
-           client_id: client_id.to_string(),
-           port: port,
-           client_secret: client_secret.to_string(),
-        }
-
-    }
-
-    /// Launches the new instance with the oauth metrhod from Previous Oauth Method Refresh Token
-    pub async fn launch_oauth(&self) {
-        let token = oauth::token(&self.refresh_token, &self.client_id, self.port, &self.client_secret);
-    }
-
-    /// Launches the new instance with the device code metrhod from Previous Device Code Method Refresh Token
-    pub async fn launch_devicecode(&self) {
-        println!(
-            "{}",
-            EXPERIEMNTAL_MESSAGE
-        );
+    /// Refreshes the Device Code token using the refresh token.
+    #[cfg(feature = "refresh")]
+    pub async fn refresh(&self) {
+        println!("{}", EXPERIEMNTAL_MESSAGE);
     }
 }
 
@@ -209,9 +196,10 @@ impl RefreshBearer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dotenv_vault::dotenv;
+    use dotenv::dotenv;
     use std::env;
 
+    #[cfg(feature = "oauth")]
     #[tokio::test]
     async fn test_oauth_url() {
         let _ = dotenv();
@@ -225,6 +213,7 @@ mod tests {
         assert_eq!(oauth.url(), expected_url);
     }
 
+    #[cfg(feature = "devicecode")]
     #[tokio::test]
     async fn test_device_code_prelaunch() {
         let _ = dotenv();
@@ -232,12 +221,69 @@ mod tests {
         let device_code = DeviceCode::new(&client_id).await.unwrap();
 
         // Act
-        let (url, message, expires_in, user_code) = device_code.prelaunch();
+        let (url, message, expires_in, user_code) = device_code.preinfo();
 
         // Assert
         assert_eq!(url, device_code.url);
         assert_eq!(message, device_code.message);
         assert_eq!(expires_in, device_code.expires_in);
         assert_eq!(user_code, device_code.user_code);
+    }
+}
+
+// -------------------------------------------------------
+
+
+//TODO Remove this at 0.3 
+
+
+/// The Method to refresh your mincraft bearer token.
+#[cfg(feature = "renew")]
+#[deprecated(
+    since = "0.2.7",
+    note = "This functionality has been deprecated. Please use the `oauth::refresh` or `devicecode::refresh` functions for refreshing tokens in the future. This feature will be removed in a future release."
+)]
+pub struct RefreshBearer {
+    refresh_token: String,
+    client_id: String,
+    port: u16,
+    client_secret: String,
+}
+
+#[cfg(feature = "renew")]
+#[deprecated(
+    since = "0.2.7",
+    note = "This functionality has been deprecated. Please use the `oauth::refresh` or `devicecode::refresh` functions for refreshing tokens in the future. This feature will be removed in a future release."
+)]
+impl RefreshBearer {
+    /// Creates a new instance of refreshing the bearer token.
+    pub fn new(
+        refresh_token: &str,
+        client_id: &str,
+        port: Option<u16>,
+        client_secret: &str,
+    ) -> Self {
+        let port = port.unwrap_or(8000);
+        Self {
+            refresh_token: refresh_token.to_string(),
+            client_id: client_id.to_string(),
+            port: port,
+            client_secret: client_secret.to_string(),
+        }
+    }
+
+    /// Launches the new instance with the oauth metrhod from Previous Oauth Method Refresh Token
+    pub async fn launch_oauth(&self) {
+        let token = oauth::token(
+            &self.refresh_token,
+            &self.client_id,
+            self.port,
+            &self.client_secret,
+        );
+    }
+
+    /// Launches the new instance with the device code metrhod from Previous Device Code Method Refresh Token
+    pub async fn launch_devicecode(&self) {
+        println!("{}", EXPERIEMNTAL_MESSAGE);
     }
 }
