@@ -2,15 +2,18 @@
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
+pub(crate) mod async_trait_alias;
 /// Contains definitions for error types used throughout the crate.
 pub mod errors;
-pub(crate) mod async_trait_alias;
+
 #[cfg(feature = "minecraft-auth")]
 mod minecraft;
+
+#[cfg(any(feature = "oauth", feature = "devicecode"))]
 mod custom;
-
-
+#[cfg(any(feature = "oauth", feature = "devicecode"))]
 pub use custom::AuthInfo as AuthData;
+
 #[cfg(feature = "minecraft-auth")]
 use minecraft::create_hash;
 
@@ -18,8 +21,6 @@ use minecraft::create_hash;
 pub(crate) const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
 pub(crate) const EXPERIEMNTAL_MESSAGE: &str =
     "\x1b[33mNOTICE: You are using and Experiemntal Feature.\x1b[0m";
-
-
 
 /// Minecraft OAuth Authentification Method.
 #[cfg(feature = "oauth")]
@@ -208,15 +209,12 @@ pub struct AuthTitles {
     pub minecraft_java: &'static str,
 }
 
-
 impl Minecraft {
-    
     /// Defines Titles for Orginal Minecraft Authentcation
     pub const AUTH_TITLES: AuthTitles = AuthTitles {
         minecraft_nintendo_switch: "00000000441cc96b",
         minecraft_java: "00000000402b5328",
     };
-
 }
 
 /// Tests for the Framework for development
@@ -260,9 +258,7 @@ mod tests {
 
 // -------------------------------------------------------
 
-
-//TODO Remove this at 0.3 
-
+//TODO Remove this at 0.3
 
 /// The Method to refresh your mincraft bearer token.
 #[cfg(feature = "renew")]
