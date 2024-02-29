@@ -77,7 +77,7 @@ println!("{:?}", auth_info)
 use minecraft_essentials::*;
 let client_id = "111231209837123098712";
 let code = device_code::new(client_id);
-println!("Stuff Here: {}", code.prelaunch());
+println!("Stuff Here: {}", code.preinfo());
 
 let code_info = code.launch().await?;
 ```

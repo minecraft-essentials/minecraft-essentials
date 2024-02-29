@@ -24,7 +24,7 @@ async fn device() {
         .await
         .expect("Failed to create device code");
 
-    println!("{:?}", auth.prelaunch());
+    println!("{:?}", auth.preinfo());
 
     let auth_info = auth.launch(false).await;
 

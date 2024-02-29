@@ -18,6 +18,7 @@ pub(crate) const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
 pub(crate) const EXPERIEMNTAL_MESSAGE: &str = "\x1b[33mNOTICE: You are using and Experiemntal Feature.\x1b[0m";
 
 /// Minecraft OAuth Authentification Method.
+#[cfg(feature = "oauth")]
 pub struct Oauth {
     url: String,
     port: u16,
@@ -44,7 +45,8 @@ pub struct RefreshBearer {
     client_secret: String,
 }
 
-/// Implemation of the oauth.
+
+#[cfg(feature = "oauth")]
 impl Oauth {
     /// Creates a new instance of Oauth.
     pub fn new(clientid: &str, port: Option<u16>) -> Self {
@@ -125,6 +127,16 @@ impl Oauth {
             return Ok(mojang::token(&xbox.display_claims.xui[0].uhs, &xts.token).await?);
         }
     }
+
+
+        /// Refreshes the OAuth token using the refresh token.
+        #[cfg(feature = "renew")]
+        pub async fn refresh(refresh_token: &str, client_id: &str, port: Option<u16>, client_secret: &str) {
+            let port = port.unwrap_or(8000);
+            let token = oauth::token(refresh_token, client_id, port, client_secret);
+        }
+    
+
 }
 
 /// Implemation of the device code.
@@ -154,8 +166,9 @@ impl DeviceCode {
         }
     }
 
+
     /// To Recive details for the device code.
-    pub fn prelaunch(&self) -> (&str, &str, u32, &str) {
+    pub fn preinfo(&self) -> (&str, &str, u32, &str) {
         (&self.url, &self.message, self.expires_in, &self.user_code)
     }
 
@@ -176,35 +189,21 @@ impl DeviceCode {
             return Ok(mojang::token(&xbox.display_claims.xui[0].uhs, &xts.token).await?);
         }
     }
-}
 
-#[cfg(feature = "renew")]
-impl RefreshBearer {
-    /// Creates a new instance of refreshing the bearer token.
-    pub fn new(refresh_token: &str, client_id: &str, port: Option<u16>, client_secret: &str) -> Self {
-        let port = port.unwrap_or(8000);
-        Self {
-           refresh_token: refresh_token.to_string(),
-           client_id: client_id.to_string(),
-           port: port,
-           client_secret: client_secret.to_string(),
-        }
 
-    }
-
-    /// Launches the new instance with the oauth metrhod from Previous Oauth Method Refresh Token
-    pub async fn launch_oauth(&self) {
-        let token = oauth::token(&self.refresh_token, &self.client_id, self.port, &self.client_secret);
-    }
-
-    /// Launches the new instance with the device code metrhod from Previous Device Code Method Refresh Token
-    pub async fn launch_devicecode(&self) {
+    /// Refreshes the Device Code token using the refresh token.
+    #[cfg(feature = "renew")]
+    pub async fn refresh(&self) {
         println!(
             "{}",
             EXPERIEMNTAL_MESSAGE
         );
     }
+
+
 }
+
+
 
 /// Tests for the Framework for development
 #[cfg(test)]
@@ -233,7 +232,7 @@ mod tests {
         let device_code = DeviceCode::new(&client_id).await.unwrap();
 
         // Act
-        let (url, message, expires_in, user_code) = device_code.prelaunch();
+        let (url, message, expires_in, user_code) = device_code.preinfo();
 
         // Assert
         assert_eq!(url, device_code.url);
