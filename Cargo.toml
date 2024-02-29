@@ -16,9 +16,8 @@ rustdocflags = ["--theme=ayu"]
 
 
 [[bin]]
-name = "minecraft-essentials"
-path = "src/cli.rs"
-features = ["cli"]
+name = "cargo-minecraft-essentials"
+path = "src/main.rs"
 
 
 [dependencies]
