@@ -14,12 +14,22 @@ repository = "https://github.com/minecraft-essentials/minecraft-essentials"
 [build]
 rustdocflags = ["--theme=ayu"]
 
+
+[[bin]]
+name = "cli"
+path = "src/cli.rs"
+features = ["cli"]
+
+
+[package.metadata.cargo-commands]
+minecraft-essentials = "run --bin minecraft-essentials"
+
 [dependencies]
 actix-web = { version = "4.5.1", optional = true }
 reqwest = { version = "0.11.24", features = ["json"], optional = true }
 serde = { version = "1.0.196", features = ["derive"], optional = true }
 serde_json = { version = "1.0.113", optional = true }
-tokio = { version = "1.36.0", features = ["rt-multi-thread", "sync"]}
+tokio = { version = "1.36.0", features = ["rt-multi-thread", "macros", "sync"]}
 
 # Hashing SHA256
 base64 = { version = "0.21.7", optional = true }
@@ -33,16 +43,19 @@ displaydoc = "0.2.4"
 ring = { version = "0.17.8", optional = true }
 hex = { version = "0.4.3", optional = true }
 
+# CLI
+clap = { version = "4.5.1", optional = true }
+
 
 [dev-dependencies]
 dotenv = { version = "0.15.0"}
-tokio = { version = "1.36.0", features = ["macros"]}
 
 
 [features]
 default = ["oauth", "devicecode"]
-devicecode = ["actix-web", "reqwest", "serde", "serde_json"]
-oauth = ["actix-web", "reqwest", "serde", "serde_json","rand"]
-minecraft-auth = ["ring", "hex"]
+devicecode = ["dep:actix-web", "dep:reqwest", "dep:serde", "dep:serde_json"]
+oauth = ["dep:actix-web", "dep:reqwest", "dep:serde", "dep:serde_json","dep:rand"]
+minecraft-auth = ["dep:ring", "dep:hex"]
 discordrpc = []
 renew = []
+cli = ["default", "dep:clap", "minecraft-auth"]
