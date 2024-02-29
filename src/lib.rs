@@ -9,18 +9,23 @@ pub mod errors;
 #[cfg(feature = "minecraft-auth")]
 mod minecraft;
 
+#[cfg(feature = "minecraft-auth")]
+use minecraft::hashes;
+
+// -----------------------
+
 #[cfg(any(feature = "oauth", feature = "devicecode"))]
 mod custom;
-#[cfg(any(feature = "oauth", feature = "devicecode"))]
-pub use custom::AuthInfo as AuthData;
 
-#[cfg(feature = "minecraft-auth")]
-use minecraft::create_hash;
+#[cfg(any(feature = "oauth", feature = "devicecode"))]
+use custom::{code, mojang, mojang::AuthInfo as AuthData, oauth, xbox};
 
 /// Scopes Required for Xbox Live And Minecraft Authentcation.
 pub(crate) const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
 pub(crate) const EXPERIEMNTAL_MESSAGE: &str =
     "\x1b[33mNOTICE: You are using and Experiemntal Feature.\x1b[0m";
+
+// -------------------------------------------------------
 
 /// Minecraft OAuth Authentification Method.
 #[cfg(feature = "oauth")]
@@ -71,8 +76,8 @@ impl Oauth {
         client_secret: &str,
     ) -> Result<AuthData, Box<dyn std::error::Error>> {
         // Launches the temporary http server.
-        let http_server = custom::server(self.port)?.await?;
-        let token = custom::token(
+        let http_server = oauth::server(self.port)?.await?;
+        let token = oauth::token(
             http_server
                 .code
                 .expect("\x1b[31mXbox Expected code.\x1b[0m")
@@ -84,9 +89,9 @@ impl Oauth {
         .await?;
 
         // Launches the Xbox UserHash And Xbl Token Process.
-        let xbox = custom::xbl(&token.access_token).await?;
+        let xbox = xbox::xbl(&token.access_token).await?;
         // Launches the Xsts Token Process.
-        let xts = custom::xsts_token(
+        let xts = xbox::xsts_token(
             // Gets the token from the xbox struct.
             &xbox.token,
             // Gets the bedrockRelm from input.
@@ -108,7 +113,7 @@ impl Oauth {
             });
         } else {
             // Returns just the access Token and UUID For Luanching
-            return Ok(custom::mojangtoken(&xbox.display_claims.xui[0].uhs, &xts.token).await?);
+            return Ok(mojang::token(&xbox.display_claims.xui[0].uhs, &xts.token).await?);
         }
     }
 
@@ -152,7 +157,7 @@ impl DeviceCode {
         // Function to start a new device code.
         let client_id_str = client_id.to_string();
         async move {
-            let response_data = custom::device_authentication_code(&client_id_str).await?;
+            let response_data = code::device_authentication_code(&client_id_str).await?;
 
             // Returns the outputs as self.
             Ok(Self {
@@ -173,9 +178,9 @@ impl DeviceCode {
 
     /// Launches the device code authentifcation.
     pub async fn launch(&self, bedrockrelm: bool) -> Result<AuthData, Box<dyn std::error::Error>> {
-        let token = custom::authenticate_device(&self.device_code, &self.client_id).await?;
-        let xbox = custom::xbl(&token.token).await?;
-        let xts = custom::xsts_token(&xbox.token, bedrockrelm).await?;
+        let token = code::authenticate_device(&self.device_code, &self.client_id).await?;
+        let xbox = xbox::xbl(&token.token).await?;
+        let xts = xbox::xsts_token(&xbox.token, bedrockrelm).await?;
         if bedrockrelm == true {
             return Ok(AuthData {
                 access_token: "null".to_string(),
@@ -185,7 +190,7 @@ impl DeviceCode {
                 xts_token: Some(xts.token),
             });
         } else {
-            return Ok(custom::mojangtoken(&xbox.display_claims.xui[0].uhs, &xts.token).await?);
+            return Ok(mojang::token(&xbox.display_claims.xui[0].uhs, &xts.token).await?);
         }
     }
 
