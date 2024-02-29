@@ -135,6 +135,8 @@ impl Oauth {
     }
 }
 
+// -------------------------------------------------------
+
 /// Implemation of the device code.
 #[cfg(feature = "devicecode")]
 impl DeviceCode {
@@ -226,5 +228,58 @@ mod tests {
         assert_eq!(message, device_code.message);
         assert_eq!(expires_in, device_code.expires_in);
         assert_eq!(user_code, device_code.user_code);
+    }
+}
+
+// -------------------------------------------------------
+
+/// The Method to refresh your mincraft bearer token.
+#[cfg(feature = "renew")]
+#[deprecated(
+    since = "0.2.7",
+    note = "This functionality has been deprecated. Please use the `oauth::refresh` or `devicecode::refresh` functions for refreshing tokens in the future. This feature will be removed in a future release."
+)]
+pub struct RefreshBearer {
+    refresh_token: String,
+    client_id: String,
+    port: u16,
+    client_secret: String,
+}
+
+#[cfg(feature = "renew")]
+#[deprecated(
+    since = "0.2.7",
+    note = "This functionality has been deprecated. Please use the `oauth::refresh` or `devicecode::refresh` functions for refreshing tokens in the future. This feature will be removed in a future release."
+)]
+impl RefreshBearer {
+    /// Creates a new instance of refreshing the bearer token.
+    pub fn new(
+        refresh_token: &str,
+        client_id: &str,
+        port: Option<u16>,
+        client_secret: &str,
+    ) -> Self {
+        let port = port.unwrap_or(8000);
+        Self {
+            refresh_token: refresh_token.to_string(),
+            client_id: client_id.to_string(),
+            port: port,
+            client_secret: client_secret.to_string(),
+        }
+    }
+
+    /// Launches the new instance with the oauth metrhod from Previous Oauth Method Refresh Token
+    pub async fn launch_oauth(&self) {
+        let token = oauth::token(
+            &self.refresh_token,
+            &self.client_id,
+            self.port,
+            &self.client_secret,
+        );
+    }
+
+    /// Launches the new instance with the device code metrhod from Previous Device Code Method Refresh Token
+    pub async fn launch_devicecode(&self) {
+        println!("{}", EXPERIEMNTAL_MESSAGE);
     }
 }
