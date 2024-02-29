@@ -3,16 +3,15 @@
 #![warn(clippy::pedantic)]
 
 // Modules
+pub(crate) mod async_trait_alias;
 /// Error handling module for the Minecraft-Essentials library.
 ///
 /// This module contains all the error types and related functionality
 /// for error handling within the library.
 pub mod errors;
-pub(crate) mod async_trait_alias;
 
 #[cfg(feature = "minecraft-auth")]
 mod minecraft;
-
 
 #[cfg(any(feature = "oauth", feature = "devicecode"))]
 mod custom;
@@ -227,7 +226,10 @@ impl DeviceCode {
     /// # Returns
     ///
     /// * `Result<CustomAuthData, Box<dyn std::error::Error>>` - A result containing the authentication data or an error if the process fails.
-    pub async fn launch(&self, bedrock_relm: bool) -> Result<CustomAuthData, Box<dyn std::error::Error>> {
+    pub async fn launch(
+        &self,
+        bedrock_relm: bool,
+    ) -> Result<CustomAuthData, Box<dyn std::error::Error>> {
         let token = code::authenticate_device(&self.device_code, &self.client_id).await?;
         let xbox = xbox::xbl(&token.token).await?;
         let xts = xbox::xsts_token(&xbox.token, bedrock_relm).await?;
