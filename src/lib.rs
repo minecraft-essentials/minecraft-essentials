@@ -15,7 +15,8 @@ pub use mojang::AuthInfo as AuthData;
 
 /// Scopes Required for Xbox Live And Minecraft Authentcation.
 pub(crate) const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
-pub(crate) const EXPERIEMNTAL_MESSAGE: &str = "\x1b[33mNOTICE: You are using and Experiemntal Feature.\x1b[0m";
+pub(crate) const EXPERIEMNTAL_MESSAGE: &str =
+    "\x1b[33mNOTICE: You are using and Experiemntal Feature.\x1b[0m";
 
 /// Minecraft OAuth Authentification Method.
 #[cfg(feature = "oauth")]
@@ -26,6 +27,7 @@ pub struct Oauth {
 }
 
 /// Minecraft Device Code Authentification Method.
+#[cfg(feature = "devicecode")]
 pub struct DeviceCode {
     url: String,
     message: String,
@@ -34,17 +36,6 @@ pub struct DeviceCode {
     device_code: String,
     client_id: String,
 }
-
-
-/// The Method to refresh your mincraft bearer token.
-#[cfg(feature = "renew")]
-pub struct RefreshBearer {
-    refresh_token: String,
-    client_id: String,
-    port: u16,
-    client_secret: String,
-}
-
 
 #[cfg(feature = "oauth")]
 impl Oauth {
@@ -128,27 +119,30 @@ impl Oauth {
         }
     }
 
-
-        /// Refreshes the OAuth token using the refresh token.
-        #[cfg(feature = "renew")]
-        pub async fn refresh(refresh_token: &str, client_id: &str, port: Option<u16>, client_secret: &str) {
-            let port = port.unwrap_or(8000);
-            let token = oauth::token(refresh_token, client_id, port, client_secret);
-        }
-    
-
+    /// Refreshes the OAuth token using the refresh token.
+    #[cfg(feature = "refresh")]
+    pub async fn refresh(
+        &self,
+        refresh_token: &str,
+        client_id: &str,
+        port: Option<u16>,
+        client_secret: &str,
+    ) -> Result<AuthData, Box<dyn std::error::Error>> {
+        let port = port.unwrap_or(8000);
+        let token = oauth::token(refresh_token, client_id, port, client_secret).await?;
+        // Assuming oauth::token returns an AuthData struct or similar, you might need to adjust this part
+        Ok(token)
+    }
 }
 
 /// Implemation of the device code.
+#[cfg(feature = "devicecode")]
 impl DeviceCode {
     /// Proccess to get the code.
     pub fn new(
         client_id: &str,
     ) -> impl async_trait_alias::AsyncSendSync<Result<Self, reqwest::Error>> {
-        println!(
-            "{}",
-            EXPERIEMNTAL_MESSAGE
-        );
+        println!("{}", EXPERIEMNTAL_MESSAGE);
         // Function to start a new device code.
         let client_id_str = client_id.to_string();
         async move {
@@ -165,7 +159,6 @@ impl DeviceCode {
             })
         }
     }
-
 
     /// To Recive details for the device code.
     pub fn preinfo(&self) -> (&str, &str, u32, &str) {
@@ -190,28 +183,21 @@ impl DeviceCode {
         }
     }
 
-
     /// Refreshes the Device Code token using the refresh token.
-    #[cfg(feature = "renew")]
+    #[cfg(feature = "refresh")]
     pub async fn refresh(&self) {
-        println!(
-            "{}",
-            EXPERIEMNTAL_MESSAGE
-        );
+        println!("{}", EXPERIEMNTAL_MESSAGE);
     }
-
-
 }
-
-
 
 /// Tests for the Framework for development
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dotenv_vault::dotenv;
+    use dotenv::dotenv;
     use std::env;
 
+    #[cfg(feature = "oauth")]
     #[tokio::test]
     async fn test_oauth_url() {
         let _ = dotenv();
@@ -225,6 +211,7 @@ mod tests {
         assert_eq!(oauth.url(), expected_url);
     }
 
+    #[cfg(feature = "devicecode")]
     #[tokio::test]
     async fn test_device_code_prelaunch() {
         let _ = dotenv();
