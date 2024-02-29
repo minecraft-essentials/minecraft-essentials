@@ -233,6 +233,10 @@ mod tests {
 
 // -------------------------------------------------------
 
+
+//TODO Remove this at 0.3 
+
+
 /// The Method to refresh your mincraft bearer token.
 #[cfg(feature = "renew")]
 #[deprecated(
