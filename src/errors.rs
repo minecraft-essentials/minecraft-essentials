@@ -1,9 +1,8 @@
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
-
-use thiserror::Error;
 use displaydoc::Display;
+use thiserror::Error;
 /// The `TokenError` enum represents potential errors that can occur during token operations.
 #[derive(Display, Error, Debug)]
 pub enum TokenError {
