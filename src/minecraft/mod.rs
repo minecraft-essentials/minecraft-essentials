@@ -1,1 +1,1 @@
-pub mod hashes;
+pub mod crypto;
