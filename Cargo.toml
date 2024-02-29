@@ -1,8 +1,3 @@
-
-[build]
-rustdocflags = ["--theme=ayu"]
-
-
 [package]
 authors = ["Eveeifyeve <eveeg1971@gmail.com>"]
 name = "minecraft-essentials"
@@ -16,24 +11,38 @@ homepage = "https://minecraft-essentials.github.io"
 readme = "README.md"
 repository = "https://github.com/minecraft-essentials/minecraft-essentials"
 
+[build]
+rustdocflags = ["--theme=ayu"]
 
 [dependencies]
-actix-web = "4.5.1"
-base64 = "0.21.7"
+actix-web = { version = "4.5.1", optional = true }
+reqwest = { version = "0.11.24", features = ["json"], optional = true }
+serde = { version = "1.0.196", features = ["derive"], optional = true }
+serde_json = { version = "1.0.113", optional = true }
+tokio = { version = "1.36.0", features = ["rt-multi-thread", "sync"]}
+
+# Hashing SHA256
+base64 = { version = "0.21.7", optional = true }
+rand = { version = "0.8.5", optional = true }
+
+# Error Handling
+thiserror = "1.0.56" 
 displaydoc = "0.2.4"
-dotenv = "0.15.0"
-rand = "0.8.5"
-reqwest = { version = "0.11.24", features = ["json"] }
-serde = { version = "1.0.196", features = ["derive"] }
-serde_json = "1.0.113"
-thiserror = "1.0.56"
-tokio = { version = "1.36.0", features = ["rt-multi-thread", "macros", "sync"] }
-ring = { version = "0.17.8", optional = true}
+
+# Hashing SHA1
+ring = { version = "0.17.8", optional = true }
+hex = { version = "0.4.3", optional = true }
+
+
+[dev-dependencies]
+dotenv = { version = "0.15.0"}
+tokio = { version = "1.36.0", features = ["macros"]}
+
 
 [features]
 default = ["oauth", "devicecode"]
-devicecode = []
+devicecode = ["actix-web", "reqwest", "serde", "serde_json"]
+oauth = ["actix-web", "reqwest", "serde", "serde_json","rand"]
+minecraft-auth = ["ring", "hex"]
 discordrpc = []
 renew = []
-oauth = []
-minecraft-auth = ["dep:ring"]
