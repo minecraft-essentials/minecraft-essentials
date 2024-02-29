@@ -22,14 +22,14 @@ mod custom;
 #[cfg(any(feature = "oauth", feature = "devicecode"))]
 use custom::{code, mojang, oauth, xbox};
 
-pub use custom::mojang::AuthInfo as AuthData;
+pub use custom::mojang::AuthInfo as CustomAuthData;
 
 // Constants
 pub(crate) const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
 pub(crate) const EXPERIMENTAL_MESSAGE: &str =
     "\x1b[33mNOTICE: You are using an experimental feature.\x1b[0m";
 
-/// OAuth Authentication
+/// OAuth 2.0 Authentication
 ///
 /// This struct represents the OAuth authentication process for Minecraft, specifically designed for use with custom Azure applications.
 /// It is used to authenticate a user and obtain a token that can be used to launch Minecraft.
@@ -94,12 +94,12 @@ impl Oauth {
     ///
     /// # Returns
     ///
-    /// * `Result<AuthData, Box<dyn std::error::Error>>` - A result containing the authentication data or an error if the process fails.
+    /// * `Result<CustomAuthData, Box<dyn std::error::Error>>` - A result containing the authentication data or an error if the process fails.
     pub async fn launch(
         &self,
         bedrock_relm: bool,
         client_secret: &str,
-    ) -> Result<AuthData, Box<dyn std::error::Error>> {
+    ) -> Result<CustomAuthData, Box<dyn std::error::Error>> {
         let http_server = oauth::server(self.port)?.await?;
         let token = oauth::token(
             http_server
@@ -116,7 +116,7 @@ impl Oauth {
         let xts = xbox::xsts_token(&xbox.token, bedrock_relm).await?;
 
         if bedrock_relm {
-            Ok(AuthData {
+            Ok(CustomAuthData {
                 access_token: "null".to_string(),
                 uuid: "null".to_string(),
                 expires_in: 0,
@@ -140,7 +140,7 @@ impl Oauth {
     ///
     /// # Returns
     ///
-    /// * `Result<AuthData, Box<dyn std::error::Error>>` - A result containing the refreshed authentication data or an error if the process fails.
+    /// * `Result<CustomAuthData, Box<dyn std::error::Error>>` - A result containing the refreshed authentication data or an error if the process fails.
     #[cfg(feature = "refresh")]
     pub async fn refresh(
         &self,
@@ -148,7 +148,7 @@ impl Oauth {
         client_id: &str,
         port: Option<u16>,
         client_secret: &str,
-    ) -> Result<AuthData, Box<dyn std::error::Error>> {
+    ) -> Result<CustomAuthData, Box<dyn std::error::Error>> {
         let port = port.unwrap_or(8000);
         let token = oauth::token(refresh_token, client_id, port, client_secret).await?;
         Ok(token)
@@ -228,14 +228,14 @@ impl DeviceCode {
     ///
     /// # Returns
     ///
-    /// * `Result<AuthData, Box<dyn std::error::Error>>` - A result containing the authentication data or an error if the process fails.
-    pub async fn launch(&self, bedrock_relm: bool) -> Result<AuthData, Box<dyn std::error::Error>> {
+    /// * `Result<CustomAuthData, Box<dyn std::error::Error>>` - A result containing the authentication data or an error if the process fails.
+    pub async fn launch(&self, bedrock_relm: bool) -> Result<CustomAuthData, Box<dyn std::error::Error>> {
         let token = code::authenticate_device(&self.device_code, &self.client_id).await?;
         let xbox = xbox::xbl(&token.token).await?;
         let xts = xbox::xsts_token(&xbox.token, bedrock_relm).await?;
 
         if bedrock_relm {
-            Ok(AuthData {
+            Ok(CustomAuthData {
                 access_token: "null".to_string(),
                 uuid: "null".to_string(),
                 expires_in: 0,

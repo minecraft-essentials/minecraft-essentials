@@ -8,7 +8,7 @@ use std::error::Error;
 
 use crate::async_trait_alias::AsyncSendSync;
 
-/// Defines the authentication data received from Mojang.
+/// Defines the custom authentication data received from Mojang.
 ///
 /// This struct contains the necessary information for authenticating a user with Mojang's services,
 /// including the access token for API requests, the user's UUID, the token's expiry time, and an optional
