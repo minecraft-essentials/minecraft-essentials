@@ -2,9 +2,12 @@
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
+
 pub(crate) mod async_trait_alias;
 /// Contains definitions for error types used throughout the crate.
 pub mod errors;
+
+// -----------------------
 
 #[cfg(feature = "minecraft-auth")]
 mod minecraft;
@@ -19,6 +22,8 @@ mod custom;
 
 #[cfg(any(feature = "oauth", feature = "devicecode"))]
 use custom::{code, mojang, mojang::AuthInfo as AuthData, oauth, xbox};
+
+// -----------------------
 
 /// Scopes Required for Xbox Live And Minecraft Authentcation.
 pub(crate) const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
