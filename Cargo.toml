@@ -16,13 +16,10 @@ rustdocflags = ["--theme=ayu"]
 
 
 [[bin]]
-name = "cli"
+name = "minecraft-essentials"
 path = "src/cli.rs"
 features = ["cli"]
 
-
-[package.metadata.cargo-commands]
-minecraft-essentials = "run --bin minecraft-essentials"
 
 [dependencies]
 actix-web = { version = "4.5.1", optional = true }
