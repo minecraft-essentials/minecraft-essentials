@@ -1,6 +1,6 @@
 use ring::digest::{Context, SHA1_FOR_LEGACY_USE_ONLY};
 
-pub fn create_hash(input: &str) -> String {
+pub fn _create_hash(input: &str) -> String {
     let mut context = Context::new(&SHA1_FOR_LEGACY_USE_ONLY);
     context.update(input.as_bytes());
     let digest = context.finish();
