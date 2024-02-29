@@ -100,6 +100,7 @@ This library is licensed under the [BSD 3.0 License](./LICENSE).
 
 - [trippleawap](https://github.com/trippleawap) for providing a Minecraft Authentication Sample for Minecraft Implementation.
 
+
 <!-- Links -->
 
 [Docs]: https://docs.rs/minecraft-Essentials
