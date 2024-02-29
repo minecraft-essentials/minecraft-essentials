@@ -2,38 +2,30 @@
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
-pub(crate) mod async_trait_alias;
-mod code;
 /// Contains definitions for error types used throughout the crate.
 pub mod errors;
-mod mojang;
-mod oauth;
-mod xbox;
+pub(crate) mod async_trait_alias;
+#[cfg(feature = "minecraft-auth")]
+mod minecraft;
+mod custom;
 
-// Imports
-pub use mojang::AuthInfo as AuthData;
+
+pub use custom::AuthInfo as AuthData;
+#[cfg(feature = "minecraft-auth")]
+use minecraft::create_hash;
 
 /// Scopes Required for Xbox Live And Minecraft Authentcation.
 pub(crate) const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
 pub(crate) const EXPERIEMNTAL_MESSAGE: &str =
     "\x1b[33mNOTICE: You are using and Experiemntal Feature.\x1b[0m";
 
+
+
 /// Minecraft OAuth Authentification Method.
 #[cfg(feature = "oauth")]
 pub struct Oauth {
     url: String,
     port: u16,
-    client_id: String,
-}
-
-/// Minecraft Device Code Authentification Method.
-#[cfg(feature = "devicecode")]
-pub struct DeviceCode {
-    url: String,
-    message: String,
-    expires_in: u32,
-    user_code: String,
-    device_code: String,
     client_id: String,
 }
 
@@ -78,8 +70,8 @@ impl Oauth {
         client_secret: &str,
     ) -> Result<AuthData, Box<dyn std::error::Error>> {
         // Launches the temporary http server.
-        let http_server = oauth::server(self.port)?.await?;
-        let token = oauth::token(
+        let http_server = custom::server(self.port)?.await?;
+        let token = custom::token(
             http_server
                 .code
                 .expect("\x1b[31mXbox Expected code.\x1b[0m")
@@ -91,9 +83,9 @@ impl Oauth {
         .await?;
 
         // Launches the Xbox UserHash And Xbl Token Process.
-        let xbox = xbox::xbl(&token.access_token).await?;
+        let xbox = custom::xbl(&token.access_token).await?;
         // Launches the Xsts Token Process.
-        let xts = xbox::xsts_token(
+        let xts = custom::xsts_token(
             // Gets the token from the xbox struct.
             &xbox.token,
             // Gets the bedrockRelm from input.
@@ -115,7 +107,7 @@ impl Oauth {
             });
         } else {
             // Returns just the access Token and UUID For Luanching
-            return Ok(mojang::token(&xbox.display_claims.xui[0].uhs, &xts.token).await?);
+            return Ok(custom::mojangtoken(&xbox.display_claims.xui[0].uhs, &xts.token).await?);
         }
     }
 
@@ -137,6 +129,17 @@ impl Oauth {
 
 // -------------------------------------------------------
 
+/// Minecraft Device Code Authentification Method.
+#[cfg(feature = "devicecode")]
+pub struct DeviceCode {
+    url: String,
+    message: String,
+    expires_in: u32,
+    user_code: String,
+    device_code: String,
+    client_id: String,
+}
+
 /// Implemation of the device code.
 #[cfg(feature = "devicecode")]
 impl DeviceCode {
@@ -148,7 +151,7 @@ impl DeviceCode {
         // Function to start a new device code.
         let client_id_str = client_id.to_string();
         async move {
-            let response_data = code::device_authentication_code(&client_id_str).await?;
+            let response_data = custom::device_authentication_code(&client_id_str).await?;
 
             // Returns the outputs as self.
             Ok(Self {
@@ -169,9 +172,9 @@ impl DeviceCode {
 
     /// Launches the device code authentifcation.
     pub async fn launch(&self, bedrockrelm: bool) -> Result<AuthData, Box<dyn std::error::Error>> {
-        let token = code::authenticate_device(&self.device_code, &self.client_id).await?;
-        let xbox = xbox::xbl(&token.token).await?;
-        let xts = xbox::xsts_token(&xbox.token, bedrockrelm).await?;
+        let token = custom::authenticate_device(&self.device_code, &self.client_id).await?;
+        let xbox = custom::xbl(&token.token).await?;
+        let xts = custom::xsts_token(&xbox.token, bedrockrelm).await?;
         if bedrockrelm == true {
             return Ok(AuthData {
                 access_token: "null".to_string(),
@@ -181,7 +184,7 @@ impl DeviceCode {
                 xts_token: Some(xts.token),
             });
         } else {
-            return Ok(mojang::token(&xbox.display_claims.xui[0].uhs, &xts.token).await?);
+            return Ok(custom::mojangtoken(&xbox.display_claims.xui[0].uhs, &xts.token).await?);
         }
     }
 
@@ -190,6 +193,30 @@ impl DeviceCode {
     pub async fn refresh(&self) {
         println!("{}", EXPERIEMNTAL_MESSAGE);
     }
+}
+
+// -------------------------------------------------------
+
+/// Orginal Minecraft Authentcation
+pub struct Minecraft {}
+
+/// Titles for Orginal Minecraft Authentcation
+pub struct AuthTitles {
+    /// Title for Nintendo switch Auth.
+    pub minecraft_nintendo_switch: &'static str,
+    /// Title for Java Auth.
+    pub minecraft_java: &'static str,
+}
+
+
+impl Minecraft {
+    
+    /// Defines Titles for Orginal Minecraft Authentcation
+    pub const AUTH_TITLES: AuthTitles = AuthTitles {
+        minecraft_nintendo_switch: "00000000441cc96b",
+        minecraft_java: "00000000402b5328",
+    };
+
 }
 
 /// Tests for the Framework for development
