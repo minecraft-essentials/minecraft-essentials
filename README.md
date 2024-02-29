@@ -1,94 +1,107 @@
-
 # Minecraft-Essentials
 
-A Package that gives all Minecraft client launchers essentials.
+A package that provides essential functionality for Minecraft client launchers.
 
 ## Features
 
-- Essential - functionality for Minecraft Client Launchers
-- Simplifies - Minecraft Client Launcher Building.
-- Fast - performs better than other frameworks in authentification and launching
-- Safe - Forbids Unsafe Code `#![forbid(unsafe_code)]`
-- Beginner Friendly - Full [documentation](https://docs.rs/minecraft-Essentials) and examples/template avalible on github.
+- **Essential**: Offers core functionality for Minecraft Client Launchers.
+- **Simplifies**: Streamlines the process of building Minecraft Client Launchers.
+- **Fast**: Delivers superior performance in authentication and launching.
+- **Safe**: Ensures safety by forbidding unsafe code.
+- **Beginner Friendly**: Comprehensive [documentation][Docs] and examples/templates available on GitHub.
 
+## Package Locations
 
+Some packages have been split up for organizational purposes:
 
-## Where is the Other Packages???
-
-Some of the packages had to be split up for reasons they are located here:
-- [NPM (Node)](https://github.com/minecraft-essentials/npm)
-- [PyPi (Coming soon!)](https://github.com/minecraft-essentials/pypi)
-
----
+- [NPM (Node)][NPMRepo]
+- [PyPi (Coming soon!)][PYPIRepo]
 
 ## Installation
 
-Prerequisites: 
-- Rust
+Add `minecraft-essentials` to your project:
 
+```sh
+cargo add minecraft-essentials
+```
 
+**OR**
 
-## Usage:
+Add the following to your `Cargo.toml`:
 
-### Oauth BearToken:
+```toml
+[dependencies]
+minecraft-essentials = "0.2.9"
+```
+
+## Usage
+
+### OAuth Custom Authentifcation | OAuth2.0
+
+This example demonstrates how to use the OAuth authentication method provided by `minecraft-essentials`, `oauth` feature.
+
 ```rust, ignore
 use minecraft_essentials::*;
 
-
+// Initialize OAuth authentication with your client ID and an optional custom port
 let client_id = "";
 let client_secret = "";
-let port = None;
 
-let bedrockrel = false;
+let port = None; // Optional: Set a custom port
+let bedrockrel = false; // Optional: Use this flag to only get the XTS token
+
+// Initialize the OAuth authentication object
 let auth = Oauth::new(client_id, port);
 
-println!("{}", auth.url());
+// Print the URL needed for authentication
+println!("URL: {}", auth.url());
 
-let auth_info = auth.launch(bedrockrel, client_secret).await;
+// Launch the authentication process
+ let auth_info = auth.launch(bedrockrel, client_secret).await;
 
+// Print the authentication information
 println!("{:?}", auth_info)
 ```
 
 
-### Oauth Bedrock Relm:
-```rust, ignore
+
+
+### Device Code Custom Authentication | DeviceCode
+
+This example demonstrates how to use the Device Code authentication method provided by `minecraft-essentials`, `devicecode` feature.
+
+```rust, ignore 
 use minecraft_essentials::*;
 
-
-let client_id = "";
-let client_secret = "";
-
-let port = None;
-let bedrockrel = true;
-
-let auth = Oauth::new(client_id, port);
-println!("{}", auth.url());
-
-let auth_info = auth.launch(bedrockrel, client_secret).await;
-
-println!("{:?}", auth_info)
-```
-
----
-
-
-### Device_Code
-```rust, ignore
-use minecraft_essentials::*;
+// Initialize Device Code authentication with your client ID 
 let client_id = "111231209837123098712";
+
+// Create a new device code instance 
 let code = device_code::new(client_id);
+
+// Print the device code information 
 println!("Stuff Here: {}", code.preinfo());
 
+// Launch the authentication process 
 let code_info = code.launch().await?;
 ```
 
 
-**More usages coming soon.**
 
+## Contributing
 
-## Want to contribute?
-If you want to contrubute to this rust/main version package/library check this out [here](./contributing.md)
+Interested in contributing to this project? Check out [Contributing](./contributing.md).
 
 ## Licensing
 
-This library is licensed under the [BSD 3.0 Licence](./LICENSE)
+This library is licensed under the [BSD 3.0 License](./LICENSE).
+
+## Credits
+
+- [trippleawap](https://github.com/trippleawap) for providing a Minecraft Authentication Sample for Minecraft Implementation.
+
+<!-- Links -->
+
+[Docs]: https://docs.rs/minecraft-Essentials
+[NPMRepo]: https://github.com/minecraft-essentials/npm
+[PYPIRepo]: https://github.com/minecraft-essentials/pypi
