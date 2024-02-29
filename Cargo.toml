@@ -16,7 +16,7 @@ rustdocflags = ["--theme=ayu"]
 
 
 [[bin]]
-name = "cargo-minecraft-essentials"
+name = "minecraft-essentials"
 path = "src/main.rs"
 
 
