@@ -44,15 +44,11 @@ async fn main() {
 async fn handle_oauth(oauth_args: &OauthArgs) {
     let auth = Oauth::new(&oauth_args.client_id, Some(oauth_args.port.unwrap_or(8000)));
     println!("URL: {} \nWaiting for Login........", auth.url());
-    match auth.launch(oauth_args.bedrockrelm.unwrap_or(false), &oauth_args.client_secret).await {
-        Ok(authinfo) => {
+    let auth_info = auth.launch(false, &oauth_args.client_secret).await.unwrap();
             println!(
                 "Bearer: {:?}, \n UUID: {:?}, \n Expire_in: {:?}, \n XtsToken: {:?}",
-                authinfo.access_token, authinfo.uuid, authinfo.uuid, authinfo.xts_token
+                auth_info.access_token, auth_info.uuid, auth_info.expires_in, auth_info.xts_token
             );
-        },
-        Err(e) => eprintln!("Failed to launch: {}", e),
-    }
 }
 
 async fn handle_device_code(device_code_args: &DeviceCodeArgs) {
