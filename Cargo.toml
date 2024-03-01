@@ -25,6 +25,7 @@ path = "src/main.rs"
 reqwest = { version = "0.11.24", features = ["json"], optional = true }
 serde = { version = "1.0.196", features = ["derive"], optional = true }
 serde_json = { version = "1.0.113", optional = true }
+serde_urlencoded = { version = "0.7.1", optional = true }
 tokio = { version = "1.36.0", features = ["rt-multi-thread", "macros", "sync"]}
 
 # Hashing SHA256
@@ -50,8 +51,9 @@ dotenv = { version = "0.15.0"}
 [features]
 default = ["oauth", "devicecode"]
 devicecode = ["dep:reqwest", "dep:serde", "dep:serde_json"]
-oauth = ["dep:reqwest", "dep:serde", "dep:serde_json","dep:rand"]
+oauth = ["dep:reqwest", "dep:serde", "dep:serde_json","dep:rand", "dep:serde_urlencoded"]
 minecraft-auth = ["dep:ring", "dep:hex"]
 discordrpc = []
 renew = []
 cli = ["default", "dep:clap", "minecraft-auth"]
+serde_urlencoded = ["dep:serde_urlencoded"]
