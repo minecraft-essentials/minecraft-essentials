@@ -22,7 +22,6 @@ path = "src/main.rs"
 
 
 [dependencies]
-actix-web = { version = "4.5.1", optional = true }
 reqwest = { version = "0.11.24", features = ["json"], optional = true }
 serde = { version = "1.0.196", features = ["derive"], optional = true }
 serde_json = { version = "1.0.113", optional = true }
@@ -50,8 +49,8 @@ dotenv = { version = "0.15.0"}
 
 [features]
 default = ["oauth", "devicecode"]
-devicecode = ["dep:actix-web", "dep:reqwest", "dep:serde", "dep:serde_json"]
-oauth = ["dep:actix-web", "dep:reqwest", "dep:serde", "dep:serde_json","dep:rand"]
+devicecode = ["dep:reqwest", "dep:serde", "dep:serde_json"]
+oauth = ["dep:reqwest", "dep:serde", "dep:serde_json","dep:rand"]
 minecraft-auth = ["dep:ring", "dep:hex"]
 discordrpc = []
 renew = []

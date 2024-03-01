@@ -29,6 +29,8 @@ pub enum XTSError {
 pub enum OAuthError {
     /// Authentcation Failed: {0}
     AuthenticationFailure(String),
+    /// Parsing Failed: {0}
+    ParseError(String),
     /// Binding error: {0}
     BindError(String),
 }

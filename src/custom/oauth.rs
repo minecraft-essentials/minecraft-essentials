@@ -1,12 +1,9 @@
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
-//! The server for OAauth login Server.
-
-use actix_web::{web, App, HttpResponse, HttpServer};
 use reqwest::Client;
 use serde::Deserialize;
-use tokio::sync::mpsc;
+use tokio::{io::AsyncReadExt, net::TcpListener, sync::mpsc};
 
 use crate::{
     async_trait_alias::*,
@@ -40,23 +37,55 @@ pub struct Token {
 pub fn server(port: u16) -> Result<impl AsyncSendSync<Result<Info, OAuthError>>, OAuthError> {
     let (tx, mut rx) = mpsc::channel::<Info>(1);
 
-    let server = tokio::spawn(
-        HttpServer::new(move || {
-            App::new().app_data(actix_web::web::Data::new(tx.clone())).route(
-                "/",
-                web::get().to(|web::Query(info): web::Query<Info>, tx: web::Data<mpsc::Sender<Info>>| async move {
-                    tx.try_send(info).unwrap();
-                    HttpResponse::Ok().body("If you see this the authentification has ran into an error.")
-                }),
-            )
-        })
-        .bind(format!("127.0.0.1:{}", port)).map_err(|e| OAuthError::BindError(e.to_string()))?
-        .workers(1)
-        .run(),
-    );
+    let server = tokio::spawn(async move {
+        match TcpListener::bind(format!("127.0.0.1:{}", port)).await {
+            Ok(listener) => {
+                loop {
+                    match listener.accept().await {
+                        Ok((mut socket, _)) => {
+                            let tx = tx.clone();
+                            tokio::spawn(async move {
+                                let mut buf = [0; 1024];
+                                loop {
+                                    let n = match socket.read(&mut buf).await {
+                                        Ok(n) if n == 0 => break,
+                                        Ok(n) => n,
+                                        Err(e) => {
+                                            eprintln!("failed to read from socket; err = {:?}", e);
+                                            break;
+                                        }
+                                    };
+                                
+                                    // Here you would parse the received data into your `Info` struct
+                                    // For demonstration, let's assume we have a function `parse_info` that does this
+                                    match parse_info(&buf[..n]) {
+                                        Ok(info) => {
+                                            if let Err(e) = tx.try_send(info) {
+                                                eprintln!("failed to send data to channel; err = {:?}", e);
+                                            }
+                                        },
+                                        Err(e) => {
+                                            eprintln!("failed to parse info; err = {:?}", e);
+                                        }
+                                    }
+                                }
+                            });
+                        },
+                        Err(e) => {
+                            eprintln!("failed to accept connection; err = {:?}", e);
+                        }
+                    }
+                }
+            },
+            Err(e) => {
+                eprintln!("failed to bind listener; err = {:?}", e);
+            }
+        }
+    });
+    
 
     Ok(async move {
-        let info = rx.recv().await.expect("server did not recive params");
+        let info = rx.recv().await.expect("server did not receive params");
 
         if info.error.as_ref().map_or(false, |s| !s.is_empty())
             && info
@@ -73,6 +102,14 @@ pub fn server(port: u16) -> Result<impl AsyncSendSync<Result<Info, OAuthError>>,
         }
     })
 }
+
+fn parse_info(data: &[u8]) -> Result<Info, OAuthError> {
+    // Assuming the data is in a format that can be directly deserialized into Info
+    // For demonstration, let's assume the data is a JSON string
+    let data_str = std::str::from_utf8(data).map_err(|_| OAuthError::ParseError("Invalid UTF-8".to_string()))?;
+    serde_json::from_str::<Info>(data_str).map_err(|_| OAuthError::ParseError("Failed to parse Info".to_string()))
+}
+
 
 pub fn token(
     code: &str,
