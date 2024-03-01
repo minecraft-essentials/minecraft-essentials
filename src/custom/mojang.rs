@@ -46,6 +46,7 @@ pub struct AuthInfo {
 #[derive(Debug, Deserialize)]
 struct MojangResponse {
     username: String,
+    _roles: Vec<String>,
     access_token: String,
     token_type: String,
     expires_in: i32,
@@ -77,14 +78,16 @@ async fn tokeninternal(client: Client, body: Value) -> Result<AuthInfo, Box<dyn 
         return Err("Invalid token type".into());
     }
 
+    println!("{:?}", response);
+
     let access_token = response.access_token;
     let uuid = response.username;
-    let expires_in = response.expires_in;
+    let expires_in = response.expires_in; // Ensure this is correctly set to the expiration time
 
     Ok(AuthInfo {
         uuid: uuid,
         access_token: access_token,
-        expires_in: expires_in,
-        xts_token: None,
+        expires_in: expires_in, // This should correctly reflect the expiration time
+        xts_token: None, // Assuming this is handled elsewhere or not relevant for this issue
     })
 }
