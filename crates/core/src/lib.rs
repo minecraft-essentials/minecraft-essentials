@@ -261,35 +261,6 @@ impl DeviceCode {
     }
 }
 
-/// Authentication Titles
-///
-/// This struct holds static strings that represent Minecraft titles.
-/// These titles are used in various authentication processes to identify
-/// the type of Minecraft edition being authenticated.
-pub struct AuthTitles {
-    /// The title for Minecraft Nintendo Switch.
-    pub minecraft_nintendo_switch: &'static str,
-    /// The title for Minecraft Java Edition.
-    pub minecraft_java: &'static str,
-}
-
-/// Minecraft
-///
-/// This struct represents the core functionalities related to Minecraft within the Minecraft-Essentials package.
-/// It is designed to provide essential features for Minecraft client launchers, simplifying the process of building
-/// and managing Minecraft client applications.
-pub struct Minecraft {}
-
-impl Minecraft {
-    /// A constant instance of `AuthTitles` with predefined titles.
-    ///
-    /// This constant is used throughout the library to refer to the Minecraft titles
-    /// in a consistent manner.
-    pub const AUTH_TITLES: AuthTitles = AuthTitles {
-        minecraft_nintendo_switch: "Minecraft Nintendo Switch",
-        minecraft_java: "Minecraft Java Edition",
-    };
-}
 
 /// `Launch` struct represents the configuration for launching a Minecraft client.
 ///
@@ -299,14 +270,20 @@ pub struct Launch {
     args: String,
 }
 
-impl Launch {
+pub(crate) const ADOPITUM_API_URL: &str = "https://api.adopitum.com";
 
+impl Launch {
+    
     /// Launches a new instance of the launch function.
     pub fn new(clientid: &str, uuid: &str, username: &str, server: Option<&str> ) {
         let mut arg_vec: Vec<String> = Vec::new();
 
+        arg_vec.push(format!("--clientid {}", clientid));
+        arg_vec.push(format!("--uuid {}", uuid));
+        arg_vec.push(format!("--username {}", username));
+
         if let Some(server) = server  {
-            arg_vec.push("--server {}", server)
+            arg_vec.push(format!("--server {}", server))
         }
          
     }
@@ -317,7 +294,10 @@ impl Launch {
     }
 
     /// This function downloads java for you minecraft client if needed you can do a custom java via a link.
-    pub fn downloadJava() {
+    /// 
+    /// Java: Defaults to Temurin JRE {{version}}
+    pub fn downloadJava(java_version: &str, download_url: Option<&str>) {
+        // Download jre based on architecture, java version and Operating system using the Adoptium API
 
     }
 }
