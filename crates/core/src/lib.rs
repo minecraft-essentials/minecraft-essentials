@@ -16,10 +16,12 @@ mod minecraft;
 #[cfg(any(feature = "oauth", feature = "devicecode"))]
 mod custom;
 
+use clap::builder::Str;
 #[cfg(any(feature = "oauth", feature = "devicecode"))]
 use custom::{code, mojang, oauth, xbox};
 
 pub use custom::mojang::AuthInfo as CustomAuthData;
+use reqwest::header::SERVER;
 
 // Constants
 pub(crate) const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
@@ -287,6 +289,37 @@ impl Minecraft {
         minecraft_nintendo_switch: "Minecraft Nintendo Switch",
         minecraft_java: "Minecraft Java Edition",
     };
+}
+
+/// `Launch` struct represents the configuration for launching a Minecraft client.
+///
+/// This struct holds the arguments required to launch the Minecraft client. The arguments are passed as a single string,
+/// which can include various options supported by the Minecraft client.
+pub struct Launch {
+    args: String,
+}
+
+impl Launch {
+
+    /// Launches a new instance of the launch function.
+    pub fn new(clientid: &str, uuid: &str, username: &str, server: Option<&str> ) {
+        let mut arg_vec: Vec<String> = Vec::new();
+
+        if let Some(server) = server  {
+            arg_vec.push("--server {}", server)
+        }
+         
+    }
+
+    // Launches a new instance of the launch function with custom args.
+    pub fn new_customargs(args: &str) {
+
+    }
+
+    /// This function downloads java for you minecraft client if needed you can do a custom java via a link.
+    pub fn downloadJava() {
+
+    }
 }
 
 // Tests
