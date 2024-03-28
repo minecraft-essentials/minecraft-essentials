@@ -1,5 +1,3 @@
 [workspace]
-members = [
-    "crates/core",
-    "crates/tauri-plugin"
-]
+members = ["crates/core", "crates/javascript", "crates/python", "crates/tauri-plugin"]
+resolver = "2"
