@@ -955,7 +955,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "minecraft-essentials-python"
+name = "minecraft-essentials-pypi"
 version = "0.1.0"
 
 [[package]]
