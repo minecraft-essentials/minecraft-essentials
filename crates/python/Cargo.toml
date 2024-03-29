@@ -1,5 +1,5 @@
 [package]
-name = "python"
+name = "minecraft-essentials-pypi"
 version = "0.1.0"
 edition = "2021"
 
