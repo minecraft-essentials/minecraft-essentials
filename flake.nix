@@ -40,15 +40,6 @@
           system,
           ...
         }:
-        let
-          cargoBuildInputs = lib.optionals pkgs.stdenv.isDarwin (
-            with pkgs.darwin.apple_sdk;
-            [
-              frameworks.Security
-              frameworks.CoreServices
-            ]
-          );
-        in
         {
           devenv.shells.default = {
             name = "Project Name"; # TODO: Change Project Name
@@ -56,7 +47,9 @@
             imports = [ ];
 
             # https://devenv.sh/reference/options/
-            packages = with pkgs; [ ];
+            packages = with pkgs; [
+
+            ];
 
             # Define Enviroment Virables
             env = {
