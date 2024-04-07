@@ -32,4 +32,5 @@
 ### Nix ###
 .pre-commit-config.yaml
 .devenv
+.direnv
 !.envrc
