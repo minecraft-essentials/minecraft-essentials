@@ -10,13 +10,9 @@ pub(crate) mod async_trait_alias;
 /// for error handling within the library.
 pub mod errors;
 
-#[cfg(feature = "minecraft-auth")]
-mod minecraft;
-
 #[cfg(any(feature = "oauth", feature = "devicecode"))]
 mod custom;
 
-use clap::builder::Str;
 #[cfg(any(feature = "oauth", feature = "devicecode"))]
 use custom::{code, mojang, oauth, xbox};
 
@@ -288,7 +284,7 @@ impl Launch {
          
     }
 
-    // Launches a new instance of the launch function with custom args.
+    /// Launches a new instance of the launch function with custom args.
     pub fn new_customargs(args: &str) {
 
     }
@@ -296,7 +292,7 @@ impl Launch {
     /// This function downloads java for you minecraft client if needed you can do a custom java via a link.
     /// 
     /// Java: Defaults to Temurin JRE {{version}}
-    pub fn downloadJava(java_version: &str, download_url: Option<&str>) {
+    pub fn download_java(java_version: &str, download_url: Option<&str>) {
         // Download jre based on architecture, java version and Operating system using the Adoptium API
 
     }

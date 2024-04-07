@@ -1,3 +1,4 @@
 {
-    "rust-analyzer.cargo.features": ["default", "cli", "minecraft-auth"]
+    "rust-analyzer.cargo.features": ["default", "cli", "minecraft-auth"],
+    "biome.enabled": false,
 }

@@ -56,9 +56,7 @@
             imports = [ ];
 
             # https://devenv.sh/reference/options/
-            packages = with pkgs; [
-
-            ];
+            packages = with pkgs; [ ];
 
             # Define Enviroment Virables
             env = {

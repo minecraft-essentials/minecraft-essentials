@@ -49,7 +49,7 @@ dotenv = { version = "0.15.0"}
 
 
 [features]
-default = ["oauth", "devicecode"]
+default = ["oauth", "devicecode", "cli"]
 devicecode = ["dep:reqwest", "dep:serde", "dep:serde_json"]
 oauth = ["dep:reqwest", "dep:serde", "dep:serde_json","dep:rand", "dep:serde_urlencoded"]
 minecraft-auth = ["dep:ring", "dep:hex"]
