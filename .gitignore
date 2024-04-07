@@ -28,3 +28,9 @@
 
 ### OPERATING SYSTEM ###
 .DS_STORE
+
+### Nix ###
+.pre-commit-config.yaml
+.devenv
+.direnv
+!.envrc
