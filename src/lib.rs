@@ -1,4 +1,4 @@
-#![doc = include_str!("../../../README.md")]
+#![doc = include_str!("../README.md")]
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
@@ -257,7 +257,6 @@ impl DeviceCode {
     }
 }
 
-
 /// `Launch` struct represents the configuration for launching a Minecraft client.
 ///
 /// This struct holds the arguments required to launch the Minecraft client. The arguments are passed as a single string,
@@ -269,32 +268,27 @@ pub struct Launch {
 pub(crate) const ADOPITUM_API_URL: &str = "https://api.adopitum.com";
 
 impl Launch {
-    
     /// Launches a new instance of the launch function.
-    pub fn new(clientid: &str, uuid: &str, username: &str, server: Option<&str> ) {
+    pub fn new(clientid: &str, uuid: &str, username: &str, server: Option<&str>) {
         let mut arg_vec: Vec<String> = Vec::new();
 
         arg_vec.push(format!("--clientid {}", clientid));
         arg_vec.push(format!("--uuid {}", uuid));
         arg_vec.push(format!("--username {}", username));
 
-        if let Some(server) = server  {
+        if let Some(server) = server {
             arg_vec.push(format!("--server {}", server))
         }
-         
     }
 
     /// Launches a new instance of the launch function with custom args.
-    pub fn new_customargs(args: &str) {
-
-    }
+    pub fn new_customargs(args: &str) {}
 
     /// This function downloads java for you minecraft client if needed you can do a custom java via a link.
-    /// 
+    ///
     /// Java: Defaults to Temurin JRE {{version}}
     pub fn download_java(java_version: &str, download_url: Option<&str>) {
         // Download jre based on architecture, java version and Operating system using the Adoptium API
-
     }
 }
 

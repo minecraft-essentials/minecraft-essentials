@@ -55,34 +55,36 @@ pub fn server(port: u16) -> Result<impl AsyncSendSync<Result<Info, OAuthError>>,
                                             break;
                                         }
                                     };
-                                
+
                                     // Here you would parse the received data into your `Info` struct
                                     // For demonstration, let's assume we have a function `parse_info` that does this
                                     match parse_info(&buf[..n]) {
                                         Ok(info) => {
                                             if let Err(e) = tx.try_send(info) {
-                                                eprintln!("failed to send data to channel; err = {:?}", e);
+                                                eprintln!(
+                                                    "failed to send data to channel; err = {:?}",
+                                                    e
+                                                );
                                             }
-                                        },
+                                        }
                                         Err(e) => {
                                             eprintln!("failed to parse info; err = {:?}", e);
                                         }
                                     }
                                 }
                             });
-                        },
+                        }
                         Err(e) => {
                             eprintln!("failed to accept connection; err = {:?}", e);
                         }
                     }
                 }
-            },
+            }
             Err(e) => {
                 eprintln!("failed to bind listener; err = {:?}", e);
             }
         }
     });
-    
 
     Ok(async move {
         let info = rx.recv().await.expect("server did not receive params");
@@ -106,10 +108,11 @@ pub fn server(port: u16) -> Result<impl AsyncSendSync<Result<Info, OAuthError>>,
 fn parse_info(data: &[u8]) -> Result<Info, OAuthError> {
     // Assuming the data is in a format that can be directly deserialized into Info
     // For demonstration, let's assume the data is a JSON string
-    let data_str = std::str::from_utf8(data).map_err(|_| OAuthError::ParseError("Invalid UTF-8".to_string()))?;
-    serde_json::from_str::<Info>(data_str).map_err(|_| OAuthError::ParseError("Failed to parse Info".to_string()))
+    let data_str = std::str::from_utf8(data)
+        .map_err(|_| OAuthError::ParseError("Invalid UTF-8".to_string()))?;
+    serde_json::from_str::<Info>(data_str)
+        .map_err(|_| OAuthError::ParseError("Failed to parse Info".to_string()))
 }
-
 
 pub fn token(
     code: &str,

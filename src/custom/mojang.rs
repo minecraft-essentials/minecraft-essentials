@@ -88,6 +88,6 @@ async fn tokeninternal(client: Client, body: Value) -> Result<AuthInfo, Box<dyn 
         uuid: uuid,
         access_token: access_token,
         expires_in: expires_in, // This should correctly reflect the expiration time
-        xts_token: None, // Assuming this is handled elsewhere or not relevant for this issue
+        xts_token: None,        // Assuming this is handled elsewhere or not relevant for this issue
     })
 }

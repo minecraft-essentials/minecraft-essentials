@@ -14,21 +14,21 @@ enum Commands {
     /// Oauth Check command.
     Oauth(OauthArgs),
     /// DeviceCode Check command.
-    DeviceCode(DeviceCodeArgs)
+    DeviceCode(DeviceCodeArgs),
 }
 
 #[derive(Args)]
 struct OauthArgs {
-    client_id: String, 
-    client_secret: String, 
-    port: Option<u16>, 
-    bedrockrelm: Option<bool>
+    client_id: String,
+    client_secret: String,
+    port: Option<u16>,
+    bedrockrelm: Option<bool>,
 }
 
 #[derive(Args)]
 struct DeviceCodeArgs {
-    client_id: String, 
-    bedrockrelm: bool
+    client_id: String,
+    bedrockrelm: bool,
 }
 
 #[tokio::main]
@@ -45,23 +45,23 @@ async fn handle_oauth(oauth_args: &OauthArgs) {
     let auth = Oauth::new(&oauth_args.client_id, Some(oauth_args.port.unwrap_or(8000)));
     println!("URL: {} \nWaiting for Login........", auth.url());
     let auth_info = auth.launch(false, &oauth_args.client_secret).await.unwrap();
-            println!(
-                "Bearer: {:?}, \n UUID: {:?}, \n Expire_in: {:?}, \n XtsToken: {:?}",
-                auth_info.access_token, auth_info.uuid, auth_info.expires_in, auth_info.xts_token
-            );
+    println!(
+        "Bearer: {:?}, \n UUID: {:?}, \n Expire_in: {:?}, \n XtsToken: {:?}",
+        auth_info.access_token, auth_info.uuid, auth_info.expires_in, auth_info.xts_token
+    );
 }
 
 async fn handle_device_code(device_code_args: &DeviceCodeArgs) {
-   let auth = DeviceCode::new(&device_code_args.client_id).await;
-   match auth {
-    Ok(device_code) => {
-        let (url, message, expires_in, user_code) = device_code.preinfo();
-        println!("Info: URL: {}, Message: {}, Expires in: {}, User Code: {} \nWaiting for Login........", url, message, expires_in, user_code);
+    let auth = DeviceCode::new(&device_code_args.client_id).await;
+    match auth {
+        Ok(device_code) => {
+            let (url, message, expires_in, user_code) = device_code.preinfo();
+            println!("Info: URL: {}, Message: {}, Expires in: {}, User Code: {} \nWaiting for Login........", url, message, expires_in, user_code);
 
-        let authinfo = device_code.launch(device_code_args.bedrockrelm);
-    },
-    Err(e) => {
-        eprintln!("Failed to create DeviceCode: {}", e);
+            let authinfo = device_code.launch(device_code_args.bedrockrelm);
+        }
+        Err(e) => {
+            eprintln!("Failed to create DeviceCode: {}", e);
+        }
     }
-}
 }
