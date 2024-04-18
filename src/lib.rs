@@ -10,10 +10,10 @@ pub(crate) mod async_trait_alias;
 /// for error handling within the library.
 pub mod errors;
 
-#[cfg(any(feature = "oauth", feature = "devicecode"))]
+#[cfg(feature = "custom-auth")]
 mod custom;
 
-#[cfg(any(feature = "oauth", feature = "devicecode"))]
+#[cfg(feature = "custom-auth")]
 use custom::{code, mojang, oauth, xbox};
 
 pub use custom::mojang::AuthInfo as CustomAuthData;
@@ -27,14 +27,14 @@ pub(crate) const EXPERIMENTAL_MESSAGE: &str =
 ///
 /// This struct represents the OAuth authentication process for Minecraft, specifically designed for use with custom Azure applications.
 /// It is used to authenticate a user and obtain a token that can be used to launch Minecraft.
-#[cfg(feature = "oauth")]
+#[cfg(feature = "custom-auth")]
 pub struct Oauth {
     url: String,
     port: u16,
     client_id: String,
 }
 
-#[cfg(feature = "oauth")]
+#[cfg(feature = "custom-auth")]
 impl Oauth {
     /// Initializes a new `Oauth` instance.
     ///
@@ -153,7 +153,7 @@ impl Oauth {
 ///
 /// This struct represents the device code authentication process for Minecraft, specifically designed for use with custom Azure applications.
 /// It is used to authenticate a device and obtain a token that can be used to launch Minecraft.
-#[cfg(feature = "devicecode")]
+#[cfg(feature = "custom-auth")]
 pub struct DeviceCode {
     url: String,
     message: String,
@@ -163,7 +163,7 @@ pub struct DeviceCode {
     client_id: String,
 }
 
-#[cfg(feature = "devicecode")]
+#[cfg(feature = "custom-auth")]
 impl DeviceCode {
     /// Initializes a new `DeviceCode` instance.
     ///
@@ -250,7 +250,6 @@ impl DeviceCode {
     /// # Note
     ///
     /// This method is intended for future use when implementing refresh functionality for the device code authentication process.
-    #[cfg(feature = "refresh")]
     pub async fn refresh(&self) {
         println!("{}", EXPERIMENTAL_MESSAGE);
     }
@@ -287,46 +286,13 @@ impl Launch {
     ///
     /// Java: Defaults to Temurin JRE {{version}}
     pub fn download_java(java_version: &str, download_url: Option<&str>) {
-        // Download jre based on architecture, java version and Operating system using the Adoptium API
+       
     }
 }
 
 // Tests
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use dotenv::dotenv;
-    use std::env;
-
-    #[cfg(feature = "oauth")]
-    #[tokio::test]
-    async fn test_oauth_url() {
-        let _ = dotenv();
-        let client_id = env::var("Client_ID").expect("Expected Client ID");
-        let oauth = Oauth::new(&client_id, None);
-        let params = format!("client_id={}&response_type=code&redirect_uri=http://localhost:8000&response_mode=query&scope={}&state=12345", client_id, SCOPE);
-        let expected_url = format!(
-            "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize/?{}",
-            params
-        );
-        assert_eq!(oauth.url(), expected_url);
-    }
-
-    #[cfg(feature = "devicecode")]
-    #[tokio::test]
-    async fn test_device_code_prelaunch() {
-        let _ = dotenv();
-        let client_id = env::var("Client_ID").expect("Expected Client ID.");
-        let device_code = DeviceCode::new(&client_id).await.unwrap();
-
-        let (url, message, expires_in, user_code) = device_code.preinfo();
-
-        assert_eq!(url, device_code.url);
-        assert_eq!(message, device_code.message);
-        assert_eq!(expires_in, device_code.expires_in);
-        assert_eq!(user_code, device_code.user_code);
-    }
-}
+mod tests;
 
 /// Deprecated Refresh Bearer
 ///
@@ -338,10 +304,10 @@ mod tests {
 ///
 /// This functionality will be removed in a future release. Developers are advised to use the
 /// recommended refresh functions instead.
-#[cfg(feature = "renew")]
+#[cfg(feature = "deperacted")]
 #[deprecated(
     since = "0.2.8",
-    note = "This functionality has been deprecated. Please use the `oauth::refresh` or `devicecode::refresh` functions for refreshing tokens in the future. This feature will be removed in a future release."
+    note = "This functionality has been deprecated. Please use the `oauth::refresh` or `devicecode::refresh` functions for refreshing tokens in the future. This feature will be removed in 0.2.10"
 )]
 pub struct RefreshBearer {
     refresh_token: String,
@@ -350,7 +316,7 @@ pub struct RefreshBearer {
     client_secret: String,
 }
 
-#[cfg(feature = "renew")]
+#[cfg(feature = "deperacted")]
 impl RefreshBearer {
     /// Initializes a new `RefreshBearer` instance.
     ///
