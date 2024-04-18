@@ -17,7 +17,6 @@ mod custom;
 use custom::{code, mojang, oauth, xbox};
 
 pub use custom::mojang::AuthInfo as CustomAuthData;
-use reqwest::header::SERVER;
 
 // Constants
 pub(crate) const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
