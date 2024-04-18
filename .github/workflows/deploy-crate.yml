@@ -1,8 +1,7 @@
 name: Deploy to Crates
 on:
  push:
-    branches:
-      - main
+    branches: [main]
 jobs:
  test:
     runs-on: ${{ matrix.os }}
