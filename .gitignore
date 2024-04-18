@@ -20,10 +20,7 @@
 
 ### ENVIROMENT VIRABLES ###
 .env*
-.flaskenv*
-!.env.project
-.env.vault
-!.env.vault
+!.env.example
 
 
 ### OPERATING SYSTEM ###
