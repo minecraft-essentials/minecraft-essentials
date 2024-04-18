@@ -47,13 +47,15 @@
             imports = [ ];
 
             # https://devenv.sh/reference/options/
-            packages = lib.optionals pkgs.stdenv.isDarwin (
-              with pkgs.darwin.apple_sdk.frameworks;
-              [
-                Security
-                SystemConfiguration
-              ]
-            );
+            packages =
+              lib.optionals pkgs.stdenv.isDarwin (
+                with pkgs.darwin.apple_sdk.frameworks;
+                [
+                  Security
+                  SystemConfiguration
+                ]
+              )
+              ++ (with pkgs; [ hyperfine ]);
 
             # Define Enviroment Virables
             env = {
