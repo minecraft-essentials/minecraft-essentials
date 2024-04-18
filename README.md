@@ -1,6 +1,6 @@
 # Minecraft-Essentials
 
-A package that provides essential functionality for Minecraft client launchers.
+The offical cargo package that provides essential functionality for Minecraft client launchers.
 
 ## Features
 
@@ -12,10 +12,7 @@ A package that provides essential functionality for Minecraft client launchers.
 
 ## Package Locations
 
-Some packages have been split up for organizational purposes:
-
-- [NPM (Node)][NPMRepo]
-- [PyPi (Coming soon!)][PYPIRepo]
+- [Node][NPMRepo]
 
 ## Installation
 
@@ -104,5 +101,4 @@ This library is licensed under the [BSD 3.0 License](./LICENSE).
 <!-- Links -->
 
 [Docs]: https://docs.rs/minecraft-Essentials
-[NPMRepo]: https://github.com/minecraft-essentials/npm
-[PYPIRepo]: https://github.com/minecraft-essentials/pypi
+[Node]: https://github.com/minecraft-essentials/node
