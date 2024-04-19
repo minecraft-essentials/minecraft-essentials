@@ -42,11 +42,11 @@ dotenv = { version = "0.15.0" }
 [features]
 default = ["custom-auth", "cli"]
 custom-auth = [
+    "dep:serde_urlencoded",
+    "dep:serde_json",
     "dep:reqwest",
     "dep:serde",
-    "dep:serde_json",
     "dep:rand",
-    "dep:serde_urlencoded",
 ]
 minecraft-auth = ["dep:ring", "dep:hex"]
 cli = ["default", "dep:clap", "custom-auth", "minecraft-auth"]

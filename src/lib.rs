@@ -285,9 +285,7 @@ impl Launch {
     /// This function downloads java for you minecraft client if needed you can do a custom java via a link.
     ///
     /// Java: Defaults to Temurin JRE {{version}}
-    pub fn download_java(java_version: &str, download_url: Option<&str>) {
-       
-    }
+    pub fn download_java(java_version: &str, download_url: Option<&str>) {}
 }
 
 // Tests
