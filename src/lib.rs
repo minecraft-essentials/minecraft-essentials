@@ -263,24 +263,14 @@ pub struct Launch {
     args: String,
 }
 
-pub(crate) const ADOPITUM_API_URL: &str = "https://api.adopitum.com";
 
 impl Launch {
     /// Launches a new instance of the launch function.
-    pub fn new(clientid: &str, uuid: &str, username: &str, server: Option<&str>) {
-        let mut arg_vec: Vec<String> = Vec::new();
-
-        arg_vec.push(format!("--clientid {}", clientid));
-        arg_vec.push(format!("--uuid {}", uuid));
-        arg_vec.push(format!("--username {}", username));
-
-        if let Some(server) = server {
-            arg_vec.push(format!("--server {}", server))
-        }
+    pub fn new(args: Vec<String>, java: String) -> Self {
+        let args_final = args.join(" ");
+        print!("{}", args_final);
+        Self { args: args_final}
     }
-
-    /// Launches a new instance of the launch function with custom args.
-    pub fn new_customargs(args: &str) {}
 
     /// This function downloads java for you minecraft client if needed you can do a custom java via a link.
     ///
