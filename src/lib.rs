@@ -9,6 +9,8 @@ pub(crate) mod async_trait_alias;
 /// This module contains all the error types and related functionality
 /// for error handling within the library.
 pub mod errors;
+#[cfg(test)]
+mod tests;
 
 #[cfg(feature = "custom-auth")]
 mod custom;
@@ -285,10 +287,6 @@ impl Launch {
     /// Java: Defaults to Temurin JRE {{version}}
     pub fn download_java(java_version: &str, download_url: Option<&str>) {}
 }
-
-// Tests
-#[cfg(test)]
-mod tests;
 
 /// Deprecated Refresh Bearer
 ///
