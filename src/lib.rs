@@ -270,11 +270,11 @@ pub struct Launch {
 
 impl Launch {
     /// Launches a new instance of the launch function.
-    pub fn new(args: Vec<String>, java_exe: String, jre: Option<PathBuf>) -> Result<Self, errors::LaunchError> {
+    pub fn new(args: Vec<String>, java_exe: String, jre: Option<PathBuf>, offline: Option<bool>) -> Result<Self, errors::LaunchError> {
         let args_final = args.join(" ");
         print!("{}", args_final);
 
-        if !args_final.contains("--uuid") && !args_final.contains("--token") {
+        if offline == Some(true) && !args_final.contains("--uuid") && !args_final.contains("--token") {
             return Err(errors::LaunchError::Requirements("Either --uuid or --token is missing in the arguments.".to_string()));
         }
         
@@ -302,7 +302,7 @@ impl Launch {
     /// 
     /// let jre_path = Path::new("/path/to/jre").to_path_buf();
     /// 
-    /// let launcher = Launch::new(vec!["-Xmx1024M --uuid --token".to_string()], "/path/to/java".to_string(), Some(jre_path)).expect("Expected Launch");  
+    /// let launcher = Launch::new(vec!["-Xmx1024M --uuid --token".to_string()], "/path/to/java".to_string(), Some(jre_path), None).expect("Expected Launch");  
     /// launcher.launch_jre();
     /// ```
     pub fn launch_jre(&self) {
