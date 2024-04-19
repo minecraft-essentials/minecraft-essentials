@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use clap::{Args, Parser, Subcommand};
 use minecraft_essentials::{DeviceCode, Oauth};
 
@@ -15,6 +16,8 @@ enum Commands {
     Oauth(OauthArgs),
     /// DeviceCode Check command.
     DeviceCode(DeviceCodeArgs),
+    // / CustomLaunch Check command
+    // CustomLaunch(CustomLaunchArgs)
 }
 
 #[derive(Args)]
@@ -23,6 +26,13 @@ struct OauthArgs {
     client_secret: String,
     port: Option<u16>,
     bedrockrelm: Option<bool>,
+}
+
+#[derive(Args)]
+struct CustomLaunchArgs {
+    token: String,
+    java_exe: String,
+    jrepath: Option<PathBuf>, 
 }
 
 #[derive(Args)]

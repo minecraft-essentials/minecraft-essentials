@@ -14,6 +14,9 @@ mod tests;
 
 #[cfg(feature = "custom-auth")]
 mod custom;
+use std::path::PathBuf;
+
+use clap::builder::Str;
 pub use custom::mojang::AuthInfo as CustomAuthData;
 #[cfg(feature = "custom-auth")]
 use custom::{code, mojang, oauth, xbox};
@@ -261,19 +264,39 @@ impl DeviceCode {
 /// which can include various options supported by the Minecraft client.
 pub struct Launch {
     args: String,
+    java_exe: String,
+    jre: Option<PathBuf>,
 }
-
 
 impl Launch {
     /// Launches a new instance of the launch function.
-    pub fn new(args: Vec<String>, java: String) -> Self {
+    pub fn new(args: Vec<String>, java_exe: String, jre: Option<PathBuf>) -> Self {
         let args_final = args.join(" ");
         print!("{}", args_final);
-        Self { args: args_final}
+        Self {
+            args: args_final,
+            java_exe,
+            jre,
+        }
     }
-
-    /// This function downloads java for you minecraft client if needed you can do a custom java via a link.
+    /// Launches the Java Runtime Environment (JRE) with the specified arguments.
     ///
-    /// Java: Defaults to Temurin JRE {{version}}
-    pub fn download_java(java_version: &str, download_url: Option<&str>) {}
+    /// This method is responsible for starting the Java Runtime Environment
+    /// with the arguments provided during the initialization of the `Launch` struct.
+    /// It is intended to be used for launching Minecraft or other Java applications.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use minecraft_essentials::Launch;
+    /// use std::path::Path;
+    /// 
+    /// let jre_path = Path::new("/path/to/jre").to_path_buf();
+    /// 
+    /// let launcher = Launch::new(vec!["-Xmx1024M".to_string()], "/path/to/java".to_string(), Some(jre_path));  
+    /// launcher.launch_jre();
+    /// ```
+    pub fn launch_jre(&self) {
+
+    }
 }

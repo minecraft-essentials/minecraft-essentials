@@ -37,16 +37,10 @@ minecraft-essentials = "0.2.9"
 
 This example demonstrates how to use the OAuth authentication method provided by `minecraft-essentials`, `oauth` feature.
 
-```rust, ignore
+```rust
 use minecraft_essentials::*;
 
-// Initialize OAuth authentication with your client ID and an optional custom port
-let client_id = "";
-let client_secret = "";
-
-let port = None; // Optional: Set a custom port
-let bedrockrel = false; // Optional: Use this flag to only get the XTS token
-
+async fn Oauth(client_id: &str, client_secret: &str, port: Option<u16>, bedrockrel: bool) {
 // Initialize the OAuth authentication object
 let auth = Oauth::new(client_id, port);
 
@@ -58,29 +52,41 @@ println!("URL: {}", auth.url());
 
 // Print the authentication information
 println!("{:?}", auth_info)
+}
+
+fn main() {
+    Oauth("CLientID", "ClientSecret", None, false);
+}
+
+
 ```
 
 
 
 
-### Device Code Custom Authentication | DeviceCode
+### Device Code Custom Authentication | DeviceCode WIP
 
 This example demonstrates how to use the Device Code authentication method provided by `minecraft-essentials`, `devicecode` feature.
 
-```rust, ignore 
+```rust, ignore
 use minecraft_essentials::*;
 
-// Initialize Device Code authentication with your client ID 
-let client_id = "111231209837123098712";
 
-// Create a new device code instance 
-let code = device_code::new(client_id);
+async fn deviceCode(client_id: &str) {
+  // Create a new device code instance 
+  let code = DeviceCode::new(client_id).expect("Expected Code");
 
-// Print the device code information 
-println!("Stuff Here: {}", code.preinfo());
+  // Print the device code information 
+  println!("Stuff Here: {}", code.preinfo());
 
-// Launch the authentication process 
-let code_info = code.launch().await?;
+  // Launch the authentication process 
+  let code_info = code.launch().await?;
+}
+
+fn main() {
+    // Initialize Device Code authentication with your client ID 
+    deviceCode("111231209837123098712");
+}
 ```
 
 
