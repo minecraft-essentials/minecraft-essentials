@@ -34,3 +34,11 @@ pub enum OAuthError {
     /// Binding error: {0}
     BindError(String),
 }
+
+
+/// The `LaunchError` enum represents potential errors that can occur during Launching minecraft.
+#[derive(Display, Error, Debug)]
+pub enum LaunchError {
+    /// Launch Requirements Failed: {0}
+    Requirements(String)
+}

@@ -270,20 +270,29 @@ pub struct Launch {
 
 impl Launch {
     /// Launches a new instance of the launch function.
-    pub fn new(args: Vec<String>, java_exe: String, jre: Option<PathBuf>) -> Self {
+    pub fn new(args: Vec<String>, java_exe: String, jre: Option<PathBuf>) -> Result<Self, errors::LaunchError> {
         let args_final = args.join(" ");
         print!("{}", args_final);
-        Self {
+
+        if !args_final.contains("--uuid") && !args_final.contains("--token") {
+            return Err(errors::LaunchError::Requirements("Either --uuid or --token is missing in the arguments.".to_string()));
+        }
+        
+        Ok(Self {
             args: args_final,
             java_exe,
             jre,
-        }
+        })
     }
     /// Launches the Java Runtime Environment (JRE) with the specified arguments.
     ///
     /// This method is responsible for starting the Java Runtime Environment
     /// with the arguments provided during the initialization of the `Launch` struct.
     /// It is intended to be used for launching Minecraft or other Java applications.
+    /// 
+    /// Required Args:
+    /// - UUID: LauncherUUID
+    /// - Token: BearerToken
     ///
     /// # Examples
     ///
@@ -293,10 +302,10 @@ impl Launch {
     /// 
     /// let jre_path = Path::new("/path/to/jre").to_path_buf();
     /// 
-    /// let launcher = Launch::new(vec!["-Xmx1024M".to_string()], "/path/to/java".to_string(), Some(jre_path));  
+    /// let launcher = Launch::new(vec!["-Xmx1024M --uuid --token".to_string()], "/path/to/java".to_string(), Some(jre_path)).expect("Expected Launch");  
     /// launcher.launch_jre();
     /// ```
     pub fn launch_jre(&self) {
-
+        let command_exe = format!("{} {:?} {}", self.java_exe, self.jre, self.args);
     }
 }
