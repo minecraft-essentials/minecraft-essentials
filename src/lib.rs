@@ -12,11 +12,9 @@ pub mod errors;
 
 #[cfg(feature = "custom-auth")]
 mod custom;
-
+pub use custom::mojang::AuthInfo as CustomAuthData;
 #[cfg(feature = "custom-auth")]
 use custom::{code, mojang, oauth, xbox};
-
-pub use custom::mojang::AuthInfo as CustomAuthData;
 
 // Constants
 pub(crate) const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
