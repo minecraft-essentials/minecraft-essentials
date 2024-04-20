@@ -21,10 +21,12 @@ pub use custom::mojang::AuthInfo as CustomAuthData;
 #[cfg(feature = "custom-auth")]
 use custom::{code, mojang, oauth, xbox};
 
-
 #[cfg(feature = "custom-launch")]
-use std::{io::{BufRead, BufReader}, path::PathBuf, process::{Command, Stdio}};
-
+use std::{
+    io::{BufRead, BufReader},
+    path::PathBuf,
+    process::{Command, Stdio},
+};
 
 // Constants
 pub(crate) const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
@@ -277,14 +279,24 @@ pub struct Launch {
 #[cfg(feature = "custom-launch")]
 impl Launch {
     /// Launches a new instance of the launch function.
-    pub fn new(args: Vec<String>, java_exe: String, jre: Option<PathBuf>, offline: Option<bool>) -> Result<Self, errors::LaunchError> {
+    pub fn new(
+        args: Vec<String>,
+        java_exe: String,
+        jre: Option<PathBuf>,
+        offline: Option<bool>,
+    ) -> Result<Self, errors::LaunchError> {
         let args_final = args.join(" ");
         print!("{}", args_final);
 
-        if offline == Some(true) && !args_final.contains("--uuid") && !args_final.contains("--token") {
-            return Err(errors::LaunchError::Requirements("Either --uuid or --token is missing in the arguments.".to_string()));
+        if offline == Some(true)
+            && !args_final.contains("--uuid")
+            && !args_final.contains("--token")
+        {
+            return Err(errors::LaunchError::Requirements(
+                "Either --uuid or --token is missing in the arguments.".to_string(),
+            ));
         }
-        
+
         Ok(Self {
             args: args_final,
             java_exe,
@@ -292,7 +304,15 @@ impl Launch {
         })
     }
 
-    #[cfg(test)]
+    /// Returns the launch configuration information.
+    ///
+    /// This method provides access to the arguments, Java executable path, and the optional Java Runtime Environment (JRE) path
+    /// that were used to initialize the `Launch` struct.
+    ///
+    /// # Returns
+    ///
+    /// * `(&str, &str, &Option<PathBuf>)` - A tuple containing the final arguments string, the path to the Java executable,
+    /// and an optional path to the Java Runtime Environment.
     pub fn info(&self) -> (&str, &str, &Option<PathBuf>) {
         (&self.args, &self.java_exe, &self.jre)
     }
@@ -302,7 +322,7 @@ impl Launch {
     /// This method is responsible for starting the Java Runtime Environment
     /// with the arguments provided during the initialization of the `Launch` struct.
     /// It is intended to be used for launching Minecraft or other Java applications.
-    /// 
+    ///
     /// Required Args:
     /// - UUID: LauncherUUID
     /// - Token: BearerToken
@@ -312,9 +332,9 @@ impl Launch {
     /// ```rust
     /// use minecraft_essentials::Launch;
     /// use std::path::Path;
-    /// 
+    ///
     /// let jre_path = Path::new("/path/to/jre").to_path_buf();
-    /// 
+    ///
     /// let launcher = Launch::new(vec!["-Xmx1024M --uuid --token".to_string()], "/path/to/java".to_string(), Some(jre_path), None).expect("Expected Launch");  
     /// launcher.launch_jre();
     /// ```
@@ -324,7 +344,7 @@ impl Launch {
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()?;
-    
+
         // Optionally, you can handle stdout and stderr in real-time
         if let Some(ref mut stdout) = command.stdout {
             let reader = BufReader::new(stdout);
@@ -332,17 +352,17 @@ impl Launch {
                 println!("{}", line?);
             }
         }
-    
+
         if let Some(ref mut stderr) = command.stderr {
             let reader = BufReader::new(stderr);
             for line in reader.lines() {
                 eprintln!("{}", line?);
             }
         }
-    
+
         // Wait for the command to finish
         command.wait()?;
-    
+
         Ok(())
     }
 }

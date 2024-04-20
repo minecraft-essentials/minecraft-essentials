@@ -35,12 +35,16 @@ async fn test_device_code_prelaunch() {
 #[tokio::test]
 async fn test_custom_launch() {
     let _ = dotenv();
-    let args = vec!["--uuid:uuidtest".to_string(), "--token:tokentest".to_string()];
+    let args = vec![
+        "--uuid:uuidtest".to_string(),
+        "--token:tokentest".to_string(),
+    ];
     let args_join = args.join(" ");
     let jre = Some(PathBuf::from("/test/java"));
     let java_exe = "/test/java";
 
-    let launch = Launch::new(args, java_exe.to_string(), jre.clone(), Some(false)).expect("Expected Launch");
+    let launch =
+        Launch::new(args, java_exe.to_string(), jre.clone(), Some(false)).expect("Expected Launch");
     let (launch_args, launch_java_exe, launch_jre) = launch.info();
     assert_eq!(args_join, launch_args);
     assert_eq!(java_exe, launch_java_exe);
