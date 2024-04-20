@@ -15,7 +15,7 @@ mod tests;
 #[cfg(feature = "custom-auth")]
 mod custom;
 
-#[cfg(feature = "custrom-auth")]
+#[cfg(feature = "custom-auth")]
 pub use custom::mojang::AuthInfo as CustomAuthData;
 
 #[cfg(feature = "custom-auth")]
