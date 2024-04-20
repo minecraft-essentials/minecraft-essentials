@@ -65,7 +65,7 @@ fn main() {
 #### Device Code Custom Authentication | DeviceCode
 
 > [!WARNING]
-> This is still work in progress so stuff may change.
+> This is still work in progress **so it may change**.
 
 
 This example demonstrates how to use the Device Code authentication method provided by `minecraft-essentials`, `devicecode` feature.
