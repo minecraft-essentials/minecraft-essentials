@@ -91,11 +91,32 @@ fn main() {
 }
 ```
 
-### Acutal Minecraft Authentfication
+#### Acutal Minecraft Authentfication
 
 > [!CAUTION]
 > This is currently in the [roadmap][Roadmap] for 0.2.11 currently it's not avalible.
 
+
+### Launching
+
+#### Custom Launching 
+```rust
+use minecraft_essentials::Launch;
+use std::path::Path;
+
+let args = vec!["--uuid:LauncherUUID".to_string(), "--token:Beartoken".to_string()];
+let jre_path = Path::new("/path/to/jre").to_path_buf();
+let java_exe = "/your/java/path";
+
+// Init the instance of launch
+let launch = Launch::new(args, java_exe.to_string(), Some(jre_path.clone()), Some(false)).expect("Expected Launch");
+
+// Grab the info to verify that your doing everything currect.
+let launch_info = launch.info();
+println!("Launching with: {:?}", launch_info);
+
+let _ = launch.launch_jre();
+```
 
 ## Contributing
 
