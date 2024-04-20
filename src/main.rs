@@ -16,8 +16,8 @@ enum Commands {
     Oauth(OauthArgs),
     /// DeviceCode Check command.
     DeviceCode(DeviceCodeArgs),
-    // / CustomLaunch Check command
-    // CustomLaunch(CustomLaunchArgs)
+    /// Custom Launch Check command
+    CustomLaunch(CustomLaunchArgs)
 }
 
 #[derive(Args)]
@@ -48,6 +48,7 @@ async fn main() {
         Commands::Oauth(oauth_args) => handle_oauth(oauth_args).await,
         Commands::DeviceCode(device_code_args) => handle_device_code(device_code_args).await,
         Commands::Version {} => println!("{}", env!("CARGO_PKG_VERSION")),
+        Commands::CustomLaunch(handle_custom_launch_args) => handle_custom_launch(handle_custom_launch_args).await,
     }
 }
 
@@ -74,4 +75,10 @@ async fn handle_device_code(device_code_args: &DeviceCodeArgs) {
             eprintln!("Failed to create DeviceCode: {}", e);
         }
     }
+}
+
+
+async fn handle_custom_launch(handle_custom_launch_args: &CustomLaunchArgs) {
+
+    
 }
