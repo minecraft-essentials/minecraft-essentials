@@ -291,6 +291,12 @@ impl Launch {
             jre,
         })
     }
+
+    #[cfg(test)]
+    pub fn info(&self) -> (&str, &str, &Option<PathBuf>) {
+        (&self.args, &self.java_exe, &self.jre)
+    }
+
     /// Launches the Java Runtime Environment (JRE) with the specified arguments.
     ///
     /// This method is responsible for starting the Java Runtime Environment
