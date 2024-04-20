@@ -40,7 +40,7 @@ thiserror = "1.0.58"
 dotenv = { version = "0.15.0" }
 
 [features]
-default = ["custom-auth", "cli"]
+default = ["custom-auth", "custom-launch", "cli"]
 custom-auth = [
     "dep:serde_urlencoded",
     "dep:serde_json",
@@ -48,6 +48,7 @@ custom-auth = [
     "dep:serde",
     "dep:rand",
 ]
+custom-launch = []
 minecraft-auth = ["dep:ring", "dep:hex"]
-cli = ["default", "dep:clap", "custom-auth", "minecraft-auth"]
+cli = ["default", "dep:clap", "custom-auth", "minecraft-auth", "custom-launch"]
 deperacted = []

@@ -14,10 +14,17 @@ mod tests;
 
 #[cfg(feature = "custom-auth")]
 mod custom;
-use std::{io::{BufRead, BufReader}, path::PathBuf, process::{Command, Stdio}};
+
+#[cfg(feature = "custrom-auth")]
 pub use custom::mojang::AuthInfo as CustomAuthData;
+
 #[cfg(feature = "custom-auth")]
 use custom::{code, mojang, oauth, xbox};
+
+
+#[cfg(feature = "custrom-launch")]
+use std::{io::{BufRead, BufReader}, path::PathBuf, process::{Command, Stdio}};
+
 
 // Constants
 pub(crate) const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
@@ -260,12 +267,14 @@ impl DeviceCode {
 ///
 /// This struct holds the arguments required to launch the Minecraft client. The arguments are passed as a single string,
 /// which can include various options supported by the Minecraft client.
+#[cfg(feature = "custrom-launch")]
 pub struct Launch {
     args: String,
     java_exe: String,
     jre: Option<PathBuf>,
 }
 
+#[cfg(feature = "custrom-launch")]
 impl Launch {
     /// Launches a new instance of the launch function.
     pub fn new(args: Vec<String>, java_exe: String, jre: Option<PathBuf>, offline: Option<bool>) -> Result<Self, errors::LaunchError> {
