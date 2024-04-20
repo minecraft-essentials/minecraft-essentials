@@ -14,9 +14,7 @@ mod tests;
 
 #[cfg(feature = "custom-auth")]
 mod custom;
-use std::path::PathBuf;
-
-use clap::builder::Str;
+use std::{io::{BufRead, BufReader}, path::PathBuf, process::{Command, Stdio}};
 pub use custom::mojang::AuthInfo as CustomAuthData;
 #[cfg(feature = "custom-auth")]
 use custom::{code, mojang, oauth, xbox};
@@ -305,7 +303,31 @@ impl Launch {
     /// let launcher = Launch::new(vec!["-Xmx1024M --uuid --token".to_string()], "/path/to/java".to_string(), Some(jre_path), None).expect("Expected Launch");  
     /// launcher.launch_jre();
     /// ```
-    pub fn launch_jre(&self) {
+    pub fn launch_jre(&self) -> std::io::Result<()> {
         let command_exe = format!("{} {:?} {}", self.java_exe, self.jre, self.args);
+        let mut command = Command::new(command_exe)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()?;
+    
+        // Optionally, you can handle stdout and stderr in real-time
+        if let Some(ref mut stdout) = command.stdout {
+            let reader = BufReader::new(stdout);
+            for line in reader.lines() {
+                println!("{}", line?);
+            }
+        }
+    
+        if let Some(ref mut stderr) = command.stderr {
+            let reader = BufReader::new(stderr);
+            for line in reader.lines() {
+                eprintln!("{}", line?);
+            }
+        }
+    
+        // Wait for the command to finish
+        command.wait()?;
+    
+        Ok(())
     }
 }
