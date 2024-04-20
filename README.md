@@ -33,7 +33,8 @@ minecraft-essentials = "0.2.9"
 
 ## Usage
 
-### OAuth Custom Authentifcation | OAuth2.0
+### Authentifcation
+#### OAuth Custom Authentifcation | OAuth2.0
 
 This example demonstrates how to use the OAuth authentication method provided by `minecraft-essentials`, `oauth` feature.
 
@@ -57,14 +58,13 @@ println!("{:?}", auth_info)
 fn main() {
     Oauth("CLientID", "ClientSecret", None, false);
 }
-
-
 ```
 
+#### Device Code Custom Authentication | DeviceCode
 
+> [!WARNING]
+> This is still work in progress so stuff may change.
 
-
-### Device Code Custom Authentication | DeviceCode WIP
 
 This example demonstrates how to use the Device Code authentication method provided by `minecraft-essentials`, `devicecode` feature.
 
@@ -89,6 +89,10 @@ fn main() {
 }
 ```
 
+### Acutal Minecraft Authentfication
+
+> [!CAUTION]
+> This is currently in the [roadmap][Roadmap] for 0.2.11 currently it's not avalible.
 
 
 ## Contributing
@@ -108,3 +112,4 @@ This library is licensed under the [BSD 3.0 License](./LICENSE).
 
 [Docs]: https://docs.rs/minecraft-Essentials
 [Node]: https://github.com/minecraft-essentials/node
+[Roadmap]: https://github.com/orgs/minecraft-essentials/projects/1
