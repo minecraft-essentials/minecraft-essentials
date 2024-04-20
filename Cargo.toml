@@ -24,7 +24,7 @@ pkg-fmt = "tgz"
 
 [dependencies]
 tokio = { version = "*", features = ["rt-multi-thread", "macros", "sync"] }
-reqwest = { version = "0.11.24", features = ["json"], optional = true }
+reqwest = { version = "0.12.4", features = ["json"], optional = true }
 serde = { version = "1.0.196", features = ["derive"], optional = true }
 clap = { version = "4.5.1", optional = true, features = ["derive"] }
 serde_urlencoded = { version = "0.7.1", optional = true }
