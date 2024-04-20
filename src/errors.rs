@@ -27,8 +27,17 @@ pub enum XTSError {
 /// The `OAuthError` enum represents potential errors that can occur during OAuth authentication.
 #[derive(Display, Error, Debug)]
 pub enum OAuthError {
-    /// Failed to authenticate: Response: {0}
+    /// Authentcation Failed: {0}
     AuthenticationFailure(String),
+    /// Parsing Failed: {0}
+    ParseError(String),
     /// Binding error: {0}
     BindError(String),
+}
+
+/// The `LaunchError` enum represents potential errors that can occur during Launching minecraft.
+#[derive(Display, Error, Debug)]
+pub enum LaunchError {
+    /// Launch Requirements Failed: {0}
+    Requirements(String),
 }

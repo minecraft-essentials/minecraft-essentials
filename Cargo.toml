@@ -1,37 +1,54 @@
+[package]
+name = "minecraft-essentials"
+version = "0.2.10"
+keywords = ["Minecraft", "MinecraftClient"]
+authors = ["Eveeifyeve <eveeg1971@gmail.com>"]
+description = "A Package that gives all Minecraft client launchers essentials."
+homepage = "https://minecraft-essentials.github.io"
+repository = "https://github.com/minecraft-essentials/minecraft-essentials"
+documentation = "https://docs.rs/minecraft-essentials"
+license-file = "LICENSE"
+edition = "2021"
 
 [build]
 rustdocflags = ["--theme=ayu"]
 
-
-[package]
-authors = ["Eveeifyeve <eveeg1971@gmail.com>"]
+[[bin]]
 name = "minecraft-essentials"
-keywords = ["Minecraft", "MinecraftClient"]
-description = "A Package that gives all Minecraft client launchers essentials."
-license-file = "LICENSE"
-documentation = "https://docs.rs/minecraft-essentials"
-version = "0.2.8"
-edition = "2021"
-homepage = "https://minecraft-essentials.github.io"
-readme = "README.md"
-repository = "https://github.com/minecraft-essentials/minecraft-essentials"
+path = "src/main.rs"
 
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-cli"
+bin-dir = "{ name }-{ target }-v{ version }/{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
 
 [dependencies]
-actix-web = "4.5.1"
-base64 = "0.21.7"
+tokio = { version = "*", features = ["rt-multi-thread", "macros", "sync"] }
+reqwest = { version = "0.11.24", features = ["json"], optional = true }
+serde = { version = "1.0.196", features = ["derive"], optional = true }
+clap = { version = "4.5.1", optional = true, features = ["derive"] }
+serde_urlencoded = { version = "0.7.1", optional = true }
+serde_json = { version = "1.0.113", optional = true }
+base64 = { version = "0.21.7", optional = true }
+ring = { version = "0.17.8", optional = true }
+rand = { version = "0.8.5", optional = true }
+hex = { version = "0.4.3", optional = true }
 displaydoc = "0.2.4"
-dotenv = "0.15.0"
-rand = "0.8.5"
-reqwest = { version = "0.11.24", features = ["json"] }
-serde = { version = "1.0.196", features = ["derive"] }
-serde_json = "1.0.113"
-thiserror = "1.0.56"
-tokio = { version = "1.36.0", features = ["rt-multi-thread", "macros", "sync"] }
+thiserror = "1.0.58"
+
+[dev-dependencies]
+dotenv = { version = "0.15.0" }
 
 [features]
-default = ["oauth", "devicecode"]
-devicecode = []
-discordrpc = []
-renew = []
-oauth = []
+default = ["custom-auth", "custom-launch", "cli"]
+custom-auth = [
+    "dep:serde_urlencoded",
+    "dep:serde_json",
+    "dep:reqwest",
+    "dep:serde",
+    "dep:rand",
+]
+custom-launch = []
+minecraft-auth = ["dep:ring", "dep:hex"]
+cli = ["default", "dep:clap", "custom-auth", "minecraft-auth", "custom-launch"]
+deperacted = []

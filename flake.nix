@@ -40,15 +40,6 @@
           system,
           ...
         }:
-        let
-          cargoBuildInputs = lib.optionals pkgs.stdenv.isDarwin (
-            with pkgs.darwin.apple_sdk;
-            [
-              frameworks.Security
-              frameworks.CoreServices
-            ]
-          );
-        in
         {
           devenv.shells.default = {
             name = "Project Name"; # TODO: Change Project Name
@@ -56,9 +47,15 @@
             imports = [ ];
 
             # https://devenv.sh/reference/options/
-            packages = with pkgs; [
-
-            ];
+            packages =
+              lib.optionals pkgs.stdenv.isDarwin (
+                with pkgs.darwin.apple_sdk.frameworks;
+                [
+                  Security
+                  SystemConfiguration
+                ]
+              )
+              ++ (with pkgs; [ hyperfine ]);
 
             # Define Enviroment Virables
             env = {
@@ -89,7 +86,6 @@
             pre-commit.hooks = {
               nixfmt.package = pkgs.nixfmt-rfc-style;
               nixfmt.enable = true;
-              clippy.enable = true;
             };
 
             # https://devenv.sh/integrations/dotenv/

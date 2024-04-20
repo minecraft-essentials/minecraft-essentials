@@ -1,94 +1,139 @@
-
 # Minecraft-Essentials
 
-A Package that gives all Minecraft client launchers essentials.
+The offical rust/cargo package that provides essential functionality for Minecraft client launchers.
 
 ## Features
 
-- Essential - functionality for Minecraft Client Launchers
-- Simplifies - Minecraft Client Launcher Building.
-- Fast - performs better than other frameworks in authentification and launching
-- Safe - Forbids Unsafe Code `#![forbid(unsafe_code)]`
-- Beginner Friendly - Full [documentation](https://docs.rs/minecraft-Essentials) and examples/template avalible on github.
+- **Essential**: Offers core functionality for Minecraft Client Launchers.
+- **Simplifies**: Streamlines the process of building Minecraft Client Launchers.
+- **Fast**: Delivers superior performance in authentication and launching.
+- **Safe**: Ensures safety by forbidding unsafe code.
+- **Beginner Friendly**: Comprehensive [documentation][Docs] and examples/templates available on GitHub.
 
+## Package Versions
+If your looking to use a package other than rust/cargo you might want to have a look at:
 
-
-## Where is the Other Packages???
-
-Some of the packages had to be split up for reasons they are located here:
-- [NPM (Node)](https://github.com/minecraft-essentials/npm)
-- [PyPi (Coming soon!)](https://github.com/minecraft-essentials/pypi)
-
----
+- [Node Version for JS/TS][Node]
+- [Python Version][Python]
 
 ## Installation
 
-Prerequisites: 
-- Rust
+Add `minecraft-essentials` to your project:
 
+```sh
+cargo add minecraft-essentials
+```
 
+**OR**
 
-## Usage:
+Add the following to your `Cargo.toml`:
 
-### Oauth BearToken:
-```rust, ignore
+```toml
+[dependencies]
+minecraft-essentials = "0.2.9"
+```
+
+## Usage
+
+### Authentifcation
+#### OAuth Custom Authentifcation | OAuth2.0
+
+This example demonstrates how to use the OAuth authentication method provided by `minecraft-essentials`, `oauth` feature.
+
+```rust
 use minecraft_essentials::*;
 
-
-let client_id = "";
-let client_secret = "";
-let port = None;
-
-let bedrockrel = false;
+async fn Oauth(client_id: &str, client_secret: &str, port: Option<u16>, bedrockrel: bool) {
+// Initialize the OAuth authentication object
 let auth = Oauth::new(client_id, port);
 
-println!("{}", auth.url());
+// Print the URL needed for authentication
+println!("URL: {}", auth.url());
 
-let auth_info = auth.launch(bedrockrel, client_secret).await;
+// Launch the authentication process
+ let auth_info = auth.launch(bedrockrel, client_secret).await;
 
+// Print the authentication information
 println!("{:?}", auth_info)
+}
+
+fn main() {
+    Oauth("CLientID", "ClientSecret", None, false);
+}
 ```
 
+#### Device Code Custom Authentication | DeviceCode
 
-### Oauth Bedrock Relm:
+> [!WARNING]
+> This is still work in progress **so it may change**.
+
+
+This example demonstrates how to use the Device Code authentication method provided by `minecraft-essentials`, `devicecode` feature.
+
 ```rust, ignore
 use minecraft_essentials::*;
 
 
-let client_id = "";
-let client_secret = "";
+async fn deviceCode(client_id: &str) {
+  // Create a new device code instance 
+  let code = DeviceCode::new(client_id).expect("Expected Code");
 
-let port = None;
-let bedrockrel = true;
+  // Print the device code information 
+  println!("Stuff Here: {}", code.preinfo());
 
-let auth = Oauth::new(client_id, port);
-println!("{}", auth.url());
+  // Launch the authentication process 
+  let code_info = code.launch().await?;
+}
 
-let auth_info = auth.launch(bedrockrel, client_secret).await;
-
-println!("{:?}", auth_info)
+fn main() {
+    // Initialize Device Code authentication with your client ID 
+    deviceCode("111231209837123098712");
+}
 ```
 
----
+#### Acutal Minecraft Authentfication
+
+> [!CAUTION]
+> This is currently in the [roadmap][Roadmap] for 0.2.11 currently it's not avalible.
 
 
-### Device_Code
-```rust, ignore
-use minecraft_essentials::*;
-let client_id = "111231209837123098712";
-let code = device_code::new(client_id);
-println!("Stuff Here: {}", code.preinfo());
+### Launching
 
-let code_info = code.launch().await?;
+#### Custom Launching 
+```rust
+use minecraft_essentials::Launch;
+use std::path::Path;
+
+let args = vec!["--uuid:LauncherUUID".to_string(), "--token:Beartoken".to_string()];
+let jre_path = Path::new("/path/to/jre").to_path_buf();
+let java_exe = "/your/java/path";
+
+// Init the instance of launch
+let launch = Launch::new(args, java_exe.to_string(), Some(jre_path.clone()), Some(false)).expect("Expected Launch");
+
+// Grab the info to verify that your doing everything currect.
+let launch_info = launch.info();
+println!("Launching with: {:?}", launch_info);
+
+let _ = launch.launch_jre();
 ```
 
+## Contributing
 
-**More usages coming soon.**
-
-
-## Want to contribute?
-If you want to contrubute to this rust/main version package/library check this out [here](./contributing.md)
+Interested in contributing to this project? Check out [Contributing](./contributing.md).
 
 ## Licensing
 
-This library is licensed under the [BSD 3.0 Licence](./LICENSE)
+This library is licensed under the [BSD 3.0 License](./LICENSE).
+
+## Credits
+
+- [trippleawap](https://github.com/trippleawap) for providing a Minecraft Authentication Sample for Minecraft Implementation.
+
+
+<!-- Links -->
+
+[Docs]: https://docs.rs/minecraft-Essentials
+[Node]: https://github.com/minecraft-essentials/Node
+[Python]: https://github.com/minecraft-essentials/Python
+[Roadmap]: https://github.com/orgs/minecraft-essentials/projects/1

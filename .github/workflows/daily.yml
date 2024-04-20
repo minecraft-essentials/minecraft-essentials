@@ -1,0 +1,20 @@
+name: Daily
+
+on:
+  schedule:
+  - cron: "21 4 * * *"
+jobs:
+  stale:
+    permissions:
+      issues: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/stale@v8
+      with:
+        stale-pr-message: 'This pull request has become stale and will be closed automatically within a period of time. Sorry about that.'
+        stale-issue-message: 'This issue has become stale and will be closed automatically within a period of time. Sorry about that.'
+        close-issue-message: "This pr has been closed automatically"
+        close-pr-message: "This pr has been closed automatically"
+        days-before-stale: 7
+        days-before-close: 14
