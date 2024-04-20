@@ -1,6 +1,6 @@
 # Minecraft-Essentials
 
-The offical cargo package that provides essential functionality for Minecraft client launchers.
+The offical rust/cargo package that provides essential functionality for Minecraft client launchers.
 
 ## Features
 
@@ -10,9 +10,11 @@ The offical cargo package that provides essential functionality for Minecraft cl
 - **Safe**: Ensures safety by forbidding unsafe code.
 - **Beginner Friendly**: Comprehensive [documentation][Docs] and examples/templates available on GitHub.
 
-## Package Locations
+## Package Versions
+If your looking to use a package other than rust/cargo you might want to have a look at:
 
-- [Node][NPMRepo]
+- [Node Version for JS/TS][Node]
+- [Python Version][Python]
 
 ## Installation
 
@@ -111,5 +113,6 @@ This library is licensed under the [BSD 3.0 License](./LICENSE).
 <!-- Links -->
 
 [Docs]: https://docs.rs/minecraft-Essentials
-[Node]: https://github.com/minecraft-essentials/node
+[Node]: https://github.com/minecraft-essentials/Node
+[Python]: https://github.com/minecraft-essentials/Python
 [Roadmap]: https://github.com/orgs/minecraft-essentials/projects/1
