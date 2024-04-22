@@ -46,7 +46,6 @@ pub struct AuthInfo {
 #[derive(Debug, Deserialize)]
 struct MojangResponse {
     username: String,
-    roles: Vec<String>,
     access_token: String,
     token_type: String,
     expires_in: i32,
@@ -77,9 +76,6 @@ async fn tokeninternal(client: Client, body: Value) -> Result<AuthInfo, Box<dyn 
         println!("Sorry, we ran into an error in authentication.");
         return Err("Invalid token type".into());
     }
-
-    println!("{:?}", response);
-
     let access_token = response.access_token;
     let uuid = response.username;
     let expires_in = response.expires_in; // Ensure this is correctly set to the expiration time
