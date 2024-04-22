@@ -142,8 +142,6 @@ fn parse_info(data: &[u8]) -> Result<Info, OAuthError> {
         error,
         error_description,
     };
-    println!("{:?}", info);
-
     Ok(info)
 }
 
