@@ -140,6 +140,7 @@ async fn xsts_internal(
         .headers(headers)
         .send()
         .await;
+
     let std::result::Result::Ok(response) = result else {
         println!("Part  1");
         return Err(XTSError::ResponseError(

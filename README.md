@@ -94,7 +94,7 @@ fn main() {
 #### Acutal Minecraft Authentfication
 
 > [!CAUTION]
-> This is currently in the [roadmap][Roadmap] for 0.2.11 currently it's not avalible.
+> This is currently in the [roadmap][Roadmap] for 0.2.12-14 currently it's not avalible.
 
 
 ### Launching

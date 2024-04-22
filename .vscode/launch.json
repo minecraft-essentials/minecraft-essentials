@@ -7,43 +7,6 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'temp'",
-            "cargo": {
-                "args": [
-                    "build",
-                    "--bin=temp",
-                    "--package=temp"
-                ],
-                "filter": {
-                    "name": "temp",
-                    "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
-            "name": "Debug unit tests in executable 'temp'",
-            "cargo": {
-                "args": [
-                    "test",
-                    "--no-run",
-                    "--bin=temp",
-                    "--package=temp"
-                ],
-                "filter": {
-                    "name": "temp",
-                    "kind": "bin"
-                }
-            },
-            "args": [],
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "type": "lldb",
-            "request": "launch",
             "name": "Debug unit tests in library 'minecraft-essentials'",
             "cargo": {
                 "args": [
