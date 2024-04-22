@@ -105,16 +105,50 @@ pub fn server(port: u16) -> Result<impl AsyncSendSync<Result<Info, OAuthError>>,
     })
 }
 
+
 fn parse_info(data: &[u8]) -> Result<Info, OAuthError> {
-    // Assuming the data is in a format that can be directly deserialized into Info
-    // For demonstration, let's assume the data is a JSON string
     let data_str = std::str::from_utf8(data)
         .map_err(|_| OAuthError::ParseError("Invalid UTF-8".to_string()))?;
-    println!("Data: {} \n", data_str);
-    serde_json::from_str::<Info>(data_str)
-        .map_err(|_| OAuthError::ParseError("Failed to parse Info".to_string()))
+
+    // Extract the query string from the HTTP request
+    let query_start = data_str.find('?').ok_or_else(|| OAuthError::ParseError("No query string found".to_string()))?;
+    let query_end = data_str.find('#').unwrap_or_else(|| data_str.len());
+    let query_string = &data_str[query_start + 1..query_end];
+
+    // Parse the query string directly
+    let query_params: Vec<(String, String)> = url::form_urlencoded::parse(query_string.as_bytes())
+        .into_owned()
+        .collect();
+
+    // Extract the 'code', 'state', 'error', and 'error_description' parameters
+    let code = query_params.iter().find_map(|(k, v)| if k == "code" { Some(v.clone()) } else { None });
+    let state = query_params.iter().find_map(|(k, v)| {
+        if k == "state" {
+            // Find the position of "HTTP/1.1\r\n" in the state value
+            let http_start = v.find(" HTTP/1.1\r\n");
+            // If found, slice the string up to that position
+            http_start.map(|pos| v[..pos].to_string())
+        } else {
+            None
+        }
+    });
+    let error = query_params.iter().find_map(|(k, v)| if k == "error" { Some(v.clone()) } else { None });
+    let error_description = query_params.iter().find_map(|(k, v)| if k == "error_description" { Some(v.clone()) } else { None });
+
+    // Construct the Info struct
+    let info = Info {
+        code,
+        state,
+        error,
+        error_description,
+    };
+    println!("{:?}", info);
+
+    Ok(info)
 }
 
+
+    
 pub fn token(
     code: &str,
     client_id: &str,
