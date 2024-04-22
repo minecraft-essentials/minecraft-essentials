@@ -46,7 +46,7 @@ pub struct AuthInfo {
 #[derive(Debug, Deserialize)]
 struct MojangResponse {
     username: String,
-    _roles: Vec<String>,
+    roles: Vec<String>,
     access_token: String,
     token_type: String,
     expires_in: i32,

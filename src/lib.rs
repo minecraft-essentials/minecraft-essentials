@@ -115,7 +115,6 @@ impl Oauth {
             client_secret,
         )
         .await?;
-
         let xbox = xbox::xbl(&token.access_token).await?;
         let xts = xbox::xsts_token(&xbox.token, bedrock_relm).await?;
 
@@ -240,7 +239,6 @@ impl DeviceCode {
         let token = code::authenticate_device(&self.device_code, &self.client_id).await?;
         let xbox = xbox::xbl(&token.token).await?;
         let xts = xbox::xsts_token(&xbox.token, bedrock_relm).await?;
-
         if bedrock_relm {
             Ok(CustomAuthData {
                 access_token: "null".to_string(),
