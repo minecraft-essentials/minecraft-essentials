@@ -560,6 +560,7 @@ dependencies = [
  "serde_urlencoded",
  "thiserror",
  "tokio",
+ "url",
 ]
 
 [[package]]

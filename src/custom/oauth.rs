@@ -110,6 +110,7 @@ fn parse_info(data: &[u8]) -> Result<Info, OAuthError> {
     // For demonstration, let's assume the data is a JSON string
     let data_str = std::str::from_utf8(data)
         .map_err(|_| OAuthError::ParseError("Invalid UTF-8".to_string()))?;
+    println!("Data: {} \n", data_str);
     serde_json::from_str::<Info>(data_str)
         .map_err(|_| OAuthError::ParseError("Failed to parse Info".to_string()))
 }
