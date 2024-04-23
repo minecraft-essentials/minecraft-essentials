@@ -105,13 +105,17 @@ pub fn server(port: u16) -> Result<impl AsyncSendSync<Result<Info, OAuthError>>,
     })
 }
 
-
 fn parse_info(data: &[u8]) -> Result<Info, OAuthError> {
     let data_str = std::str::from_utf8(data)
         .map_err(|_| OAuthError::ParseError("Invalid UTF-8".to_string()))?;
 
     // Extract the query string from the HTTP request
-    let query_start = data_str.find('?').ok_or_else(|| OAuthError::ParseError("No query string found".to_string()))?;
+    let mut query_start = None;
+    while query_start.is_none() {
+        query_start = data_str.find('?');
+    }
+    let query_start =
+        query_start.ok_or_else(|| OAuthError::ParseError("No query string found".to_string()))?;
     let query_end = data_str.find('#').unwrap_or_else(|| data_str.len());
     let query_string = &data_str[query_start + 1..query_end];
 
@@ -121,7 +125,9 @@ fn parse_info(data: &[u8]) -> Result<Info, OAuthError> {
         .collect();
 
     // Extract the 'code', 'state', 'error', and 'error_description' parameters
-    let code = query_params.iter().find_map(|(k, v)| if k == "code" { Some(v.clone()) } else { None });
+    let code = query_params
+        .iter()
+        .find_map(|(k, v)| if k == "code" { Some(v.clone()) } else { None });
     let state = query_params.iter().find_map(|(k, v)| {
         if k == "state" {
             // Find the position of "HTTP/1.1\r\n" in the state value
@@ -132,8 +138,16 @@ fn parse_info(data: &[u8]) -> Result<Info, OAuthError> {
             None
         }
     });
-    let error = query_params.iter().find_map(|(k, v)| if k == "error" { Some(v.clone()) } else { None });
-    let error_description = query_params.iter().find_map(|(k, v)| if k == "error_description" { Some(v.clone()) } else { None });
+    let error = query_params
+        .iter()
+        .find_map(|(k, v)| if k == "error" { Some(v.clone()) } else { None });
+    let error_description = query_params.iter().find_map(|(k, v)| {
+        if k == "error_description" {
+            Some(v.clone())
+        } else {
+            None
+        }
+    });
 
     // Construct the Info struct
     let info = Info {
@@ -145,8 +159,6 @@ fn parse_info(data: &[u8]) -> Result<Info, OAuthError> {
     Ok(info)
 }
 
-
-    
 pub fn token(
     code: &str,
     client_id: &str,
