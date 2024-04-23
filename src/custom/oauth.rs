@@ -77,13 +77,15 @@ pub fn server(port: u16) -> Result<impl AsyncSendSync<Result<Info, OAuthError>>,
                             });
                         }
                         Err(e) => {
-                            eprintln!("failed to accept connection; err = {:?}", e);
+                            let err = OAuthError::AcceptConnectionError(format!("failed to accept connection; err = {:?}", e));
+                            eprintln!("{}", err);
                         }
                     }
                 }
             }
             Err(e) => {
-                eprintln!("failed to bind listener; err = {:?}", e);
+                let err = OAuthError::BindError(format!("failed to bind listener; err = {:?}", e));
+                eprintln!("{}", err);
             }
         }
     });

@@ -39,7 +39,8 @@ pub enum OAuthError {
     ChannelSendError(String),
     /// Failed to parse info: {0}
     ParseInfoError(String),
-
+    /// Failed to accept connection: {0}
+    AcceptConnectionError(String),
 }
 
 /// The `LaunchError` enum represents potential errors that can occur during Launching minecraft.
