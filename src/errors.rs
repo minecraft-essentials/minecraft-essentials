@@ -33,6 +33,13 @@ pub enum OAuthError {
     ParseError(String),
     /// Binding error: {0}
     BindError(String),
+    /// Socket Read Error: {0}
+    SocketReadError(String),
+    /// Failed to send data to channel: {0}
+    ChannelSendError(String),
+    /// Failed to parse info: {0}
+    ParseInfoError(String),
+
 }
 
 /// The `LaunchError` enum represents potential errors that can occur during Launching minecraft.

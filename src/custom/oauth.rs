@@ -1,6 +1,8 @@
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
+use std::fmt::format;
+
 use reqwest::Client;
 use serde::Deserialize;
 use tokio::{io::AsyncReadExt, net::TcpListener, sync::mpsc};
@@ -51,7 +53,8 @@ pub fn server(port: u16) -> Result<impl AsyncSendSync<Result<Info, OAuthError>>,
                                         Ok(n) if n == 0 => break,
                                         Ok(n) => n,
                                         Err(e) => {
-                                            eprintln!("failed to read from socket; err = {:?}", e);
+                                            let err = OAuthError::SocketReadError(format!("failed to read from socket; err = {:?}", e));
+                                            eprintln!("{}", err);
                                             break;
                                         }
                                     };
@@ -61,14 +64,13 @@ pub fn server(port: u16) -> Result<impl AsyncSendSync<Result<Info, OAuthError>>,
                                     match parse_info(&buf[..n]) {
                                         Ok(info) => {
                                             if let Err(e) = tx.try_send(info) {
-                                                eprintln!(
-                                                    "failed to send data to channel; err = {:?}",
-                                                    e
-                                                );
+                                                let err = OAuthError::ChannelSendError(format!("failed to send data to channel; err = {:?}", e));
+                                                eprintln!("{}", err);
                                             }
                                         }
                                         Err(e) => {
-                                            eprintln!("failed to parse info; err = {:?}", e);
+                                            let err = OAuthError::ParseInfoError(format!("failed to parse info; err = {:?}", e));
+                                            eprintln!("{}", err);
                                         }
                                     }
                                 }
