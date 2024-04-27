@@ -160,8 +160,9 @@ async fn run_server(port: u16, tx: mpsc::Sender<Info>) -> Result<(), OAuthError>
 #[cfg(feature = "tauri")]
 pub fn tauri_server(port: u16) -> Result<impl AsyncSendSync<Result<Info, OAuthError>>, OAuthError> {
     let (tx, mut rx) = mpsc::channel::<Info>(1);
-
+    println!("Calling Tauri Server");
     let server = tokio::task::spawn_blocking(move || {
+        println!("Spawning thread");
         run_server(port, tx.clone())
     });
     
