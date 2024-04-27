@@ -1,8 +1,6 @@
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
-use std::fmt::format;
-
 use reqwest::Client;
 use serde::Deserialize;
 use tokio::{io::AsyncReadExt, net::TcpListener, sync::mpsc};
@@ -110,8 +108,10 @@ pub fn server(port: u16) -> Result<impl AsyncSendSync<Result<Info, OAuthError>>,
 }
 
 
-fn run_server(port: u16, tx: mpsc::Sender<Info>) -> Result<(), OAuthError> {
-    let listener = TcpListener::bind(format!("127.0.0.1:{}", port)).await?;
+async fn run_server(port: u16, tx: mpsc::Sender<Info>) -> Result<(), OAuthError> {
+    let listener = TcpListener::bind(format!("127.0.0.1:{}", port))
+    .await
+    .map_err(|e| OAuthError::BindError(format!("failed to bind listener; err = {:?}", e)))?;
 
     loop {
         match listener.accept().await {
@@ -161,7 +161,7 @@ fn run_server(port: u16, tx: mpsc::Sender<Info>) -> Result<(), OAuthError> {
 pub fn tauri_server(port: u16) -> Result<impl AsyncSendSync<Result<Info, OAuthError>>, OAuthError> {
     let (tx, mut rx) = mpsc::channel::<Info>(1);
 
-    let server = tokio::spawn_blocking(move || {
+    let server = tokio::task::spawn_blocking(move || {
         run_server(port, tx.clone())
     });
     

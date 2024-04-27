@@ -148,7 +148,7 @@ impl Oauth {
         &self,
         bedrock_relm: bool,
         client_secret: &str,
-    ) -> Result<CustomAuthData, Box<dyn std::error::Error>> {\
+    ) -> Result<CustomAuthData, Box<dyn std::error::Error>> {
         println!("{}", EXPERIMENTAL_MESSAGE);
         let http_server = oauth::tauri_server(self.port)?.await?;
         let token = oauth::token(
