@@ -22,7 +22,6 @@ async fn auth() -> Result<CustomAuthData, String> {
     }
 }
 
-
 async fn handle_auth() -> Result<CustomAuthData, Box<dyn std::error::Error>> {
     let auth = Oauth::new("ClientID", None);
     let window_url = auth.url();
@@ -33,7 +32,4 @@ async fn handle_auth() -> Result<CustomAuthData, Box<dyn std::error::Error>> {
 
     Ok(auth_info)
 }
-
-
-
 ```
