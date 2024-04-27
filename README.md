@@ -61,6 +61,8 @@ fn main() {
     Oauth("CLientID", "ClientSecret", None, false);
 }
 ```
+Just to note for Tauri support [check out here](.github/doc/tauri.md)
+
 
 #### Device Code Custom Authentication | DeviceCode
 
