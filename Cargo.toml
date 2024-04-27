@@ -1,6 +1,6 @@
 [package]
 name = "minecraft-essentials"
-version = "0.2.11"
+version = "0.2.12"
 keywords = ["Minecraft", "MinecraftClient"]
 authors = ["Eveeifyeve <eveeg1971@gmail.com>"]
 description = "A Package that gives all Minecraft client launchers essentials."
