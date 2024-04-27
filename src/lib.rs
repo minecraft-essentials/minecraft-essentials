@@ -143,38 +143,6 @@ impl Oauth {
     ///
     /// * `Result<CustomAuthData, Box<dyn std::error::Error>>` - A result containing the authentication data or an error if the process fails.
 
-    #[cfg(feature = "tauri")]
-    pub async fn tauri_launch(
-        &self,
-        bedrock_relm: bool,
-        client_secret: &str,
-    ) -> Result<CustomAuthData, Box<dyn std::error::Error>> {
-        println!("{}", EXPERIMENTAL_MESSAGE);
-        let http_server = oauth::tauri_server(self.port)?.await?;
-        let token = oauth::token(
-            http_server
-                .code
-                .expect("\x1b[31mXbox Expected code.\x1b[0m")
-                .as_str(),
-            &self.client_id,
-            self.port,
-            client_secret,
-        )
-        .await?;
-        let xbox = xbox::xbl(&token.access_token).await?;
-        let xts = xbox::xsts_token(&xbox.token, bedrock_relm).await?;
-
-        if bedrock_relm {
-            Ok(CustomAuthData {
-                access_token: "null".to_string(),
-                uuid: "null".to_string(),
-                expires_in: 0,
-                xts_token: Some(xts.token),
-            })
-        } else {
-            Ok(mojang::token(&xbox.display_claims.xui[0].uhs, &xts.token).await?)
-        }
-    }
 
     /// Refreshes the OAuth authentication process.
     ///
