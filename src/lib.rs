@@ -13,13 +13,13 @@ pub mod errors;
 mod tests;
 
 #[cfg(feature = "custom-auth")]
-mod custom;
+mod auth;
 
 #[cfg(feature = "custom-auth")]
-pub use custom::mojang::AuthInfo as CustomAuthData;
+pub use auth::mojang::AuthInfo as CustomAuthData;
 
 #[cfg(feature = "custom-auth")]
-use custom::{code, mojang, oauth, xbox};
+use auth::{code, mojang, oauth, xbox};
 
 #[cfg(feature = "custom-launch")]
 use std::{
@@ -104,30 +104,7 @@ impl Oauth {
         bedrock_relm: bool,
         client_secret: &str,
     ) -> Result<CustomAuthData, Box<dyn std::error::Error>> {
-        let http_server = oauth::server(self.port)?.await?;
-        let token = oauth::token(
-            http_server
-                .code
-                .expect("\x1b[31mXbox Expected code.\x1b[0m")
-                .as_str(),
-            &self.client_id,
-            self.port,
-            client_secret,
-        )
-        .await?;
-        let xbox = xbox::xbl(&token.access_token).await?;
-        let xts = xbox::xsts_token(&xbox.token, bedrock_relm).await?;
-
-        if bedrock_relm {
-            Ok(CustomAuthData {
-                access_token: "null".to_string(),
-                uuid: "null".to_string(),
-                expires_in: 0,
-                xts_token: Some(xts.token),
-            })
-        } else {
-            Ok(mojang::token(&xbox.display_claims.xui[0].uhs, &xts.token).await?)
-        }
+        auth::oauth(self.port, &self.client_id, client_secret, bedrock_relm).await
     }
 
     /// Launches Oauth using method which fixes 500 issue.
@@ -142,7 +119,6 @@ impl Oauth {
     /// # Returns
     ///
     /// * `Result<CustomAuthData, Box<dyn std::error::Error>>` - A result containing the authentication data or an error if the process fails.
-
 
     /// Refreshes the OAuth authentication process.
     ///
@@ -169,6 +145,97 @@ impl Oauth {
         let port = port.unwrap_or(8000);
         let token = oauth::token(refresh_token, client_id, port, client_secret).await?;
         Ok(token)
+    }
+}
+
+/// Represents the type of authentication to be used.
+///
+/// This enum is used to specify the authentication method for Minecraft client launchers.
+/// It supports OAuth, Device Code, Minecraft Device Code, and Minecraft OAuth authentication methods.
+pub enum AuthType {
+    /// OAuth authentication method.
+    ///
+    /// This variant is used for OAuth 2.0 authentication with Minecraft.
+    #[cfg(feature = "custom-auth")]
+    Oauth,
+
+    /// Device Code authentication method.
+    ///
+    /// This variant is used for device code authentication with Minecraft.
+    #[cfg(feature = "custom-auth")]
+    DeviceCode,
+    // /// Minecraft Device Code authentication method.
+    // ///
+    // /// This variant is specifically designed for Minecraft deafult device code authentication.
+    // MinecraftDeviceCode,
+
+    // /// Minecraft OAuth authentication method.
+    // ///
+    // /// This variant is specifically designed for Minecraft deafult OAuth authentication.
+    // MinecraftOAuth,
+}
+
+/// Represents a builder for authentication configurations.
+///
+/// This struct is used to build your authentfcation with your type of authenfication options.
+/// Deafults to `AuthType::OAuth` if no other option is specified.
+/// It supports methods from `AuthType` and can be used to create a new instance of `Authentication` for your minecraft client launchers.
+pub struct AuthenticationBuilder {
+    auth_type: AuthType,
+    client_id: String,
+    port: Option<u16>,
+    client_secrect: String,
+    bedrockrel: Option<bool>,
+}
+
+impl AuthenticationBuilder {
+    /// Creates a new instance of `AuthenticationBuilder`.
+    pub fn builder() -> Self {
+        Self {
+            auth_type: AuthType::Oauth,
+            client_id: "".to_string(),
+            port: None,                     // Default port
+            client_secrect: "".to_string(), // Default client_secret
+            bedrockrel: None,               // Default bedrockrel
+        }
+    }
+    pub fn of_type(&mut self, auth_type: AuthType) -> &mut Self {
+        self.of_type(auth_type)
+    }
+
+    pub fn client_id(&mut self, client_id: &str) -> &mut Self {
+        self.client_id(client_id);
+        self
+    }
+
+    pub fn port(&mut self, port: Option<u16>) -> &mut Self {
+        self.port = Some(port);
+        self
+    }
+
+    pub fn client_secret(&mut self, client_secret: &str) -> &mut Self {
+        self.client_secret(client_secret);
+        self
+    }
+
+    pub fn bedrockrel(&mut self, bedrock_rel: bool) -> &mut Self {
+        self.bedrockrel(bedrock_rel);
+        self
+    }
+
+    pub async fn launch(&mut self) -> Result<CustomAuthData, Box<dyn std::error::Error>> {
+        match self.auth_type {
+            AuthType::Oauth => {
+                auth::oauth(
+                    self.port.unwrap_or(8000),
+                    &self.client_id,
+                    &self.client_secrect,
+                    self.bedrockrel.is_some(),
+                )
+                .await
+            }
+            AuthType::DeviceCode => {}
+        }
     }
 }
 

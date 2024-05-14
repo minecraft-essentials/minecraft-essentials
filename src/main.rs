@@ -1,6 +1,6 @@
-use std::path::PathBuf;
 use clap::{Args, Parser, Subcommand};
-use minecraft_essentials::{Launch, Oauth};
+use minecraft_essentials::{AuthType, AuthenticationBuilder, Launch, Oauth};
+use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(version, long_about = None)]
@@ -17,7 +17,7 @@ enum Commands {
     /// DeviceCode Check command.
     DeviceCode(DeviceCodeArgs),
     /// Custom Launch Check command
-    CustomLaunch(CustomLaunchArgs)
+    CustomLaunch(CustomLaunchArgs),
 }
 
 #[derive(Args)]
@@ -34,8 +34,8 @@ struct CustomLaunchArgs {
     uuid: String,
     optional_args: String,
     java_exe: String,
-    jrepath: Option<PathBuf>, 
-    offline: Option<bool>
+    jrepath: Option<PathBuf>,
+    offline: Option<bool>,
 }
 
 #[derive(Args)]
@@ -43,7 +43,6 @@ struct DeviceCodeArgs {
     client_id: String,
     bedrockrelm: bool,
 }
-
 
 pub(crate) const EXPERIMENTAL_MESSAGE: &str =
     "\x1b[33mNOTICE: You are using an experimental feature.\x1b[0m";
@@ -55,7 +54,9 @@ async fn main() {
         Commands::Oauth(oauth_args) => handle_oauth(oauth_args).await,
         Commands::DeviceCode(device_code_args) => handle_device_code(device_code_args).await,
         Commands::Version {} => println!("{}", env!("CARGO_PKG_VERSION")),
-        Commands::CustomLaunch(handle_custom_launch_args) => handle_custom_launch(handle_custom_launch_args).await,
+        Commands::CustomLaunch(handle_custom_launch_args) => {
+            handle_custom_launch(handle_custom_launch_args).await
+        }
     }
 }
 
@@ -73,7 +74,6 @@ async fn handle_device_code(_device_code_args: &DeviceCodeArgs) {
     println!("{}", EXPERIMENTAL_MESSAGE);
 }
 
-
 async fn handle_custom_launch(handle_custom_launch_args: &CustomLaunchArgs) {
     let mut args = Vec::new();
 
@@ -84,17 +84,17 @@ async fn handle_custom_launch(handle_custom_launch_args: &CustomLaunchArgs) {
         args.push(handle_custom_launch_args.optional_args.clone())
     }
 
-
     let launch = Launch::new(
         args,
         handle_custom_launch_args.java_exe.clone(),
         handle_custom_launch_args.jrepath.clone(),
-        handle_custom_launch_args.offline 
-    ).expect("Expected Launch");
+        handle_custom_launch_args.offline,
+    )
+    .expect("Expected Launch");
 
     let launch_info = launch.info();
 
     println!("Launching with: {:?}", launch_info);
 
-    let _ = launch.launch_jre();    
+    let _ = launch.launch_jre();
 }
