@@ -183,9 +183,9 @@ pub enum AuthType {
 pub struct AuthenticationBuilder {
     auth_type: AuthType,
     client_id: String,
-    port: Option<u16>,
+    port: u16,
     client_secrect: String,
-    bedrockrel: Option<bool>,
+    bedrockrel: bool,
 }
 
 impl AuthenticationBuilder {
@@ -194,47 +194,57 @@ impl AuthenticationBuilder {
         Self {
             auth_type: AuthType::Oauth,
             client_id: "".to_string(),
-            port: None,                     // Default port
-            client_secrect: "".to_string(), // Default client_secret
-            bedrockrel: None,               // Default bedrockrel
+            port: 8000,
+            client_secrect: "".to_string(),
+            bedrockrel: false,
         }
     }
+
+    /// Type of authentication.
+    ///
+    /// Sets the type of authentication to be used.
     pub fn of_type(&mut self, auth_type: AuthType) -> &mut Self {
-        self.of_type(auth_type)
+        self.auth_type = auth_type;
+        self
     }
 
+    /// Client ID from your application Required for `OAuth` & `DeviceCode`.
     pub fn client_id(&mut self, client_id: &str) -> &mut Self {
-        self.client_id(client_id);
+        self.client_id = client_id.to_string();
         self
     }
 
+    /// Port for the Temporary https Required for `OAuth``.
     pub fn port(&mut self, port: Option<u16>) -> &mut Self {
-        self.port = Some(port);
+        self.port = port.unwrap_or(8000);
         self
     }
 
+    /// Client Secret from your application Required for `OAuth` & `DeviceCode`.
     pub fn client_secret(&mut self, client_secret: &str) -> &mut Self {
-        self.client_secret(client_secret);
+        self.client_secrect = client_secret.to_string();
         self
     }
 
-    pub fn bedrockrel(&mut self, bedrock_rel: bool) -> &mut Self {
-        self.bedrockrel(bedrock_rel);
+    /// Bedrock relm related that only need xts token not bearer.
+    pub fn bedrockrel(&mut self, bedrock_rel: Option<bool>) -> &mut Self {
+        self.bedrockrel = bedrock_rel.unwrap_or(false);
         self
     }
 
+    /// Launchs the authentication process.
     pub async fn launch(&mut self) -> Result<CustomAuthData, Box<dyn std::error::Error>> {
         match self.auth_type {
             AuthType::Oauth => {
                 auth::oauth(
-                    self.port.unwrap_or(8000),
+                    self.port,
                     &self.client_id,
                     &self.client_secrect,
-                    self.bedrockrel.is_some(),
+                    self.bedrockrel,
                 )
                 .await
             }
-            AuthType::DeviceCode => {}
+            AuthType::DeviceCode => auth::DeviceCode(&self.client_id, self.bedrockrel).await,
         }
     }
 }
