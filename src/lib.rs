@@ -1,6 +1,7 @@
 #![doc = include_str!("../README.md")]
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
+#![allow(deprecated)] // For now we're using deprecated features for both DeviceCode and Oauth impl.
 
 // Modules
 pub(crate) mod async_trait_alias;
@@ -12,14 +13,21 @@ pub mod errors;
 #[cfg(test)]
 mod tests;
 
-#[cfg(feature = "custom-auth")]
+#[cfg(feature = "launch")]
+mod launch;
+
+#[cfg(feature = "auth")]
 mod auth;
 
-#[cfg(feature = "custom-auth")]
-pub use auth::mojang::AuthInfo as CustomAuthData;
+#[cfg(feature = "auth")]
+pub use auth::AuthInfo as CustomAuthData;
 
-#[cfg(feature = "custom-auth")]
-use auth::{code, mojang, oauth, xbox};
+#[cfg(feature = "auth")]
+use auth::{
+    bearer_token,
+    microsoft::{authenticate_device, device_authentication_code, ouath, ouath_token, SCOPE},
+    xbox::{xbl, xsts},
+};
 
 #[cfg(feature = "custom-launch")]
 use std::{
@@ -29,7 +37,6 @@ use std::{
 };
 
 // Constants
-pub(crate) const SCOPE: &str = "XboxLive.signin%20XboxLive.offline_access";
 pub(crate) const EXPERIMENTAL_MESSAGE: &str =
     "\x1b[33mNOTICE: You are using an experimental feature.\x1b[0m";
 
@@ -37,14 +44,19 @@ pub(crate) const EXPERIMENTAL_MESSAGE: &str =
 ///
 /// This struct represents the OAuth authentication process for Minecraft, specifically designed for use with custom Azure applications.
 /// It is used to authenticate a user and obtain a token that can be used to launch Minecraft.
-#[cfg(feature = "custom-auth")]
+// TODO: Remove this
+#[cfg(feature = "auth")]
 pub struct Oauth {
     url: String,
     port: u16,
     client_id: String,
 }
 
-#[cfg(feature = "custom-auth")]
+#[cfg(feature = "auth")]
+#[deprecated(
+    note = "The Ouath implementation is deprecated. Please migrate to AuthenticationBuilder and utilize the Oauth type for authentication.",
+    since = "0.2.13"
+)]
 impl Oauth {
     /// Initializes a new `Oauth` instance.
     ///
@@ -104,7 +116,14 @@ impl Oauth {
         bedrock_relm: bool,
         client_secret: &str,
     ) -> Result<CustomAuthData, Box<dyn std::error::Error>> {
-        auth::oauth(self.port, &self.client_id, client_secret, bedrock_relm).await
+        AuthenticationBuilder::builder()
+            .bedrockrel(Some(bedrock_relm))
+            .of_type(AuthType::Oauth)
+            .client_secret(client_secret)
+            .client_id(&self.client_id)
+            .port(Some(self.port))
+            .launch()
+            .await
     }
 
     /// Launches Oauth using method which fixes 500 issue.
@@ -152,27 +171,19 @@ impl Oauth {
 ///
 /// This enum is used to specify the authentication method for Minecraft client launchers.
 /// It supports OAuth, Device Code, Minecraft Device Code, and Minecraft OAuth authentication methods.
+#[cfg(feature = "auth")]
 pub enum AuthType {
     /// OAuth authentication method.
     ///
     /// This variant is used for OAuth 2.0 authentication with Minecraft.
-    #[cfg(feature = "custom-auth")]
+    #[cfg(feature = "auth")]
     Oauth,
 
     /// Device Code authentication method.
     ///
     /// This variant is used for device code authentication with Minecraft.
-    #[cfg(feature = "custom-auth")]
+    #[cfg(feature = "auth")]
     DeviceCode,
-    // /// Minecraft Device Code authentication method.
-    // ///
-    // /// This variant is specifically designed for Minecraft deafult device code authentication.
-    // MinecraftDeviceCode,
-
-    // /// Minecraft OAuth authentication method.
-    // ///
-    // /// This variant is specifically designed for Minecraft deafult OAuth authentication.
-    // MinecraftOAuth,
 }
 
 /// Represents a builder for authentication configurations.
@@ -180,6 +191,7 @@ pub enum AuthType {
 /// This struct is used to build your authentfcation with your type of authenfication options.
 /// Deafults to `AuthType::OAuth` if no other option is specified.
 /// It supports methods from `AuthType` and can be used to create a new instance of `Authentication` for your minecraft client launchers.
+#[cfg(feature = "auth")]
 pub struct AuthenticationBuilder {
     auth_type: AuthType,
     client_id: String,
@@ -188,6 +200,7 @@ pub struct AuthenticationBuilder {
     bedrockrel: bool,
 }
 
+#[cfg(feature = "auth")]
 impl AuthenticationBuilder {
     /// Creates a new instance of `AuthenticationBuilder`.
     pub fn builder() -> Self {
@@ -236,15 +249,49 @@ impl AuthenticationBuilder {
     pub async fn launch(&mut self) -> Result<CustomAuthData, Box<dyn std::error::Error>> {
         match self.auth_type {
             AuthType::Oauth => {
-                auth::oauth(
-                    self.port,
+                let server = ouath(self.port)?.await?;
+                let server_token = ouath_token(
+                    server
+                        .code
+                        .expect("\x1b[31mXbox Expected code.\x1b[0m")
+                        .as_str(),
                     &self.client_id,
+                    self.port,
                     &self.client_secrect,
-                    self.bedrockrel,
                 )
-                .await
+                .await?;
+                let xbl = xbl(&server_token.access_token).await?;
+                let xts = xsts(&xbl.token, self.bedrockrel).await?;
+
+                if self.bedrockrel {
+                    Ok(CustomAuthData {
+                        access_token: None,
+                        uuid: None,
+                        expires_in: 0,
+                        xts_token: Some(xts.token),
+                    })
+                } else {
+                    Ok(bearer_token(&xbl.display_claims.xui[0].uhs, &xts.token).await?)
+                }
             }
-            AuthType::DeviceCode => auth::DeviceCode(&self.client_id, self.bedrockrel).await,
+            AuthType::DeviceCode => {
+                print!("{} \n Status: WIP (Work In Progress)", EXPERIMENTAL_MESSAGE);
+                let code = device_authentication_code(&self.client_id).await?;
+                let code_token = authenticate_device(&code.device_code, &self.client_id).await?;
+                let xbl = xbl(&code_token.token).await?;
+                let xts = xsts(&xbl.token, self.bedrockrel).await?;
+
+                if self.bedrockrel {
+                    Ok(CustomAuthData {
+                        access_token: None,
+                        uuid: None,
+                        expires_in: 0,
+                        xts_token: Some(xts.token),
+                    })
+                } else {
+                    Ok(bearer_token(&xbl.display_claims.xui[0].uhs, &xts.token).await?)
+                }
+            }
         }
     }
 }
@@ -253,7 +300,12 @@ impl AuthenticationBuilder {
 ///
 /// This struct represents the device code authentication process for Minecraft, specifically designed for use with custom Azure applications.
 /// It is used to authenticate a device and obtain a token that can be used to launch Minecraft.
-#[cfg(feature = "custom-auth")]
+#[cfg(feature = "auth")]
+#[cfg(feature = "auth")]
+#[deprecated(
+    note = "The Device implementation is deprecated. Please migrate to AuthenticationBuilder and utilize the DeviceCode type for authentication.",
+    since = "0.2.13"
+)]
 pub struct DeviceCode {
     url: String,
     message: String,
@@ -263,7 +315,7 @@ pub struct DeviceCode {
     client_id: String,
 }
 
-#[cfg(feature = "custom-auth")]
+#[cfg(feature = "auth")]
 impl DeviceCode {
     /// Initializes a new `DeviceCode` instance.
     ///
@@ -284,7 +336,7 @@ impl DeviceCode {
         println!("{}", EXPERIMENTAL_MESSAGE);
         let client_id_str = client_id.to_string();
         async move {
-            let response_data = code::device_authentication_code(&client_id_str).await?;
+            let response_data = device_authentication_code(&client_id_str).await?;
 
             Ok(Self {
                 url: response_data.verification_uri,
@@ -327,131 +379,36 @@ impl DeviceCode {
         &self,
         bedrock_relm: bool,
     ) -> Result<CustomAuthData, Box<dyn std::error::Error>> {
-        let token = code::authenticate_device(&self.device_code, &self.client_id).await?;
-        let xbox = xbox::xbl(&token.token).await?;
-        let xts = xbox::xsts_token(&xbox.token, bedrock_relm).await?;
+        let code = authenticate_device(&self.device_code, &self.client_id).await?;
+        let xbl = xbl(&code.token).await?;
+        let xts = xsts(&xbl.token, bedrock_relm).await?;
+
         if bedrock_relm {
             Ok(CustomAuthData {
-                access_token: "null".to_string(),
-                uuid: "null".to_string(),
+                access_token: None,
+                uuid: None,
                 expires_in: 0,
                 xts_token: Some(xts.token),
             })
         } else {
-            Ok(mojang::token(&xbox.display_claims.xui[0].uhs, &xts.token).await?)
+            Ok(bearer_token(&xbl.display_claims.xui[0].uhs, &xts.token).await?)
         }
     }
 
     /// Refreshes the device code authentication process.
     ///
-    /// This method is marked as experimental and currently does not perform any actions.
+    /// This method was previously used to manually refresh the device code authentication process but has been superseded by the `AuthenticationBuilder`. The new approach allows for more flexible and streamlined authentication flow management.
     ///
-    /// # Note
+    /// To refresh the authentication, users should now utilize the `AuthenticationBuilder` and call the `.refresh_type(AuthType::DeviceCode)` method. This method automatically handles the necessary steps to refresh the authentication state according to the selected authentication type.
     ///
-    /// This method is intended for future use when implementing refresh functionality for the device code authentication process.
+    /// # Removal Notice
+    ///
+    /// Effective immediately, this method is marked as deprecated and will be removed in the next minor version release. Users are strongly encouraged to migrate to using the `AuthenticationBuilder` for refreshing authentication states before upgrading to the next version.
+    #[deprecated(
+        note = "Effective immediately, please migrate to using the `AuthenticationBuilder` and its `.refresh_type(AuthType::DeviceCode)` method for refreshing the authentication state. This method will be removed in the next minor version release.",
+        since = "0.2.13"
+    )]
     pub async fn refresh(&self) {
-        println!("{}", EXPERIMENTAL_MESSAGE);
-    }
-}
-
-/// `Launch` struct represents the configuration for launching a Minecraft client.
-///
-/// This struct holds the arguments required to launch the Minecraft client. The arguments are passed as a single string,
-/// which can include various options supported by the Minecraft client.
-#[cfg(feature = "custom-launch")]
-pub struct Launch {
-    args: String,
-    java_exe: String,
-    jre: Option<PathBuf>,
-}
-
-#[cfg(feature = "custom-launch")]
-impl Launch {
-    /// Launches a new instance of the launch function.
-    pub fn new(
-        args: Vec<String>,
-        java_exe: String,
-        jre: Option<PathBuf>,
-        offline: Option<bool>,
-    ) -> Result<Self, errors::LaunchError> {
-        let args_final = args.join(" ");
-        print!("{}", args_final);
-
-        if offline == Some(true)
-            && !args_final.contains("--uuid")
-            && !args_final.contains("--token")
-        {
-            return Err(errors::LaunchError::Requirements(
-                "Either --uuid or --token is missing in the arguments.".to_string(),
-            ));
-        }
-
-        Ok(Self {
-            args: args_final,
-            java_exe,
-            jre,
-        })
-    }
-
-    /// Returns the launch configuration information.
-    ///
-    /// This method provides access to the arguments, Java executable path, and the optional Java Runtime Environment (JRE) path
-    /// that were used to initialize the `Launch` struct.
-    ///
-    /// # Returns
-    ///
-    /// * `(&str, &str, &Option<PathBuf>)` - A tuple containing the final arguments string, the path to the Java executable,
-    /// and an optional path to the Java Runtime Environment.
-    pub fn info(&self) -> (&str, &str, &Option<PathBuf>) {
-        (&self.args, &self.java_exe, &self.jre)
-    }
-
-    /// Launches the Java Runtime Environment (JRE) with the specified arguments.
-    ///
-    /// This method is responsible for starting the Java Runtime Environment
-    /// with the arguments provided during the initialization of the `Launch` struct.
-    /// It is intended to be used for launching Minecraft or other Java applications.
-    ///
-    /// Required Args:
-    /// - UUID: LauncherUUID
-    /// - Token: BearerToken
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// use minecraft_essentials::Launch;
-    /// use std::path::Path;
-    ///
-    /// let jre_path = Path::new("/path/to/jre").to_path_buf();
-    ///
-    /// let launcher = Launch::new(vec!["-Xmx1024M --uuid --token".to_string()], "/path/to/java".to_string(), Some(jre_path), None).expect("Expected Launch");  
-    /// launcher.launch_jre();
-    /// ```
-    pub fn launch_jre(&self) -> std::io::Result<()> {
-        let command_exe = format!("{} {:?} {}", self.java_exe, self.jre, self.args);
-        let mut command = Command::new(command_exe)
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()?;
-
-        // Optionally, you can handle stdout and stderr in real-time
-        if let Some(ref mut stdout) = command.stdout {
-            let reader = BufReader::new(stdout);
-            for line in reader.lines() {
-                println!("{}", line?);
-            }
-        }
-
-        if let Some(ref mut stderr) = command.stderr {
-            let reader = BufReader::new(stderr);
-            for line in reader.lines() {
-                eprintln!("{}", line?);
-            }
-        }
-
-        // Wait for the command to finish
-        command.wait()?;
-
-        Ok(())
+        println!("This method is deprecated and will be removed in the next minor version. Please refer to the updated documentation on using the `AuthenticationBuilder`.");
     }
 }

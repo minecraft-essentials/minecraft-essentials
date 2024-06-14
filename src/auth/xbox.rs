@@ -91,10 +91,7 @@ pub struct XtsOutput {
     pub display_claims: DisplayClaims,
 }
 
-pub fn xsts_token(
-    xbl_token: &str,
-    bedrock_rel: bool,
-) -> impl AsyncSendSync<Result<XtsOutput, XTSError>> {
+pub fn xsts(xbl_token: &str, bedrock_rel: bool) -> impl AsyncSendSync<Result<XtsOutput, XTSError>> {
     let url = format!("https://xsts.auth.xboxlive.com/xsts/authorize");
     let bedrock_party = "https://pocket.realms.minecraft.net/";
     let java_party = "rp://api.minecraftservices.com/";
