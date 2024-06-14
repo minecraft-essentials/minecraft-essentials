@@ -44,7 +44,6 @@ pub(crate) const EXPERIMENTAL_MESSAGE: &str =
 ///
 /// This struct represents the OAuth authentication process for Minecraft, specifically designed for use with custom Azure applications.
 /// It is used to authenticate a user and obtain a token that can be used to launch Minecraft.
-// TODO: Remove this
 #[cfg(feature = "auth")]
 pub struct Oauth {
     url: String,
@@ -57,6 +56,7 @@ pub struct Oauth {
     note = "The Ouath implementation is deprecated. Please migrate to AuthenticationBuilder and utilize the Oauth type for authentication.",
     since = "0.2.13"
 )]
+// TODO: REMOVE THIS AT 0.2.15
 impl Oauth {
     /// Initializes a new `Oauth` instance.
     ///
@@ -301,7 +301,7 @@ impl AuthenticationBuilder {
 /// This struct represents the device code authentication process for Minecraft, specifically designed for use with custom Azure applications.
 /// It is used to authenticate a device and obtain a token that can be used to launch Minecraft.
 #[cfg(feature = "auth")]
-#[cfg(feature = "auth")]
+// TODO: REMOVE THIS AT 0.2.15
 #[deprecated(
     note = "The Device implementation is deprecated. Please migrate to AuthenticationBuilder and utilize the DeviceCode type for authentication.",
     since = "0.2.13"
