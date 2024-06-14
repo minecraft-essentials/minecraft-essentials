@@ -1,7 +1,5 @@
 {
-    "rust-analyzer.cargo.features": ["default", "tauri"],
-    "biome.enabled": false,
-    "cSpell.ignorePaths": [
-        "src/**/*"
-    ]
+  "rust-analyzer.cargo.features": ["default"],
+  "biome.enabled": false,
+  "cSpell.ignorePaths": ["src/**/*"]
 }
