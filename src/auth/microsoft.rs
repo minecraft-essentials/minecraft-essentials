@@ -201,7 +201,7 @@ pub fn ouath_token(
 
 // Device Code
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CodeResponse {
     pub device_code: String,
     pub user_code: String,
