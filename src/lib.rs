@@ -19,6 +19,7 @@ mod launch;
 #[cfg(feature = "auth")]
 mod auth;
 
+use auth::microsoft::CodeResponse;
 #[cfg(feature = "auth")]
 pub use auth::AuthInfo as CustomAuthData;
 
@@ -28,6 +29,7 @@ use auth::{
     microsoft::{authenticate_device, device_authentication_code, ouath, ouath_token, SCOPE},
     xbox::{xbl, xsts},
 };
+use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "custom-launch")]
 use std::{
@@ -54,9 +56,9 @@ pub struct Oauth {
 #[cfg(feature = "auth")]
 #[deprecated(
     note = "The Ouath implementation is deprecated. Please migrate to AuthenticationBuilder and utilize the Oauth type for authentication.",
-    since = "0.2.13"
+    since = "0.2.12"
 )]
-// TODO: REMOVE THIS AT 0.2.15
+// TODO: REMOVE THIS AT 0.2.14
 impl Oauth {
     /// Initializes a new `Oauth` instance.
     ///
@@ -119,6 +121,7 @@ impl Oauth {
         AuthenticationBuilder::builder()
             .bedrockrel(Some(bedrock_relm))
             .of_type(AuthType::Oauth)
+            .await
             .client_secret(client_secret)
             .client_id(&self.client_id)
             .port(Some(self.port))
@@ -172,6 +175,7 @@ impl Oauth {
 /// This enum is used to specify the authentication method for Minecraft client launchers.
 /// It supports OAuth, Device Code, Minecraft Device Code, and Minecraft OAuth authentication methods.
 #[cfg(feature = "auth")]
+#[derive(PartialEq)]
 pub enum AuthType {
     /// OAuth authentication method.
     ///
@@ -196,8 +200,19 @@ pub struct AuthenticationBuilder {
     auth_type: AuthType,
     client_id: String,
     port: u16,
+    device_code: Option<CodeResponse>,
     client_secrect: String,
     bedrockrel: bool,
+}
+
+/// Represents authentication information.
+///
+/// This struct holds the necessary information for authentication processes,
+/// such as device codes and OAuth URLs that you'll recive.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AuthInfo {
+    _device_code: Option<CodeResponse>,
+    _ouath_url: Option<String>,
 }
 
 #[cfg(feature = "auth")]
@@ -208,6 +223,7 @@ impl AuthenticationBuilder {
             auth_type: AuthType::Oauth,
             client_id: "".to_string(),
             port: 8000,
+            device_code: None,
             client_secrect: "".to_string(),
             bedrockrel: false,
         }
@@ -216,7 +232,13 @@ impl AuthenticationBuilder {
     /// Type of authentication.
     ///
     /// Sets the type of authentication to be used.
-    pub fn of_type(&mut self, auth_type: AuthType) -> &mut Self {
+    pub async fn of_type(&mut self, auth_type: AuthType) -> &mut Self {
+        if auth_type == AuthType::DeviceCode {
+            let code = device_authentication_code(&self.client_id).await.unwrap();
+
+            self.device_code = Some(code)
+        }
+
         self.auth_type = auth_type;
         self
     }
@@ -245,10 +267,23 @@ impl AuthenticationBuilder {
         self
     }
 
+    /// Gets the code for device code method
+    pub fn get_info(&mut self) -> AuthInfo {
+        if self.auth_type == AuthType::DeviceCode {
+            AuthInfo {
+                _device_code: self.device_code.clone(),
+                _ouath_url: None,
+            }
+        } else {
+            AuthInfo { _device_code: None, _ouath_url: Some(format!("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize/?clientid={}&response_type=code&redirect_uri=http://localhost:{}&response_mode=query&scope={}&state=12345", self.client_id, self.port, SCOPE)) }
+        }
+    }
+
     /// Launchs the authentication process.
     pub async fn launch(&mut self) -> Result<CustomAuthData, Box<dyn std::error::Error>> {
         match self.auth_type {
             AuthType::Oauth => {
+                print!("{}", self.client_id);
                 let server = ouath(self.port)?.await?;
                 let server_token = ouath_token(
                     server
@@ -406,7 +441,7 @@ impl DeviceCode {
     /// Effective immediately, this method is marked as deprecated and will be removed in the next minor version release. Users are strongly encouraged to migrate to using the `AuthenticationBuilder` for refreshing authentication states before upgrading to the next version.
     #[deprecated(
         note = "Effective immediately, please migrate to using the `AuthenticationBuilder` and its `.refresh_type(AuthType::DeviceCode)` method for refreshing the authentication state. This method will be removed in the next minor version release.",
-        since = "0.2.13"
+        since = "0.2.12"
     )]
     pub async fn refresh(&self) {
         println!("This method is deprecated and will be removed in the next minor version. Please refer to the updated documentation on using the `AuthenticationBuilder`.");
