@@ -5,8 +5,6 @@ use std::env;
 #[cfg(feature = "custom-auth")]
 #[tokio::test]
 async fn test_oauth_url() {
-    use ;
-
     let _ = dotenv();
     let client_id = env::var("Client_ID").expect("Expected Client ID");
     let oauth = Oauth::new(&client_id, None);
