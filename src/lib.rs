@@ -214,8 +214,10 @@ pub struct AuthenticationBuilder {
 /// such as device codes and OAuth URLs that you'll recive.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AuthInfo {
-    _device_code: Option<CodeResponse>,
-    _ouath_url: Option<String>,
+    /// Device Code Info that you will recive based on AuthType::DeviceCode.
+    pub _device_code: Option<CodeResponse>,
+    /// OAuth URL that you will recive based on AuthType::OAuth.
+    pub _ouath_url: Option<String>,
 }
 
 #[cfg(feature = "auth")]
