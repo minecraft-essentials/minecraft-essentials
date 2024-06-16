@@ -1,7 +1,6 @@
 #![doc = include_str!("../README.md")]
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
-#![allow(deprecated)] // For now we're using deprecated features for both DeviceCode and Oauth impl.
 
 // Modules
 pub(crate) mod async_trait_alias;
@@ -47,6 +46,10 @@ pub(crate) const EXPERIMENTAL_MESSAGE: &str =
 /// This struct represents the OAuth authentication process for Minecraft, specifically designed for use with custom Azure applications.
 /// It is used to authenticate a user and obtain a token that can be used to launch Minecraft.
 #[cfg(feature = "auth")]
+#[deprecated(
+    note = "The Ouath implementation is deprecated. Please migrate to AuthenticationBuilder and utilize the Oauth type for authentication.",
+    since = "0.2.12"
+)]
 pub struct Oauth {
     url: String,
     port: u16,
@@ -371,6 +374,10 @@ pub struct DeviceCode {
 }
 
 #[cfg(feature = "auth")]
+#[deprecated(
+    note = "The Ouath implementation is deprecated. Please migrate to AuthenticationBuilder and utilize the Oauth type for authentication.",
+    since = "0.2.12"
+)]
 impl DeviceCode {
     /// Initializes a new `DeviceCode` instance.
     ///
