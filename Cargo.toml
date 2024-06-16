@@ -24,7 +24,7 @@ pkg-fmt = "tgz"
 
 [dependencies]
 tokio = { version = "1.37.0", features = ["rt-multi-thread", "macros", "sync"] }
-reqwest = { version = "0.12.4", features = ["json"] }
+reqwest = { version = "0.12.4", features = ["json"], optional = true }
 serde = { version = "1.0.199", features = ["derive"], optional = true }
 clap = { version = "4.5.4", optional = true, features = ["derive"] }
 serde_urlencoded = { version = "0.7.1", optional = true }
@@ -47,8 +47,10 @@ default = ["auth", "cli"]
 auth = [
     "dep:serde_urlencoded",
     "dep:serde_json",
+    "dep:reqwest",
     "dep:serde",
     "dep:rand",
     "dep:url",
 ]
+launch = ["dep:serde_json", "dep:serde", "dep:reqwest"]
 cli = ["dep:clap", "auth"]
