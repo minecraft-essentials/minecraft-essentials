@@ -331,6 +331,24 @@ impl AuthenticationBuilder {
     }
 }
 
+pub enum Settings {
+    /// A Normal Vec to do Settings (Intermediate)
+    Normal(Vec<String>),
+    /// Descripted Settings (Begineers)
+}
+
+/// A builder that launches minecraft or your own custom client.
+pub struct LaunchBuilder {
+    settings: Option<Settings>,
+}
+
+impl LaunchBuilder {
+    /// Create a new instanve of `LaunchBuilder`.
+    pub fn builder() -> Self {
+        Self { settings: None }
+    }
+}
+
 /// Device Code Authentication
 ///
 /// This struct represents the device code authentication process for Minecraft, specifically designed for use with custom Azure applications.
