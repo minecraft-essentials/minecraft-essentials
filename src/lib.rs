@@ -178,7 +178,7 @@ impl Oauth {
 /// This enum is used to specify the authentication method for Minecraft client launchers.
 /// It supports OAuth, Device Code, Minecraft Device Code, and Minecraft OAuth authentication methods.
 #[cfg(feature = "auth")]
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub enum AuthType {
     /// OAuth authentication method.
     ///
