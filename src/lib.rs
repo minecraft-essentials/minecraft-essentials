@@ -336,6 +336,7 @@ impl AuthenticationBuilder {
     }
 }
 
+/// Settings for the Instance
 pub enum Settings {
     /// A Normal Vec to do Settings (Intermediate)
     Normal(Vec<String>),
