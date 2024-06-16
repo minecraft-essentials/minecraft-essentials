@@ -284,10 +284,10 @@ impl AuthenticationBuilder {
 
     /// Launchs the authentication process.
     pub async fn launch(&mut self) -> Result<CustomAuthData, Box<dyn std::error::Error>> {
-        dbg!(self.auth_type, self.client_id);
+        dbg!(&self.auth_type, &self.client_id);
         match self.auth_type {
             AuthType::Oauth => {
-                dbg!(self.client_secrect, self.port);
+                dbg!(&self.client_secrect, self.port);
                 print!("{}", self.client_id);
                 let server = ouath(self.port)?.await?;
                 let server_token = ouath_token(
