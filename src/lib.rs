@@ -339,7 +339,7 @@ impl AuthenticationBuilder {
 pub enum Settings {
     /// A Normal Vec to do Settings (Intermediate)
     Normal(Vec<String>),
-    /// Descripted Settings (Begineers)
+    // / Descripted Settings (Begineers)
 }
 
 /// A builder that launches minecraft or your own custom client.
