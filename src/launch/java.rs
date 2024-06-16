@@ -29,7 +29,7 @@ pub fn download_java(
 
     match jre {
         JRE::Adoptium => {
-            // arch_support(["x86_64", "x86", "aarch64", "arm"]);
+            arch_support(["x86_64", "x86", "aarch64", "arm"]);
 
             if std::env::consts::ARCH == "x86_64" {
                 url = format!(
