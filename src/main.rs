@@ -34,12 +34,14 @@ struct OauthArgs {
 
 #[derive(Args)]
 struct LaucnhArgs {
+    // Java Args
     min_memory: Option<i32>,
     max_memory: i32,
     launcher_name: Option<String>,
     launcher_version: Option<String>,
     class_path: Option<String>,
 
+    // Game Args
     client_id: Option<String>,
     username: Option<String>,
     version: Option<String>,
@@ -48,6 +50,7 @@ struct LaucnhArgs {
     width: Option<i32>,
     height: Option<i32>,
 
+    // Quick Play Args
     quick_play_singleplayer: Option<String>,
     quick_play_multiplayer: Option<String>,
 }
