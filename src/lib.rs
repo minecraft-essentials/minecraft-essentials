@@ -9,6 +9,12 @@ pub(crate) mod async_trait_alias;
 /// This module contains all the error types and related functionality
 /// for error handling within the library.
 pub mod errors;
+
+/// Structs module for the Minecraft-Essentials library.
+///
+/// This module contains all the structs and related functionality
+/// for structs within the library.
+pub mod structs;
 #[cfg(test)]
 mod tests;
 
@@ -29,13 +35,6 @@ use auth::{
     xbox::{xbl, xsts},
 };
 use serde::{Deserialize, Serialize};
-
-#[cfg(feature = "custom-launch")]
-use std::{
-    io::{BufRead, BufReader},
-    path::PathBuf,
-    process::{Command, Stdio},
-};
 
 // Constants
 pub(crate) const EXPERIMENTAL_MESSAGE: &str =
@@ -339,21 +338,54 @@ impl AuthenticationBuilder {
 }
 
 /// Settings for the Instance
-pub enum Settings {
+pub enum Args {
     /// A Normal Vec to do Settings (Intermediate)
     Normal(Vec<String>),
-    // / Descripted Settings (Begineers)
+    /// Descripted Settings (Begineers)
+    Descriptive(ArgsDescriptive),
+}
+
+/// Descripted version of the JavaArgs
+#[derive(serde::Serialize)]
+pub struct ArgsDescriptive {
+    /// Game Arguments
+    pub game_args: Option<structs::GameArguments>,
+    /// Java Arguments
+    pub java_args: structs::JavaArguments,
 }
 
 /// A builder that launches minecraft or your own custom client.
 pub struct LaunchBuilder {
-    settings: Option<Settings>,
+    args: Args,
 }
 
 impl LaunchBuilder {
     /// Create a new instanve of `LaunchBuilder`.
     pub fn builder() -> Self {
-        Self { settings: None }
+        Self {
+            args: Args::Normal(vec!["".to_string()]),
+        }
+    }
+
+    /// Set the Java Arguments for the Minecraft Client.
+    pub fn java_args(&mut self, args: Args) -> &mut Self {
+        self.args = args;
+        self
+    }
+
+    /// Launches the Minecraft/Your Client!
+    pub async fn launch(&self) {
+        let mut launch_args = String::new();
+
+        match &self.args {
+            Args::Normal(arg) => launch_args = arg.join(""),
+            Args::Descriptive(args) => {
+                launch_args =
+                    serde_json::to_string_pretty(args).unwrap_or_else(|_| String::from(""))
+            }
+        }
+
+        println!("{}", launch_args);
     }
 }
 

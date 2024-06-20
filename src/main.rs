@@ -1,6 +1,10 @@
-use clap::{Args, Parser, Subcommand};
-use minecraft_essentials::{AuthType, AuthenticationBuilder};
 use std::path::PathBuf;
+
+use clap::{Args, Parser, Subcommand};
+use minecraft_essentials::{
+    structs::{GameArguments, JavaArguments, QuickPlayArguments},
+    ArgsDescriptive, AuthType, AuthenticationBuilder, LaunchBuilder,
+};
 
 #[derive(Parser)]
 #[command(version, long_about = None)]
@@ -16,8 +20,8 @@ enum Commands {
     Oauth(OauthArgs),
     /// DeviceCode Check command.
     DeviceCode(DeviceCodeArgs),
-    // / Custom Launch Check command
-    // CustomLaunch(CustomLaunchArgs),
+    /// Minecraft Launching Check command.
+    Launch(LaucnhArgs),
 }
 
 #[derive(Args)]
@@ -29,13 +33,29 @@ struct OauthArgs {
 }
 
 #[derive(Args)]
-struct CustomLaunchArgs {
-    token: String,
-    uuid: String,
-    optional_args: String,
-    java_exe: String,
-    jrepath: Option<PathBuf>,
-    offline: Option<bool>,
+struct LaucnhArgs {
+    min_memory: Option<i32>,
+    max_memory: i32,
+    launcher_name: Option<String>,
+    launcher_version: Option<String>,
+    class_path: Option<String>,
+
+    client_id: Option<String>,
+    username: Option<String>,
+    version: Option<String>,
+    uuid: Option<String>,
+    game_directory: Option<PathBuf>,
+    width: Option<i32>,
+    height: Option<i32>,
+
+    quick_play_singleplayer: Option<String>,
+    quick_play_multiplayer: Option<String>,
+}
+
+#[derive(Args, Clone)]
+struct WindowSize {
+    width: i32,
+    height: i32,
 }
 
 #[derive(Args)]
@@ -44,9 +64,6 @@ struct DeviceCodeArgs {
     bedrockrelm: bool,
 }
 
-pub(crate) const EXPERIMENTAL_MESSAGE: &str =
-    "\x1b[33mNOTICE: You are using an experimental feature.\x1b[0m";
-
 #[tokio::main]
 async fn main() {
     let cli = Cli::parse();
@@ -54,9 +71,7 @@ async fn main() {
         Commands::Oauth(oauth_args) => handle_oauth(oauth_args).await,
         Commands::DeviceCode(device_code_args) => handle_device_code(device_code_args).await,
         Commands::Version {} => println!("{}", env!("CARGO_PKG_VERSION")),
-        // Commands::CustomLaunch(handle_custom_launch_args) => {
-        //     handle_custom_launch(handle_custom_launch_args).await
-        // }
+        Commands::Launch(arg) => handle_launch(arg).await,
     }
 }
 
@@ -90,27 +105,52 @@ async fn handle_device_code(device_code_args: &DeviceCodeArgs) {
     println!("{:?}", auth_builder.launch().await);
 }
 
-// async fn handle_custom_launch(handle_custom_launch_args: &CustomLaunchArgs) {
-//     let mut args = Vec::new();
+async fn handle_launch(arg: &LaucnhArgs) {
+    let mut builder = LaunchBuilder::builder();
 
-//     args.push(format!("--token{}", handle_custom_launch_args.token));
-//     args.push(format!("--uuid{}", handle_custom_launch_args.uuid));
+    let quick_play_arguments = if let Some(singleplayer) = arg.quick_play_singleplayer.clone() {
+        QuickPlayArguments::SinglePlayer(singleplayer)
+    } else if let Some(multiplayer) = arg.quick_play_multiplayer.clone() {
+        QuickPlayArguments::MultiPlayer(multiplayer)
+    } else {
+        QuickPlayArguments::None
+    };
 
-//     if !handle_custom_launch_args.optional_args.is_empty() {
-//         args.push(handle_custom_launch_args.optional_args.clone())
-//     }
+    let args = minecraft_essentials::Args::Descriptive(ArgsDescriptive {
+        game_args: Some(GameArguments {
+            window_size: Some((arg.width.unwrap_or(1920), arg.height.unwrap_or(1080))),
+            // Handling client_id correctly to avoid borrow checker errors
+            client_id: Some(
+                arg.client_id
+                    .as_deref()
+                    .map(|s| s.to_owned())
+                    .unwrap_or_else(|| String::from("")),
+            ),
+            username: <Option<std::string::String> as Clone>::clone(&arg.username)
+                .map(|s| s.to_owned()),
+            version: Some(
+                <Option<std::string::String> as Clone>::clone(&arg.version)
+                    .map(|s| s.to_owned())
+                    .unwrap_or_else(|| "1.20.1".to_string()),
+            ),
+            game_directory: arg.game_directory.as_ref().map(|pb| {
+                <PathBuf as Clone>::clone(&pb)
+                    .into_os_string()
+                    .into_string()
+                    .unwrap_or(String::new())
+            }),
+            uuid: arg.uuid.as_ref().map(|s| s.to_owned()),
+            quick_play: Some(quick_play_arguments),
+        }),
+        java_args: JavaArguments {
+            min_memory: arg.min_memory.map(|mem| mem as i32),
+            max_memory: arg.max_memory,
+            launcher_name: arg.launcher_name.as_deref().map(|s| s.to_owned()),
+            launcher_version: arg.launcher_version.as_deref().map(|s| s.to_owned()),
+            class_path: arg.class_path.as_deref().map(|s| s.to_owned()),
+        },
+    });
 
-//     let launch = Launch::new(
-//         args,
-//         handle_custom_launch_args.java_exe.clone(),
-//         handle_custom_launch_args.jrepath.clone(),
-//         handle_custom_launch_args.offline,
-//     )
-//     .expect("Expected Launch");
-
-//     let launch_info = launch.info();
-
-//     println!("Launching with: {:?}", launch_info);
-
-//     let _ = launch.launch_jre();
-// }
+    builder.java_args(args);
+    builder.launch().await;
+}
