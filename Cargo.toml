@@ -34,7 +34,7 @@ ring = { version = "0.17.8", optional = true }
 rand = { version = "0.8.5", optional = true }
 hex = { version = "0.4.3", optional = true }
 url = { version = "2.5.0", optional = true}
-displaydoc = "0.2.4"
+displaydoc = "0.2.5"
 thiserror = "1.0.58"
 
 [dev-dependencies]
