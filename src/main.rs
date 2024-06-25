@@ -2,9 +2,8 @@ use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
 use minecraft_essentials::{
-    structs::{GameArguments, JavaArguments, QuickPlayArguments},
-    Args as MinecraftArgs, ArgsDeclared, AuthType, AuthenticationBuilder, LaunchArgs,
-    LaunchBuilder,
+    structs::QuickPlayArguments, Args as MinecraftArgs, AuthType, AuthenticationBuilder,
+    LaunchArgs, LaunchArgsAuth, LaunchBuilder,
 };
 
 #[derive(Parser)]
@@ -48,18 +47,13 @@ struct LaucnhArgs {
     version: Option<String>,
     uuid: Option<String>,
     game_directory: Option<PathBuf>,
-    width: Option<i32>,
-    height: Option<i32>,
+    width: Option<u32>,
+    height: Option<u32>,
+    access_token: Option<String>,
 
     // Quick Play Args
     quick_play_singleplayer: Option<String>,
     quick_play_multiplayer: Option<String>,
-}
-
-#[derive(Args, Clone)]
-struct WindowSize {
-    width: i32,
-    height: i32,
 }
 
 #[derive(Args)]
@@ -117,9 +111,14 @@ async fn handle_launch(arg: &LaucnhArgs) {
     };
 
     let launch_args = LaunchArgs::builder()
-        .auth(arg.auth.clone().unwrap())
+        .auth(LaunchArgsAuth {
+            username: arg.username.clone(),
+            uuid: arg.uuid.clone(),
+            client_id: arg.client_id.clone(),
+            access_token: arg.access_token.clone(),
+        })
         .game_dir(arg.game_directory.clone().unwrap())
-        .window_size(arg.window_size.clone().unwrap())
+        .window_size((arg.width.unwrap(), arg.height.unwrap()))
         .quick_play(quick_play_arguments)
         .combine();
 
