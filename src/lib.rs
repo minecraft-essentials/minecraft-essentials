@@ -333,6 +333,7 @@ impl AuthenticationBuilder {
 }
 
 /// Arguments for the Launch
+#[cfg(feature = "launch")]
 pub enum Args {
     /// A Normal Vec to do Settings (Intermediate)
     Normal(Vec<String>),
@@ -342,6 +343,7 @@ pub enum Args {
 
 /// Descripted version of the JavaArgs
 #[derive(serde::Serialize)]
+#[cfg(feature = "launch")]
 pub struct ArgsDeclared {
     /// Game Arguments
     pub game_args: Option<structs::GameArguments>,
