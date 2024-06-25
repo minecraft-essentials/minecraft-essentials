@@ -3,7 +3,8 @@ use std::path::PathBuf;
 use clap::{Args, Parser, Subcommand};
 use minecraft_essentials::{
     structs::{GameArguments, JavaArguments, QuickPlayArguments},
-    Args as MinecraftArgs, ArgsDeclared, AuthType, AuthenticationBuilder, LaunchBuilder,
+    Args as MinecraftArgs, ArgsDeclared, AuthType, AuthenticationBuilder, LaunchArgs,
+    LaunchBuilder,
 };
 
 #[derive(Parser)]
@@ -115,51 +116,15 @@ async fn handle_launch(arg: &LaucnhArgs) {
         QuickPlayArguments::None
     };
 
-    let args_declared = ArgsDeclared {
-        game_args: Some(GameArguments {
-            window_size: Some((arg.width.unwrap_or(1920), arg.height.unwrap_or(1080))),
-            // Handling client_id correctly to avoid borrow checker errors
-            client_id: Some(
-                arg.client_id
-                    .as_deref()
-                    .map(|s| s.to_owned())
-                    .unwrap_or_else(|| String::from("")),
-            ),
-            username: <Option<std::string::String> as Clone>::clone(&arg.username)
-                .map(|s| s.to_owned()),
-            version: Some(
-                <Option<std::string::String> as Clone>::clone(&arg.version)
-                    .map(|s| s.to_owned())
-                    .unwrap_or_else(|| "1.20.1".to_string()),
-            ),
-            game_directory: arg.game_directory.as_ref().map(|pb| {
-                <PathBuf as Clone>::clone(&pb)
-                    .into_os_string()
-                    .into_string()
-                    .unwrap_or(String::new())
-            }),
-            uuid: arg.uuid.as_ref().map(|s| s.to_owned()),
-            quick_play: Some(quick_play_arguments),
-        }),
-        java_args: JavaArguments {
-            min_memory: arg.min_memory.map(|mem| mem as i32),
-            max_memory: arg.max_memory,
-            launcher_name: arg.launcher_name.as_deref().map(|s| s.to_owned()),
-            launcher_version: arg.launcher_version.as_deref().map(|s| s.to_owned()),
-            class_path: arg.class_path.as_deref().map(|s| s.to_owned()),
-        },
-    };
+    let launch_args = LaunchArgs::builder()
+        .auth(arg.auth.clone().unwrap())
+        .game_dir(arg.game_directory.clone().unwrap())
+        .window_size(arg.window_size.clone().unwrap())
+        .quick_play(quick_play_arguments)
+        .combine();
 
     LaunchBuilder::builder()
-        .args(MinecraftArgs::Declared(args_declared))
+        .args(MinecraftArgs::Declared(launch_args))
         .launch()
         .await;
-
-    let quick_play_arguments = if let Some(singleplayer) = arg.quick_play_singleplayer.clone() {
-        QuickPlayArguments::SinglePlayer(singleplayer)
-    } else if let Some(multiplayer) = arg.quick_play_multiplayer.clone() {
-        QuickPlayArguments::MultiPlayer(multiplayer)
-    } else {
-        QuickPlayArguments::None
-    };
 }
