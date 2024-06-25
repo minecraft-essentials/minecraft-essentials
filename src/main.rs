@@ -2,8 +2,8 @@ use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
 use minecraft_essentials::{
-    structs::{GameArguments, JavaArguments, QuickPlayArguments},
-    ArgsDescriptive, AuthType, AuthenticationBuilder, LaunchBuilder,
+    structs::{Args as MinecraftArgs, GameArguments, JavaArguments, QuickPlayArguments},
+    ArgsDeclared, AuthType, AuthenticationBuilder, LaunchBuilder,
 };
 
 #[derive(Parser)]
@@ -82,13 +82,12 @@ async fn handle_oauth(oauth_args: &OauthArgs) {
     let mut auth_builder = AuthenticationBuilder::builder();
     auth_builder
         .of_type(AuthType::Oauth)
-        .await
         .client_id(&oauth_args.client_id)
         .client_secret(&oauth_args.client_secret)
         .bedrockrel(oauth_args.bedrockrelm)
         .port(oauth_args.port);
 
-    println!("{:?}", auth_builder.get_info());
+    println!("{:?}", auth_builder.get_info().await);
 
     let auth_info = auth_builder.launch().await.unwrap();
 
@@ -99,18 +98,15 @@ async fn handle_device_code(device_code_args: &DeviceCodeArgs) {
     let mut auth_builder = AuthenticationBuilder::builder();
     auth_builder
         .of_type(AuthType::DeviceCode)
-        .await
         .client_id(&device_code_args.client_id)
         .bedrockrel(Some(device_code_args.bedrockrelm));
 
-    println!("{:?}", auth_builder.get_info());
+    println!("{:?}", auth_builder.get_info().await);
 
     println!("{:?}", auth_builder.launch().await);
 }
 
 async fn handle_launch(arg: &LaucnhArgs) {
-    let mut builder = LaunchBuilder::builder();
-
     let quick_play_arguments = if let Some(singleplayer) = arg.quick_play_singleplayer.clone() {
         QuickPlayArguments::SinglePlayer(singleplayer)
     } else if let Some(multiplayer) = arg.quick_play_multiplayer.clone() {
@@ -119,7 +115,7 @@ async fn handle_launch(arg: &LaucnhArgs) {
         QuickPlayArguments::None
     };
 
-    let args = minecraft_essentials::Args::Descriptive(ArgsDescriptive {
+    let args_declared = ArgsDeclared {
         game_args: Some(GameArguments {
             window_size: Some((arg.width.unwrap_or(1920), arg.height.unwrap_or(1080))),
             // Handling client_id correctly to avoid borrow checker errors
@@ -143,7 +139,7 @@ async fn handle_launch(arg: &LaucnhArgs) {
                     .unwrap_or(String::new())
             }),
             uuid: arg.uuid.as_ref().map(|s| s.to_owned()),
-            quick_play: Some(quick_play_arguments),
+            quick_play: Some(),
         }),
         java_args: JavaArguments {
             min_memory: arg.min_memory.map(|mem| mem as i32),
@@ -152,8 +148,18 @@ async fn handle_launch(arg: &LaucnhArgs) {
             launcher_version: arg.launcher_version.as_deref().map(|s| s.to_owned()),
             class_path: arg.class_path.as_deref().map(|s| s.to_owned()),
         },
-    });
+    };
 
-    builder.java_args(args);
-    builder.launch().await;
+    LaunchBuilder::builder()
+        .args(MinecraftArgs::Declared(args_declared))
+        .launch
+        .await;
+
+    let quick_play_arguments = if let Some(singleplayer) = arg.quick_play_singleplayer.clone() {
+        QuickPlayArguments::SinglePlayer(singleplayer)
+    } else if let Some(multiplayer) = arg.quick_play_multiplayer.clone() {
+        QuickPlayArguments::MultiPlayer(multiplayer)
+    } else {
+        QuickPlayArguments::None
+    };
 }
