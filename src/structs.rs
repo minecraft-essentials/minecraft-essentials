@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-// Dry ()
+// Dry (Do not Repeat Yourself)
 
 #[derive(Deserialize, Clone, Debug)]
 pub enum Args {
