@@ -24,6 +24,8 @@ mod launch;
 #[cfg(feature = "auth")]
 mod auth;
 
+use std::path::PathBuf;
+
 use auth::microsoft::CodeResponse;
 #[cfg(feature = "auth")]
 pub use auth::AuthInfo as CustomAuthData;
@@ -391,7 +393,7 @@ pub struct LaunchArgs {
     max_memory: Option<u32>,
     java_version: Option<String>,
     auth: Option<LaunchArgsAuth>,
-    game_dir: Option<String>,
+    game_dir: Option<PathBuf>,
     window_size: Option<(u32, u32)>,
     quick_play: Option<QuickPlayArguments>,
 }
@@ -399,10 +401,14 @@ pub struct LaunchArgs {
 /// Authentication Arguments for LaunchArgs
 #[derive(Clone)]
 pub struct LaunchArgsAuth {
-    username: Option<String>,
-    uuid: Option<String>,
-    client_id: Option<String>,
-    access_token: Option<String>,
+    /// Username
+    pub username: Option<String>,
+    /// UUID
+    pub uuid: Option<String>,
+    /// Client ID
+    pub client_id: Option<String>,
+    /// Access Token
+    pub access_token: Option<String>,
 }
 
 impl LaunchArgs {
@@ -453,7 +459,7 @@ impl LaunchArgs {
     }
 
     /// Set the game directory for the Minecraft Client.
-    pub fn game_dir(&mut self, game_dir: String) -> &mut Self {
+    pub fn game_dir(&mut self, game_dir: PathBuf) -> &mut Self {
         self.game_dir = Some(game_dir);
         self
     }

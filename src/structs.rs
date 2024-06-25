@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use serde::{Deserialize, Serialize};
 
 // Dry (Do not Repeat Yourself)
@@ -139,7 +141,7 @@ pub struct GameArguments {
     pub uuid: Option<String>,
 
     /// Game Directory
-    pub game_directory: Option<String>,
+    pub game_directory: Option<PathBuf>,
     /// Window Size
     pub window_size: Option<(u32, u32)>,
     /// Quick Play
