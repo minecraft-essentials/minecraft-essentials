@@ -35,6 +35,7 @@ use auth::{
     xbox::{xbl, xsts},
 };
 use serde::{Deserialize, Serialize};
+use structs::{GameArguments, QuickPlayArguments};
 
 // Constants
 pub(crate) const EXPERIMENTAL_MESSAGE: &str =
@@ -381,6 +382,107 @@ impl LaunchBuilder {
 
         println!("{}", launch_args);
     }
+}
+
+/// A builder that makes laucnh arguments easier.
+pub struct LaunchArgs {
+    min_memory: u32,
+    max_memory: Option<u32>,
+    java_version: Option<String>,
+    auth: Option<LaunchArgsAuth>,
+    game_dir: Option<String>,
+    window_size: Option<(u32, u32)>,
+    quick_play: Option<QuickPlayArguments>,
+}
+
+/// Authentication Arguments for LaunchArgs
+pub struct LaunchArgsAuth {
+    username: Option<String>,
+    uuid: Option<String>,
+    client_id: Option<String>,
+    access_token: Option<String>,
+}
+
+impl LaunchArgs {
+    /// Create a new instance of `LaunchArgs`.
+    pub fn builder() -> Self {
+        Self {
+            min_memory: 2048, // Minecraft Requires 2GB
+            max_memory: None,
+            java_version: None,
+            auth: None,
+            game_dir: None,
+            window_size: None,
+            quick_play: None,
+        }
+    }
+
+    /// Set the minimum memory for the Minecraft Client.
+    pub fn min_memory(&mut self, min_memory: u32) -> &mut Self {
+        if min_memory < 2048 {
+            panic!("Minimum memory must be greater than 2048");
+        }
+
+        self.min_memory = min_memory;
+        self
+    }
+
+    /// Set the maximum memory for the Minecraft Client.
+    pub fn max_memory(&mut self, max_memory: u32) -> &mut Self {
+        if max_memory < self.min_memory {
+            panic!("Maximum memory must be greater than minimum memory");
+        }
+
+        self.max_memory = Some(max_memory);
+        self
+    }
+
+    /// Set the Java version for the Minecraft Client.
+    /// This is the game version in number form (e.g. 1.16.5 is 1165).
+    pub fn java_version(&mut self, version: String) -> &mut Self {
+        self.java_version = Some(version);
+    }
+
+    /// Set the authentication for the Minecraft Client.
+    pub fn auth(&mut self, auth: LaunchArgsAuth) -> &mut Self {
+        self.auth = Some(auth);
+    }
+
+    /// Set the game directory for the Minecraft Client.
+    pub fn game_dir(&mut self, game_dir: String) -> &mut Self {
+        self.game_dir = Some(game_dir);
+    }
+
+    /// Set the window size for the Minecraft Client.
+    pub fn window_size(&mut self, window_size: (u32, u32)) -> &mut Self {
+        self.window_size = Some(window_size);
+    }
+
+    /// Set the quick play for the Minecraft Client.
+    pub fn quick_play(&mut self, quick_play: QuickPlayArguments) -> &mut Self {
+        self.quick_play = Some(quick_play);
+    }
+
+    /// Combines all the arguments into a ArgsDeclared struct.
+    pub fn combine(&self) {
+        let mut args = ArgsDeclared {
+            game_args: Some(GameArguments {
+                client_id: self.auth.clone().unwrap().client_id,
+                username: self.auth.clone().unwrap().username,
+                version: self.java_version.clone(),
+                uuid: self.auth.clone().unwrap().uuid,
+                game_directory: self.game_dir.clone(),
+                window_size: self.window_size.clone(),
+                quick_play: self.quick_play.clone(),
+            }),
+            java_args: JavaArguments {
+                min_memory: Some(self.min_memory),
+                max_memory: self.max_memory.unwrap_or(2048),
+                launcher_name: None,
+                launcher_version: None,
+                class_path: None,
+            },
+    };
 }
 
 /// Device Code Authentication
