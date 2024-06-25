@@ -1,5 +1,4 @@
-use core::arch;
-use std::{fmt::format, fs, path::PathBuf};
+use std::{fs, path::PathBuf};
 
 use crate::{async_trait_alias::AsyncSendSync, errors::LaunchErrors};
 use reqwest::Client;
@@ -7,26 +6,21 @@ use reqwest::Client;
 use super::download_files;
 
 // use super::download_files;
-
+#[derive(Debug)]
 pub enum JRE {
     Adoptium, // We only support this one for now more will come soon.
-              //TODO: More Java Runtime Enviroments (JRE) Supported to make it not limited
+    Zulu,
+    //TODO: More Java Runtime Enviroments (JRE) Supported to make it not limited
 }
 
-pub fn get_java(dir: &PathBuf, version: &str, jre: JRE, user_agent: &str) {
-    if super::is_dir_empty(dir).expect("Expected Dir Checker") {
-        download_java(dir, version, jre, user_agent);
-    }
-}
-
-pub fn download_java(
+pub fn get_java(
     dir: &PathBuf,
     version: &str,
     jre: JRE,
     user_agent: &str,
 ) -> impl AsyncSendSync<Result<(), LaunchErrors>> {
-    let mut url = format!("");
-    url = match jre {
+    dbg!(&jre, &user_agent, &version, &dir);
+    let url = match jre {
         JRE::Adoptium => {
             arch_support(vec!["x86_64", "x86", "aarch64", "arm"]);
 
@@ -52,29 +46,31 @@ pub fn download_java(
             ]).unwrap_or(String::from(""));
             java_url
         }
+        JRE::Zulu => todo!(),
     };
 
     let mut dir_clone = dir.clone();
+    let user_agent = user_agent.to_owned();
+    // println!("{}", url);
 
-    if cfg!(target_os = "Windows") {
-        dir_clone.push("jre.zip")
-    } else {
-        dir_clone.push("jre.tar.gz");
+    async move {
+        if cfg!(target_os = "Windows") {
+            dir_clone.push("jre.zip")
+        } else {
+            dir_clone.push("jre.tar.gz");
+        }
+
+        let _ = download_jre(url, dir_clone, &user_agent).await;
+
+        Ok(())
     }
-
-    let client = Client::new().clone();
-
-    download_jre(&client, url, dir_clone, user_agent)
 
     //TODO: Donwload and extract JARs
 }
 
-async fn download_jre(
-    client: &Client,
-    url: String,
-    dir: PathBuf,
-    user_agent: &str,
-) -> Result<(), LaunchErrors> {
+async fn download_jre(url: String, dir: PathBuf, user_agent: &str) -> Result<(), LaunchErrors> {
+    let client = Client::new();
+
     match download_files(client.clone(), user_agent, &dir, url).await {
         Ok(_) => {}
         Err(e) => {
@@ -96,7 +92,6 @@ struct ArchUrl {
     url: String,
 }
 
-//
 fn arch_url(arch: Vec<ArchUrl>) -> Option<String> {
     for arch in arch {
         match arch.arch {
