@@ -2,8 +2,8 @@ use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
 use minecraft_essentials::{
-    structs::{Args as MinecraftArgs, GameArguments, JavaArguments, QuickPlayArguments},
-    ArgsDeclared, AuthType, AuthenticationBuilder, LaunchBuilder,
+    structs::{GameArguments, JavaArguments, QuickPlayArguments},
+    Args as MinecraftArgs, ArgsDeclared, AuthType, AuthenticationBuilder, LaunchBuilder,
 };
 
 #[derive(Parser)]
@@ -139,7 +139,7 @@ async fn handle_launch(arg: &LaucnhArgs) {
                     .unwrap_or(String::new())
             }),
             uuid: arg.uuid.as_ref().map(|s| s.to_owned()),
-            quick_play: Some(),
+            quick_play: Some(quick_play_arguments),
         }),
         java_args: JavaArguments {
             min_memory: arg.min_memory.map(|mem| mem as i32),
@@ -152,7 +152,7 @@ async fn handle_launch(arg: &LaucnhArgs) {
 
     LaunchBuilder::builder()
         .args(MinecraftArgs::Declared(args_declared))
-        .launch
+        .launch()
         .await;
 
     let quick_play_arguments = if let Some(singleplayer) = arg.quick_play_singleplayer.clone() {

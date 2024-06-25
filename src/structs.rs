@@ -3,13 +3,13 @@ use serde::{Deserialize, Serialize};
 // Dry (Do not Repeat Yourself)
 
 #[derive(Deserialize, Clone, Debug)]
-pub(crate) enum Args {
+pub(crate) enum ManifestArgs {
     Simple(String),
     ComplexArgs,
 }
 
 #[derive(Deserialize, Clone, Debug)]
-pub(crate) struct ComplexArgs {
+pub(crate) struct ManifestComplexArgs {
     pub(crate) rules: Vec<Rules>,
     pub(crate) value: Vec<String>,
 }
@@ -89,8 +89,8 @@ pub(crate) struct VersionManifest {
 
 #[derive(Deserialize, Clone, Debug)]
 pub(crate) struct Arguments {
-    pub(crate) game: Args,
-    pub(crate) jvm: Args,
+    pub(crate) game: ManifestArgs,
+    pub(crate) jvm: ManifestArgs,
 }
 
 #[derive(Deserialize, Clone, Debug)]
