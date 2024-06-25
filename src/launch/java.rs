@@ -22,7 +22,7 @@ pub fn get_java(
     dbg!(&jre, &user_agent, &version, &dir);
     let url = match jre {
         JRE::Adoptium => {
-            arch_support(vec!["x86_64", "x86", "aarch64", "arm"]);
+            let _ = arch_support(vec!["x86_64", "x86", "aarch64", "arm"]);
 
             let java_url = arch_url(vec![
                 ArchUrl {
@@ -82,7 +82,7 @@ async fn download_jre(url: String, dir: PathBuf, user_agent: &str) -> Result<(),
     }
 
     if dir.exists() && dir.is_file() {
-        fs::remove_file(dir);
+        let _ = fs::remove_file(dir);
     }
     Ok(())
 }
