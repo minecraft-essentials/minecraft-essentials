@@ -3,36 +3,36 @@ use serde::{Deserialize, Serialize};
 // Dry (Do not Repeat Yourself)
 
 #[derive(Deserialize, Clone, Debug)]
-pub enum Args {
+pub(crate) enum Args {
     Simple(String),
     ComplexArgs,
 }
 
 #[derive(Deserialize, Clone, Debug)]
-pub struct ComplexArgs {
+pub(crate) struct ComplexArgs {
     pub(crate) rules: Vec<Rules>,
     pub(crate) value: Vec<String>,
 }
 
 #[derive(Deserialize, Clone, Debug)]
-pub struct Rules {
+pub(crate) struct Rules {
     pub(crate) action: String,
     pub(crate) features: Option<RulesFutures>,
     pub(crate) os: Option<RulesOS>,
 }
 
 #[derive(Deserialize, Clone, Debug)]
-pub struct RulesFutures {}
+pub(crate) struct RulesFutures {}
 
 #[derive(Deserialize, Clone, Debug)]
-pub struct RulesOS {
+pub(crate) struct RulesOS {
     pub(crate) name: String,
     pub(crate) arch: String,
 }
 
 #[derive(Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct FileIndex {
+pub(crate) struct FileIndex {
     pub(crate) id: Option<String>,
     pub(crate) sha1: Option<String>,
     pub(crate) path: Option<String>,
@@ -46,27 +46,27 @@ pub struct FileIndex {
 // Manifest Json
 
 #[derive(Deserialize, Debug, Clone)]
-pub struct ManifestVersion {
-    pub latest: LatestVersion,
-    pub versions: VersionEntry,
+pub(crate) struct ManifestVersion {
+    pub(crate) latest: LatestVersion,
+    pub(crate) versions: VersionEntry,
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub struct LatestVersion {
-    pub release: String,
-    pub snapshot: String,
+pub(crate) struct LatestVersion {
+    pub(crate) release: String,
+    pub(crate) snapshot: String,
 }
 
 #[derive(Deserialize, Debug, Clone)]
-pub struct VersionEntry {
-    pub id: String,
+pub(crate) struct VersionEntry {
+    pub(crate) id: String,
     #[serde(rename = "type")]
-    pub version_type: String,
-    pub url: String,
-    pub time: String,
-    pub release_time: String,
-    pub sha1: String,
-    pub compliance_level: i32,
+    pub(crate) version_type: String,
+    pub(crate) url: String,
+    pub(crate) time: String,
+    pub(crate) release_time: String,
+    pub(crate) sha1: String,
+    pub(crate) compliance_level: i32,
 }
 
 /////////....../////
@@ -75,7 +75,7 @@ pub struct VersionEntry {
 
 #[derive(Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct VersionManifest {
+pub(crate) struct VersionManifest {
     // #[serde(rename = "type")]
     pub(crate) arguments: Arguments,
     pub(crate) assetindex: FileIndex,
@@ -88,27 +88,27 @@ pub struct VersionManifest {
 }
 
 #[derive(Deserialize, Clone, Debug)]
-pub struct Arguments {
+pub(crate) struct Arguments {
     pub(crate) game: Args,
     pub(crate) jvm: Args,
 }
 
 #[derive(Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct JavaVersion {
+pub(crate) struct JavaVersion {
     pub(crate) component: String,
     pub(crate) majorversion: i32,
     pub(crate) minorversion: i32,
 }
 
 #[derive(Deserialize, Clone, Debug)]
-pub struct Libraries {
+pub(crate) struct Libraries {
     pub(crate) donwloads: FileIndex,
     pub(crate) name: String,
 }
 
 #[derive(Deserialize, Clone, Debug)]
-pub struct Logging {
+pub(crate) struct Logging {
     pub(crate) argument: String,
     pub(crate) file: FileIndex,
     #[serde(rename = "type")]
@@ -116,7 +116,7 @@ pub struct Logging {
 }
 
 #[derive(Deserialize, Clone, Debug)]
-pub struct Downloads {
+pub(crate) struct Downloads {
     pub(crate) artiface: Option<FileIndex>,
     pub(crate) client: Option<FileIndex>,
     pub(crate) client_mappings: Option<FileIndex>,
