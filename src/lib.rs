@@ -464,8 +464,8 @@ impl LaunchArgs {
     }
 
     /// Combines all the arguments into a ArgsDeclared struct.
-    pub fn combine(&self) {
-        let mut args = ArgsDeclared {
+    pub fn combine(&self) -> ArgsDeclared {
+        ArgsDeclared {
             game_args: Some(GameArguments {
                 client_id: self.auth.clone().unwrap().client_id,
                 username: self.auth.clone().unwrap().username,
@@ -482,7 +482,7 @@ impl LaunchArgs {
                 launcher_version: None,
                 class_path: None,
             },
-    };
+    }
 }
 
 /// Device Code Authentication
