@@ -40,6 +40,9 @@ use serde::{Deserialize, Serialize};
 pub(crate) const EXPERIMENTAL_MESSAGE: &str =
     "\x1b[33mNOTICE: You are using an experimental feature.\x1b[0m";
 
+pub(crate) const MANIFEST_URL: &str =
+    "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
+
 /// OAuth 2.0 Authentication
 ///
 /// This struct represents the OAuth authentication process for Minecraft, specifically designed for use with custom Azure applications.
@@ -342,12 +345,12 @@ pub enum Args {
     /// A Normal Vec to do Settings (Intermediate)
     Normal(Vec<String>),
     /// Descripted Settings (Begineers)
-    Descriptive(ArgsDescriptive),
+    Declared(ArgsDeclared),
 }
 
 /// Descripted version of the JavaArgs
 #[derive(serde::Serialize)]
-pub struct ArgsDescriptive {
+pub struct ArgsDeclared {
     /// Game Arguments
     pub game_args: Option<structs::GameArguments>,
     /// Java Arguments
@@ -368,22 +371,19 @@ impl LaunchBuilder {
     }
 
     /// Set the Java Arguments for the Minecraft Client.
-    pub fn java_args(&mut self, args: Args) -> &mut Self {
+    pub fn args(&mut self, args: Args) -> &mut Self {
         self.args = args;
         self
     }
 
     /// Launches the Minecraft/Your Client!
     pub async fn launch(&self) {
-        let mut launch_args = String::new();
-
-        match &self.args {
-            Args::Normal(arg) => launch_args = arg.join(""),
-            Args::Descriptive(args) => {
-                launch_args =
-                    serde_json::to_string_pretty(args).unwrap_or_else(|_| String::from(""))
+        let launch_args = match &self.args {
+            Args::Normal(arg) => arg.join(""),
+            Args::Declared(args) => {
+                serde_json::to_string_pretty(args).unwrap_or_else(|_| String::from(""))
             }
-        }
+        };
 
         println!("{}", launch_args);
     }
