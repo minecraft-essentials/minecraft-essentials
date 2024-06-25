@@ -1,4 +1,4 @@
-use super::structs::VersionManifest;
+use crate::structs::VersionManifest;
 use reqwest::{header::USER_AGENT, Client};
 use serde::Deserialize;
 

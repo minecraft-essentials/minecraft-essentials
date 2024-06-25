@@ -1,4 +1,5 @@
-use std::{fs, path::PathBuf};
+use core::arch;
+use std::{fmt::format, fs, path::PathBuf};
 
 use crate::{async_trait_alias::AsyncSendSync, errors::LaunchErrors};
 use reqwest::Client;
@@ -14,7 +15,7 @@ pub enum JRE {
 
 pub fn get_java(dir: &PathBuf, version: &str, jre: JRE, user_agent: &str) {
     if super::is_dir_empty(dir).expect("Expected Dir Checker") {
-        download_java(dir, version, jre, user_agent)
+        download_java(dir, version, jre, user_agent);
     }
 }
 
@@ -23,48 +24,93 @@ pub fn download_java(
     version: &str,
     jre: JRE,
     user_agent: &str,
-) -> AsyncSendSync<Result<()>> {
-    let url: String;
-    let client = Client::new();
-
-    match jre {
+) -> impl AsyncSendSync<Result<(), LaunchErrors>> {
+    let mut url = format!("");
+    url = match jre {
         JRE::Adoptium => {
-            arch_support(["x86_64", "x86", "aarch64", "arm"]);
+            arch_support(vec!["x86_64", "x86", "aarch64", "arm"]);
 
-            if std::env::consts::ARCH == "x86_64" {
-                url = format!(
-                    "https://api.adoptium.net/v3/binary/latest/{}/ga/{}/{}/jre/hotspot/normal/eclipse",
-                    version,
-                    std::env::consts::OS,
-                    "x64"
-                );
-            } else {
-                url = format!(
-                    "https://api.adoptium.net/v3/binary/latest/{}/ga/{}/{}/jre/hotspot/normal/eclipse",
-                    version,
-                    std::env::consts::OS,
-                    std::env::consts::ARCH
-                );
-            }
+            let java_url = arch_url(vec![
+                ArchUrl {
+                    arch: Some(String::from("x86_64")),
+                    url: format!(
+                        "https://api.adoptium.net/v3/binary/latest/{}/ga/{}/{}/jre/hotspot/normal/eclipse",
+                        version,
+                        std::env::consts::OS,
+                        "x64"
+                    ),
+                },
+                ArchUrl {
+                    arch: None,
+                    url: format!(
+                        "https://api.adoptium.net/v3/binary/latest/{}/ga/{}/{}/jre/hotspot/normal/eclipse",
+                        version,
+                        std::env::consts::OS,
+                        std::env::consts::ARCH
+                    ),
+                },
+            ]).unwrap_or(String::from(""));
+            java_url
         }
-    }
+    };
 
-    let dir_clone = dir.clone();
+    let mut dir_clone = dir.clone();
 
     if cfg!(target_os = "Windows") {
         dir_clone.push("jre.zip")
     } else {
-        dir_clone.push("jre.tar.gz")
+        dir_clone.push("jre.tar.gz");
     }
 
-    async move {
-        'out: {
-            download_files(client, user_agent, dir, url).await?;
-            fs::remove_file(dir_clone)?;
-            Ok(())
+    let client = Client::new().clone();
+
+    download_jre(&client, url, dir_clone, user_agent)
+
+    //TODO: Donwload and extract JARs
+}
+
+async fn download_jre(
+    client: &Client,
+    url: String,
+    dir: PathBuf,
+    user_agent: &str,
+) -> Result<(), LaunchErrors> {
+    match download_files(client.clone(), user_agent, &dir, url).await {
+        Ok(_) => {}
+        Err(e) => {
+            return Err(LaunchErrors::Requirements(format!(
+                "Failed to download JRE Due to: {}",
+                e
+            )))
         }
     }
-    //TODO: Donwload and extract JARs
+
+    if dir.exists() && dir.is_file() {
+        fs::remove_file(dir);
+    }
+    Ok(())
+}
+
+struct ArchUrl {
+    arch: Option<String>,
+    url: String,
+}
+
+//
+fn arch_url(arch: Vec<ArchUrl>) -> Option<String> {
+    for arch in arch {
+        match arch.arch {
+            Some(archsep) => {
+                if archsep == std::env::consts::ARCH {
+                    return Some(arch.url);
+                }
+            }
+            None => {
+                return Some(arch.url);
+            }
+        }
+    }
+    None
 }
 
 // Archtechure support function that will error if wrong archtechure for all jre/jdk's

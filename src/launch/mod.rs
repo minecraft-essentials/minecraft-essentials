@@ -52,5 +52,10 @@ pub async fn get_minecraft(user_agent: &str, version: &str, jre: &str) -> Result
         .send()
         .await?;
 
-    let version_manifest_res: structs::VersionManifest = version_manifest.json().await?.clone();
+    let version_manifest_res = version_manifest
+        .json::<structs::VersionManifest>()
+        .await?
+        .clone();
+
+    println!("{:?}", version_manifest_res);
 }
