@@ -126,7 +126,6 @@ impl Oauth {
         AuthenticationBuilder::builder()
             .bedrockrel(Some(bedrock_relm))
             .of_type(AuthType::Oauth)
-            .await
             .client_secret(client_secret)
             .client_id(&self.client_id)
             .port(Some(self.port))
@@ -205,7 +204,6 @@ pub struct AuthenticationBuilder {
     auth_type: AuthType,
     client_id: String,
     port: u16,
-    device_code: Option<CodeResponse>,
     client_secrect: String,
     bedrockrel: bool,
 }
@@ -230,7 +228,6 @@ impl AuthenticationBuilder {
             auth_type: AuthType::Oauth,
             client_id: "".to_string(),
             port: 8000,
-            device_code: None,
             client_secrect: "".to_string(),
             bedrockrel: false,
         }
@@ -239,13 +236,7 @@ impl AuthenticationBuilder {
     /// Type of authentication.
     ///
     /// Sets the type of authentication to be used.
-    pub async fn of_type(&mut self, auth_type: AuthType) -> &mut Self {
-        if auth_type == AuthType::DeviceCode {
-            let code = device_authentication_code(&self.client_id).await.unwrap();
-
-            self.device_code = Some(code)
-        }
-
+    pub fn of_type(&mut self, auth_type: AuthType) -> &mut Self {
         self.auth_type = auth_type;
         self
     }
@@ -275,10 +266,11 @@ impl AuthenticationBuilder {
     }
 
     /// Gets the code for device code method
-    pub fn get_info(&mut self) -> AuthInfo {
+    pub async fn get_info(&mut self) -> AuthInfo {
         if self.auth_type == AuthType::DeviceCode {
+            let code = device_authentication_code(&self.client_id).await.unwrap();
             AuthInfo {
-                _device_code: self.device_code.clone(),
+                _device_code: Some(code),
                 _ouath_url: None,
             }
         } else {
@@ -340,7 +332,7 @@ impl AuthenticationBuilder {
     }
 }
 
-/// Settings for the Instance
+/// Arguments for the Launch
 pub enum Args {
     /// A Normal Vec to do Settings (Intermediate)
     Normal(Vec<String>),
