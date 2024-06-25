@@ -141,13 +141,13 @@ pub struct GameArguments {
     /// Game Directory
     pub game_directory: Option<String>,
     /// Window Size
-    pub window_size: Option<(i32, i32)>,
+    pub window_size: Option<(u32, u32)>,
     /// Quick Play
     pub quick_play: Option<QuickPlayArguments>,
 }
 
 /// Represents arguments for quick play options in Minecraft.
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub enum QuickPlayArguments {
     /// Singleplayer
     SinglePlayer(String),
@@ -161,9 +161,9 @@ pub enum QuickPlayArguments {
 #[derive(Serialize)]
 pub struct JavaArguments {
     /// Minimal Memory
-    pub min_memory: Option<i32>,
+    pub min_memory: Option<u32>,
     /// Maximum Memory
-    pub max_memory: i32,
+    pub max_memory: u32,
     /// Launcher Name
     pub launcher_name: Option<String>,
     /// Launcher Version

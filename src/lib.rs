@@ -35,7 +35,7 @@ use auth::{
     xbox::{xbl, xsts},
 };
 use serde::{Deserialize, Serialize};
-use structs::{GameArguments, QuickPlayArguments};
+use structs::{GameArguments, JavaArguments, QuickPlayArguments};
 
 // Constants
 pub(crate) const EXPERIMENTAL_MESSAGE: &str =
@@ -385,6 +385,7 @@ impl LaunchBuilder {
 }
 
 /// A builder that makes laucnh arguments easier.
+#[derive(Clone)]
 pub struct LaunchArgs {
     min_memory: u32,
     max_memory: Option<u32>,
@@ -396,6 +397,7 @@ pub struct LaunchArgs {
 }
 
 /// Authentication Arguments for LaunchArgs
+#[derive(Clone)]
 pub struct LaunchArgsAuth {
     username: Option<String>,
     uuid: Option<String>,
@@ -441,38 +443,44 @@ impl LaunchArgs {
     /// This is the game version in number form (e.g. 1.16.5 is 1165).
     pub fn java_version(&mut self, version: String) -> &mut Self {
         self.java_version = Some(version);
+        self
     }
 
     /// Set the authentication for the Minecraft Client.
     pub fn auth(&mut self, auth: LaunchArgsAuth) -> &mut Self {
         self.auth = Some(auth);
+        self
     }
 
     /// Set the game directory for the Minecraft Client.
     pub fn game_dir(&mut self, game_dir: String) -> &mut Self {
         self.game_dir = Some(game_dir);
+        self
     }
 
     /// Set the window size for the Minecraft Client.
     pub fn window_size(&mut self, window_size: (u32, u32)) -> &mut Self {
         self.window_size = Some(window_size);
+        self
     }
 
     /// Set the quick play for the Minecraft Client.
     pub fn quick_play(&mut self, quick_play: QuickPlayArguments) -> &mut Self {
         self.quick_play = Some(quick_play);
+        self
     }
 
     /// Combines all the arguments into a ArgsDeclared struct.
     pub fn combine(&self) -> ArgsDeclared {
+        let auth = self.auth.clone().unwrap();
         ArgsDeclared {
             game_args: Some(GameArguments {
-                client_id: self.auth.clone().unwrap().client_id,
-                username: self.auth.clone().unwrap().username,
+                client_id: auth.client_id,
+                username: auth.username,
                 version: self.java_version.clone(),
-                uuid: self.auth.clone().unwrap().uuid,
+                uuid: auth.uuid,
                 game_directory: self.game_dir.clone(),
-                window_size: self.window_size.clone(),
+                window_size: self.window_size,
                 quick_play: self.quick_play.clone(),
             }),
             java_args: JavaArguments {
@@ -482,6 +490,7 @@ impl LaunchArgs {
                 launcher_version: None,
                 class_path: None,
             },
+        }
     }
 }
 
