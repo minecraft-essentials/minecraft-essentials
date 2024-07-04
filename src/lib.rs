@@ -510,7 +510,7 @@ impl LaunchArgs {
     pub fn combine(&self) -> ArgsDeclared {
         let auth = self.auth.clone().unwrap();
         ArgsDeclared {
-            game_args: Some(GameArguments {
+            game_args: GameArguments {
                 client_id: auth.client_id,
                 username: auth.username,
                 version: self.java_version.clone(),
@@ -518,7 +518,7 @@ impl LaunchArgs {
                 game_directory: self.game_dir.clone(),
                 window_size: self.window_size,
                 quick_play: self.quick_play.clone(),
-            }),
+            },
             java_args: JavaArguments {
                 min_memory: Some(self.min_memory),
                 max_memory: self.max_memory.unwrap_or(2048),
