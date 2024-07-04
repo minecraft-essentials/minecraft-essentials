@@ -24,7 +24,7 @@ mod launch;
 #[cfg(feature = "auth")]
 mod auth;
 
-use std::path::PathBuf;
+use std::{fmt::format, path::PathBuf};
 
 use auth::microsoft::CodeResponse;
 #[cfg(feature = "auth")]
@@ -349,7 +349,7 @@ pub enum Args {
 #[cfg(feature = "launch")]
 pub struct ArgsDeclared {
     /// Game Arguments
-    pub game_args: Option<structs::GameArguments>,
+    pub game_args: structs::GameArguments,
     /// Java Arguments
     pub java_args: structs::JavaArguments,
 }
@@ -375,10 +375,40 @@ impl LaunchBuilder {
 
     /// Launches the Minecraft/Your Client!
     pub async fn launch(&self) {
-        let launch_args = match &self.args {
+        let launch_args: String = match &self.args {
             Args::Normal(arg) => arg.join(""),
             Args::Declared(args) => {
-                serde_json::to_string_pretty(args).unwrap_or_else(|_| String::from(""))
+                let mut output: Vec<String> = Vec::new();
+                let game_args = &args.game_args;
+
+                let args = [
+                    ("--username", &game_args.username),
+                    ("--uuid", &game_args.uuid),
+                    ("--client_id", &game_args.client_id),
+                    ("--version", &game_args.version),
+                    (
+                        "--game_directory",
+                        &game_args
+                            .game_directory
+                            .as_ref()
+                            .map(|path| path.display().to_string()),
+                    ),
+                ];
+
+                for &(arg_name, arg_value) in args.iter() {
+                    if let Some(value) = arg_value {
+                        output.push(format!("{} {}", arg_name, value));
+                    }
+                }
+
+                if let Some(window_size) = &game_args.window_size {
+                    output.push(format!(
+                        "--width {} --height {}",
+                        window_size.0, window_size.1
+                    ));
+                }
+
+                output.join(" ")
             }
         };
 

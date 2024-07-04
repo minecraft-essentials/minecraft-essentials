@@ -129,7 +129,7 @@ pub(crate) struct Downloads {
 /////////....../////
 
 /// Game Arguments for Minecraft
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct GameArguments {
     /// ClientId
     pub client_id: Option<String>,
