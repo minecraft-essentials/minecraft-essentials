@@ -36,8 +36,8 @@ use auth::{
     microsoft::{authenticate_device, device_authentication_code, ouath, ouath_token, SCOPE},
     xbox::{xbl, xsts},
 };
+use launch::JavaJRE;
 use serde::{Deserialize, Serialize};
-use structs::{GameArguments, JavaArguments, QuickPlayArguments};
 
 // Constants
 pub(crate) const EXPERIMENTAL_MESSAGE: &str =
@@ -335,197 +335,57 @@ impl AuthenticationBuilder {
     }
 }
 
-/// Arguments for the Launch
-#[cfg(feature = "launch")]
-pub enum Args {
-    /// A Normal Vec to do Settings (Intermediate)
-    Normal(Vec<String>),
-    /// Descripted Settings (Begineers)
-    Declared(ArgsDeclared),
-}
-
-/// Descripted version of the JavaArgs
-#[derive(serde::Serialize)]
-#[cfg(feature = "launch")]
-pub struct ArgsDeclared {
-    /// Game Arguments
-    pub game_args: structs::GameArguments,
-    /// Java Arguments
-    pub java_args: structs::JavaArguments,
-}
-
 /// A builder that launches minecraft or your own custom client.
 pub struct LaunchBuilder {
-    args: Args,
+    args: Vec<String>,
+    java_path: Option<PathBuf>,
+    jre: Option<JavaJRE>,
+    client: Option<PathBuf>,
+    mods: Option<Vec<PathBuf>>,
 }
 
 impl LaunchBuilder {
     /// Create a new instanve of `LaunchBuilder`.
-    pub fn builder() -> Self {
+    pub fn init() -> Self {
         Self {
-            args: Args::Normal(vec!["".to_string()]),
+            args: Vec::new(),
+            java_path: None,
+            jre: None,
+            client: None,
+            mods: None,
         }
     }
 
-    /// Set the Java Arguments for the Minecraft Client.
-    pub fn args(&mut self, args: Args) -> &mut Self {
+    /// Set the Java Arguments for the Minecraft.
+    pub fn args(&mut self, args: Vec<String>) -> &mut Self {
+        dbg!(&args);
         self.args = args;
         self
     }
 
+    /// Set the Java Path for the Minecraft.
+    /// FOR CUSTOM JAVA ONLY
+    pub fn java(&mut self, path: Option<PathBuf>) -> &mut Self {
+        self.java_path = path;
+        self
+    }
+
+    /// Set for Custom Minecraft Client
+    pub fn client(&mut self, client: Option<PathBuf>) -> &mut Self {
+        self.client = client;
+        self
+    }
+
+    pub fn mods(&mut self, mods: Option<Vec<PathBuf>>) -> &mut Self {
+        self.mods = mods;
+        self
+    }
+
     /// Launches the Minecraft/Your Client!
-    pub async fn launch(&self) {
-        let launch_args: String = match &self.args {
-            Args::Normal(arg) => arg.join(""),
-            Args::Declared(args) => {
-                let mut output: Vec<String> = Vec::new();
-                let game_args = &args.game_args;
-
-                let args = [
-                    ("--username", &game_args.username),
-                    ("--uuid", &game_args.uuid),
-                    ("--client_id", &game_args.client_id),
-                    ("--version", &game_args.version),
-                    (
-                        "--game_directory",
-                        &game_args
-                            .game_directory
-                            .as_ref()
-                            .map(|path| path.display().to_string()),
-                    ),
-                ];
-
-                for &(arg_name, arg_value) in args.iter() {
-                    if let Some(value) = arg_value {
-                        output.push(format!("{} {}", arg_name, value));
-                    }
-                }
-
-                if let Some(window_size) = &game_args.window_size {
-                    output.push(format!(
-                        "--width {} --height {}",
-                        window_size.0, window_size.1
-                    ));
-                }
-
-                output.join(" ")
-            }
-        };
-
-        println!("{}", launch_args);
-    }
-}
-
-/// A builder that makes laucnh arguments easier.
-#[derive(Clone)]
-pub struct LaunchArgs {
-    min_memory: u32,
-    max_memory: Option<u32>,
-    java_version: Option<String>,
-    auth: Option<LaunchArgsAuth>,
-    game_dir: Option<PathBuf>,
-    window_size: Option<(u32, u32)>,
-    quick_play: Option<QuickPlayArguments>,
-}
-
-/// Authentication Arguments for LaunchArgs
-#[derive(Clone)]
-pub struct LaunchArgsAuth {
-    /// Username
-    pub username: Option<String>,
-    /// UUID
-    pub uuid: Option<String>,
-    /// Client ID
-    pub client_id: Option<String>,
-    /// Access Token
-    pub access_token: Option<String>,
-}
-
-impl LaunchArgs {
-    /// Create a new instance of `LaunchArgs`.
-    pub fn builder() -> Self {
-        Self {
-            min_memory: 2048, // Minecraft Requires 2GB
-            max_memory: None,
-            java_version: None,
-            auth: None,
-            game_dir: None,
-            window_size: None,
-            quick_play: None,
-        }
-    }
-
-    /// Set the minimum memory for the Minecraft Client.
-    pub fn min_memory(&mut self, min_memory: u32) -> &mut Self {
-        if min_memory < 2048 {
-            panic!("Minimum memory must be greater than 2048");
-        }
-
-        self.min_memory = min_memory;
-        self
-    }
-
-    /// Set the maximum memory for the Minecraft Client.
-    pub fn max_memory(&mut self, max_memory: u32) -> &mut Self {
-        if max_memory < self.min_memory {
-            panic!("Maximum memory must be greater than minimum memory");
-        }
-
-        self.max_memory = Some(max_memory);
-        self
-    }
-
-    /// Set the Java version for the Minecraft Client.
-    /// This is the game version in number form (e.g. 1.16.5 is 1165).
-    pub fn java_version(&mut self, version: String) -> &mut Self {
-        self.java_version = Some(version);
-        self
-    }
-
-    /// Set the authentication for the Minecraft Client.
-    pub fn auth(&mut self, auth: LaunchArgsAuth) -> &mut Self {
-        self.auth = Some(auth);
-        self
-    }
-
-    /// Set the game directory for the Minecraft Client.
-    pub fn game_dir(&mut self, game_dir: PathBuf) -> &mut Self {
-        self.game_dir = Some(game_dir);
-        self
-    }
-
-    /// Set the window size for the Minecraft Client.
-    pub fn window_size(&mut self, window_size: (u32, u32)) -> &mut Self {
-        self.window_size = Some(window_size);
-        self
-    }
-
-    /// Set the quick play for the Minecraft Client.
-    pub fn quick_play(&mut self, quick_play: QuickPlayArguments) -> &mut Self {
-        self.quick_play = Some(quick_play);
-        self
-    }
-
-    /// Combines all the arguments into a ArgsDeclared struct.
-    pub fn combine(&self) -> ArgsDeclared {
-        let auth = self.auth.clone().unwrap();
-        ArgsDeclared {
-            game_args: GameArguments {
-                client_id: auth.client_id,
-                username: auth.username,
-                version: self.java_version.clone(),
-                uuid: auth.uuid,
-                game_directory: self.game_dir.clone(),
-                window_size: self.window_size,
-                quick_play: self.quick_play.clone(),
-            },
-            java_args: JavaArguments {
-                min_memory: Some(self.min_memory),
-                max_memory: self.max_memory.unwrap_or(2048),
-                launcher_name: None,
-                launcher_version: None,
-                class_path: None,
-            },
+    /// `jre` is required if you use custom java.
+    pub async fn launch(&mut self, jre: Option<JavaJRE>) {
+        if cfg!(target_os = "macos") {
+            self.args.push(format!("-XstartOnFirstThread"));
         }
     }
 }
