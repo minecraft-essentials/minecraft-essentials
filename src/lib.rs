@@ -427,6 +427,7 @@ impl LaunchArgs {
         &mut self,
         window_size: Option<(u32, u32)>,
         launcher_branding: Option<(String, String)>,
+        mut dirs: LauncherDirs,
         version_input: Option<(String, String)>,
         memory: (u16, Option<u16>),
     ) {
@@ -451,6 +452,21 @@ impl LaunchArgs {
         if let Some(memory) = memory.1 {
             self.args.push(format!("--Xmx{}M", memory));
         }
+
+        self.args
+            .push(format!("--gameDir {}", dirs.game_dir.display()));
+        self.args
+            .push(format!("--assetsDir {}", dirs.assets_dir.display()));
+        self.args.push(format!(
+            "--assetsIndex {:?}",
+            dirs.assets_dir.push("/index.json")
+        ));
+        self.args
+            .push(format!("--librariesDir {}", dirs.libraries_dir.display()));
+        self.args
+            .push(format!("--nativesDir {}", dirs.natives_dir.display()));
+        self.args
+            .push(format!("--javaDir {}", dirs.java_dir.display()));
     }
 }
 
