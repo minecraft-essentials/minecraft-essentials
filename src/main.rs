@@ -36,7 +36,7 @@ struct LaucnhArgs {
     max_memory: Option<usize>,
     launcher_name: Option<String>,
     launcher_version: Option<String>,
-    jre: Option<JavaJRE>,
+    jre: Option<String>,
     class_path: Option<String>,
 
     // Game Args
