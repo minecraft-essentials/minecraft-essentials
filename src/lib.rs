@@ -397,7 +397,7 @@ impl LaunchBuilder {
 /// This struct represents the device code authentication process for Minecraft, specifically designed for use with custom Azure applications.
 /// It is used to authenticate a device and obtain a token that can be used to launch Minecraft.
 #[cfg(feature = "auth")]
-// TODO: REMOVE THIS AT 0.2.15
+// TODO: REMOVE THIS AT 0.2.14
 #[deprecated(
     note = "The Device implementation is deprecated. Please migrate to AuthenticationBuilder and utilize the DeviceCode type for authentication.",
     since = "0.2.13"
