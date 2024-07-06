@@ -19,12 +19,13 @@ pub mod structs;
 mod tests;
 
 #[cfg(feature = "launch")]
-mod launch;
+/// Launch module for the Minecraft-Essentials library.
+pub mod launch;
 
 #[cfg(feature = "auth")]
 mod auth;
 
-use std::{fmt::format, path::PathBuf};
+use std::path::PathBuf;
 
 use auth::microsoft::CodeResponse;
 #[cfg(feature = "auth")]
@@ -376,6 +377,7 @@ impl LaunchBuilder {
         self
     }
 
+    /// Set for Custom Minecraft Mods to include in the launch.s
     pub fn mods(&mut self, mods: Option<Vec<PathBuf>>) -> &mut Self {
         self.mods = mods;
         self
