@@ -340,9 +340,22 @@ impl AuthenticationBuilder {
 pub struct LaunchBuilder {
     args: Vec<String>,
     java_path: Option<PathBuf>,
-    jre: Option<JavaJRE>,
     client: Option<PathBuf>,
     mods: Option<Vec<PathBuf>>,
+}
+
+/// Launch Directories for minecraft
+pub struct LauncherDirs {
+    /// Game Directory
+    pub game_dir: PathBuf,
+    /// Assets Directory
+    pub assets_dir: PathBuf,
+    /// Libraries Directory
+    pub libraries_dir: PathBuf,
+    /// Natives Directory
+    pub natives_dir: PathBuf,
+    /// Java Directory
+    pub java_dir: PathBuf,
 }
 
 impl LaunchBuilder {
@@ -351,7 +364,6 @@ impl LaunchBuilder {
         Self {
             args: Vec::new(),
             java_path: None,
-            jre: None,
             client: None,
             mods: None,
         }
@@ -385,9 +397,59 @@ impl LaunchBuilder {
 
     /// Launches the Minecraft/Your Client!
     /// `jre` is required if you use custom java.
-    pub async fn launch(&mut self, jre: Option<JavaJRE>) {
+    pub async fn launch(&mut self, jre: Option<JavaJRE>, dirs: Option<LauncherDirs>) {
         if cfg!(target_os = "macos") {
             self.args.push(format!("-XstartOnFirstThread"));
+        }
+    }
+}
+
+/// Launch Args
+///
+/// This struct is used to build the launch arguments for your Minecraft client.
+/// It provides a builder-like interface for setting various launch arguments.
+pub struct LaunchArgs {
+    args: Vec<String>,
+}
+
+impl LaunchArgs {
+    /// Creates a new LaunchArgs builder
+    pub fn builder() -> Self {
+        Self { args: Vec::new() }
+    }
+
+    /// Sets general game settings
+    /// window_size: width, height
+    /// launcher_branding: name, version
+    /// version_input: version, version_type
+    /// memory: min, max (MB)
+    pub fn game_settings(
+        &mut self,
+        window_size: Option<(u32, u32)>,
+        launcher_branding: Option<(String, String)>,
+        version_input: Option<(String, String)>,
+        memory: (u16, Option<u16>),
+    ) {
+        self.args.push(format!("--Xms{}m", memory.0));
+        if let Some(branding) = launcher_branding {
+            self.args
+                .push(format!("-Dminecraft.launcher.brand={}", branding.0));
+            self.args
+                .push(format!("--Dminecraft.launcher.version={}", branding.1));
+        }
+
+        if let Some(version) = version_input {
+            self.args.push(format!("--version {}", version.0));
+            self.args.push(format!("--versionType {}", version.1));
+        }
+
+        if let Some(window_size) = window_size {
+            self.args.push(format!("--width {}", window_size.0));
+            self.args.push(format!("--height {}", window_size.1));
+        }
+
+        if let Some(memory) = memory.1 {
+            self.args.push(format!("--Xmx{}M", memory));
         }
     }
 }
