@@ -1,9 +1,9 @@
 mod java;
 mod minecraft;
 
-use std::{fs::File, io::Write, path::PathBuf};
-
+pub use java::JRE as JavaJRE;
 use reqwest::{header::USER_AGENT, Client};
+use std::{fs::File, io::Write, path::PathBuf};
 
 pub(crate) async fn download_files(
     client: Client,
