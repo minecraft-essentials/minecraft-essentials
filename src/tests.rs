@@ -7,10 +7,13 @@ use std::env;
 async fn test_oauth_url() {
     let _ = dotenv();
     let client_id = env::var("Client_ID").expect("Expected Client ID");
+    let port = 8000;
     let expected_url = format!(
-        "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize/?client_id={}&response_type=code&redirect_uri=http://localhost:8000&response_mode=query&scope={}&state=12345",
-        client_id, SCOPE
+        "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize/?client_id={}&response_type=code&redirect_uri=http://localhost:{}&response_mode=query&scope={}&state=12345",
+        port,client_id, SCOPE
     );
+    let oauth = Oauth::new(&client_id, Some(port));
+
     assert_eq!(oauth.url(), expected_url);
 }
 
