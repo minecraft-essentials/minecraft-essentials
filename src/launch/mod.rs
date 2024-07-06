@@ -24,7 +24,7 @@ pub(crate) async fn download_files(
     return Ok(());
 }
 
-pub async fn launch_minecraft(
+pub(crate) async fn launch_minecraft(
     args: Vec<String>,
     dir: &PathBuf,
     user_agent: &str,
