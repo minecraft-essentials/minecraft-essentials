@@ -6,10 +6,18 @@ use reqwest::Client;
 use super::download_files;
 
 // use super::download_files;
-#[derive(Debug)]
+/// Java Runtime Environment (JRE) for Minecraft.
+#[derive(Debug, Clone)]
 pub enum JRE {
-    Adoptium, // We only support this one for now more will come soon.
+    /// Adoptium or known as Eclipse Temurin is the Java Runtime Environment (JRE) by Eclipse Foundation.
+    /// It is open-source and free to use for all Java projects.
+    Adoptium,
+    /// Zulu is a free and closed-sourced Java Runtime Environment (JRE) by Azul Systems.
+    /// It is not open-source but free to use for all Java projects.
+    /// WIP: Not Supported Yet
     Zulu,
+    /// GraalVM is a free and open-source Java Runtime Environment (JRE) by Oracle.
+    /// It is open-source and free to use for all Java projects.
     GraalVM,
     //TODO: More Java Runtime Enviroments (JRE) Supported to make it not limited
 }
@@ -141,7 +149,7 @@ fn arch_url(arch: Vec<ArchUrl>) -> Option<String> {
                 }
             }
         } else {
-            for os in os.as_deref() {
+            while let Some(os) = os.as_deref() {
                 if os == env::consts::OS {
                     for arch in &arch {
                         match &arch.arch {
