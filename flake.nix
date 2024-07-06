@@ -55,7 +55,7 @@
                   SystemConfiguration
                 ]
               )
-              ++ (with pkgs; [ hyperfine ]);
+              ++ (with pkgs; [ hyperfine bacon ]);
 
             # Define Enviroment Virables
             env = {
