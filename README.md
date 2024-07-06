@@ -55,7 +55,7 @@ use std::env;
 ### Launching
 ```rust
 use minecraft-essentials::LaunchBuilder;
-  let args = ["--argexample 123"]
+  let args = ["--argexample 123"] 
   let mut builder = LaunchBuilder::builder();
   builder
       .args(args)
