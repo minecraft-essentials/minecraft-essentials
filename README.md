@@ -1,6 +1,6 @@
 # Minecraft-Essentials
 
-The offical rust/cargo package that provides essential functionality for Minecraft client launchers.
+The official rust/cargo package that provides essential functionality for Minecraft client launchers.
 
 ## Features
 
@@ -35,89 +35,34 @@ minecraft-essentials = "0.2.9"
 
 ## Usage
 
-### Authentifcation
-#### OAuth Custom Authentifcation | OAuth2.0
-
-This example demonstrates how to use the OAuth authentication method provided by `minecraft-essentials`, `oauth` feature.
-
+### Authentication
 ```rust
-use minecraft_essentials::*;
+use minecraft-essentials::{AuthentifcationBuilder, AuthType};
+use std::env;
 
-async fn Oauth(client_id: &str, client_secret: &str, port: Option<u16>, bedrockrel: bool) {
-// Initialize the OAuth authentication object
-let auth = Oauth::new(client_id, port);
-
-// Print the URL needed for authentication
-println!("URL: {}", auth.url());
-
-// Launch the authentication process
- let auth_info = auth.launch(bedrockrel, client_secret).await;
-
-// Print the authentication information
-println!("{:?}", auth_info)
-}
-
-fn main() {
-    Oauth("CLientID", "ClientSecret", None, false);
-}
+  let client_id = "ClientID here";
+  let client_secret = env::var("Client_Secret").expect("Expected Client Secret.");
+  let mut builder = AuthenticationBuilder::builder();
+  builder
+      .of_type(AuthType::\* type*\)
+      .client_id(&client_id)
+      .client_secret(&client_secret) // Only Required for ouath
+      .port(Some(8000)); // Optional for ouath but defaults to port 8000
+  println!("Info: {:?}", builder.get_info().await.unwrap()) // users info 
+  println!("Authentifcation Final Info: {:?}", builder.launch.await.unwrap()) // for your launcher.
 ```
-Just to note for Tauri support [check out here](.github/doc/tauri.md)
-
-
-#### Device Code Custom Authentication | DeviceCode
-
-> [!WARNING]
-> This is still work in progress **so it may change**.
-
-
-This example demonstrates how to use the Device Code authentication method provided by `minecraft-essentials`, `devicecode` feature.
-
-```rust, ignore
-use minecraft_essentials::*;
-
-
-async fn deviceCode(client_id: &str) {
-  // Create a new device code instance 
-  let code = DeviceCode::new(client_id).expect("Expected Code");
-
-  // Print the device code information 
-  println!("Stuff Here: {}", code.preinfo());
-
-  // Launch the authentication process 
-  let code_info = code.launch().await?;
-}
-
-fn main() {
-    // Initialize Device Code authentication with your client ID 
-    deviceCode("111231209837123098712");
-}
-```
-
-#### Acutal Minecraft Authentfication
-
-> [!CAUTION]
-> This is currently in the [roadmap][Roadmap] for 0.2.12-14 currently it's not avalible.
-
 
 ### Launching
-
-#### Custom Launching 
 ```rust
-use minecraft_essentials::Launch;
-use std::path::Path;
-
-let args = vec!["--uuid:LauncherUUID".to_string(), "--token:Beartoken".to_string()];
-let jre_path = Path::new("/path/to/jre").to_path_buf();
-let java_exe = "/your/java/path";
-
-// Init the instance of launch
-let launch = Launch::new(args, java_exe.to_string(), Some(jre_path.clone()), Some(false)).expect("Expected Launch");
-
-// Grab the info to verify that your doing everything currect.
-let launch_info = launch.info();
-println!("Launching with: {:?}", launch_info);
-
-let _ = launch.launch_jre();
+use minecraft-essentials::LaunchBuilder;
+  let args = ["--argexample 123"]
+  let mut builder = LaunchBuilder::builder();
+  builder
+      .args(args)
+      .java(Some(PathBuf::from("C:\\Program Files\\Java\\jdk-17.0.1\\bin\\java.exe"))) // Custom Java Path for custom java
+      .client(Some(PathBuf::from("C:\\Users\\User\\Desktop\\Client.jar"))) // Minecraft Client Path for custom client
+      .mods(Some(vec![PathBuf::from("C:\\Users\\User\\Desktop\\Mod1.jar"), PathBuf::from("C:\\Users\\User\\Desktop\\Mod2.jar")])) // Custom Mods Path for custom mods (Optional)
+      .launch(None) // Launches Minecraft
 ```
 
 ## Contributing
