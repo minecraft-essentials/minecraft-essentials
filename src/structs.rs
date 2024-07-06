@@ -1,6 +1,4 @@
-use std::path::PathBuf;
-
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 // Dry (Do not Repeat Yourself)
 
@@ -124,52 +122,4 @@ pub(crate) struct Downloads {
     pub(crate) client_mappings: Option<FileIndex>,
     pub(crate) server: Option<FileIndex>,
     pub(crate) server_mappings: Option<FileIndex>,
-}
-
-/////////....../////
-
-/// Game Arguments for Minecraft
-#[derive(Serialize, Clone)]
-pub struct GameArguments {
-    /// ClientId
-    pub client_id: Option<String>,
-    /// Username (Not Recommended)
-    pub username: Option<String>,
-    /// Version of Minecraft
-    pub version: Option<String>,
-    /// UUID
-    pub uuid: Option<String>,
-
-    /// Game Directory
-    pub game_directory: Option<PathBuf>,
-    /// Window Size
-    pub window_size: Option<(u32, u32)>,
-    /// Quick Play
-    pub quick_play: Option<QuickPlayArguments>,
-}
-
-/// Represents arguments for quick play options in Minecraft.
-#[derive(Serialize, Clone)]
-pub enum QuickPlayArguments {
-    /// Singleplayer
-    SinglePlayer(String),
-    /// Multiplayer
-    MultiPlayer(String),
-    /// None
-    None,
-}
-
-/// Java Arguments for Minecraft
-#[derive(Serialize)]
-pub struct JavaArguments {
-    /// Minimal Memory
-    pub min_memory: Option<u32>,
-    /// Maximum Memory
-    pub max_memory: u32,
-    /// Launcher Name
-    pub launcher_name: Option<String>,
-    /// Launcher Version
-    pub launcher_version: Option<String>,
-    /// Class Path
-    pub class_path: Option<String>,
 }
