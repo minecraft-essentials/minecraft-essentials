@@ -37,6 +37,7 @@ use auth::{
     microsoft::{authenticate_device, device_authentication_code, ouath, ouath_token, SCOPE},
     xbox::{xbl, xsts},
 };
+#[cfg(feature = "launch")]
 use launch::JavaJRE;
 use serde::{Deserialize, Serialize};
 
@@ -44,6 +45,7 @@ use serde::{Deserialize, Serialize};
 pub(crate) const EXPERIMENTAL_MESSAGE: &str =
     "\x1b[33mNOTICE: You are using an experimental feature.\x1b[0m";
 
+#[cfg(feature = "launch")]
 pub(crate) const MANIFEST_URL: &str =
     "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
 
@@ -337,6 +339,7 @@ impl AuthenticationBuilder {
 }
 
 /// A builder that launches minecraft or your own custom client.
+#[cfg(feature = "launch")]
 pub struct LaunchBuilder {
     args: Vec<String>,
     java_path: Option<PathBuf>,
@@ -345,6 +348,7 @@ pub struct LaunchBuilder {
 }
 
 /// Launch Directories for minecraft
+#[cfg(feature = "launch")]
 pub struct LauncherDirs {
     /// Game Directory
     pub game_dir: PathBuf,
@@ -358,6 +362,7 @@ pub struct LauncherDirs {
     pub java_dir: PathBuf,
 }
 
+#[cfg(feature = "launch")]
 impl LaunchBuilder {
     /// Create a new instanve of `LaunchBuilder`.
     pub fn init() -> Self {
@@ -408,10 +413,12 @@ impl LaunchBuilder {
 ///
 /// This struct is used to build the launch arguments for your Minecraft client.
 /// It provides a builder-like interface for setting various launch arguments.
+#[cfg(feature = "launch")]
 pub struct LaunchArgs {
     args: Vec<String>,
 }
 
+#[cfg(feature = "launch")]
 impl LaunchArgs {
     /// Creates a new LaunchArgs builder
     pub fn builder() -> Self {
