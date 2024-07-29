@@ -23,7 +23,7 @@ bin-dir = "{ name }-{ target }-v{ version }/{ bin }{ binary-ext }"
 pkg-fmt = "tgz"
 
 [dependencies]
-tokio = { version = "1.37.0", features = ["rt-multi-thread", "macros", "sync"] }
+tokio = { version = "1.39.2", features = ["rt-multi-thread", "macros", "sync"] }
 reqwest = { version = "0.12.4", features = ["json"], optional = true }
 serde = { version = "1.0.198", features = ["derive"], optional = true }
 clap = { version = "4.5.4", optional = true, features = ["derive"] }
