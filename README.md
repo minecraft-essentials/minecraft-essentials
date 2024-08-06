@@ -1,4 +1,6 @@
 # Minecraft-Essentials
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fminecraft-essentials%2Fminecraft-essentials.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fminecraft-essentials%2Fminecraft-essentials?ref=badge_shield)
+
 
 The offical rust/cargo package that provides essential functionality for Minecraft client launchers.
 
@@ -125,6 +127,9 @@ Interested in contributing to this project? Check out [Contributing](./contribut
 ## Licensing
 
 This library is licensed under the [BSD 3.0 License](./LICENSE).
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fminecraft-essentials%2Fminecraft-essentials.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fminecraft-essentials%2Fminecraft-essentials?ref=badge_large)
 
 ## Credits
 
