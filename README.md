@@ -128,9 +128,6 @@ Interested in contributing to this project? Check out [Contributing](./contribut
 
 This library is licensed under the [BSD 3.0 License](./LICENSE).
 
-
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fminecraft-essentials%2Fminecraft-essentials.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fminecraft-essentials%2Fminecraft-essentials?ref=badge_large)
-
 ## Credits
 
 - [trippleawap](https://github.com/trippleawap) for providing a Minecraft Authentication Sample for Minecraft Implementation.
