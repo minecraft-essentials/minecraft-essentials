@@ -3,12 +3,12 @@
 #![warn(clippy::pedantic)]
 
 // Modules
-pub(crate) mod trait_alias;
 /// Error handling module for the Minecraft-Essentials library.
 ///
 /// This module contains all the error types and related functionality
 /// for error handling within the library.
 pub mod errors;
+pub(crate) mod trait_alias;
 
 /// Structs module for the Minecraft-Essentials library.
 ///
@@ -40,6 +40,7 @@ use auth::{
 #[cfg(feature = "launch")]
 use launch::JavaJRE;
 use serde::{Deserialize, Serialize};
+use trait_alias::Optional;
 
 // Constants
 pub(crate) const EXPERIMENTAL_MESSAGE: &str =
@@ -254,8 +255,12 @@ impl AuthenticationBuilder {
     }
 
     /// Port for the Temporary https Required for `OAuth``.
-    pub fn port(&mut self, port: Option<u16>) -> &mut Self {
-        self.port = port.unwrap_or(8000);
+    pub fn port<T: Optional<u16>>(&mut self, port: T) -> &mut Self {
+        let port = match port.into() {
+            Some(port) => port,
+            None => 8000,
+        };
+        self.port = port;
         self
     }
 
@@ -266,8 +271,12 @@ impl AuthenticationBuilder {
     }
 
     /// Bedrock relm related that only need xts token not bearer.
-    pub fn bedrockrel(&mut self, bedrock_rel: Option<bool>) -> &mut Self {
-        self.bedrockrel = bedrock_rel.unwrap_or(false);
+    pub fn bedrockrel<T: Optional<bool>>(&mut self, bedrock_rel: T) -> &mut Self {
+        let bedrock_rel = match bedrock_rel.into() {
+            Some(bedrock_rel) => bedrock_rel,
+            None => false,
+        };
+        self.bedrockrel = bedrock_rel;
         self
     }
 
@@ -515,9 +524,7 @@ impl DeviceCode {
     /// # Returns
     ///
     /// * `impl trait_alias::AsyncSendSync<Result<Self, reqwest::Error>>` - A future that resolves to a `Result` containing the `DeviceCode` instance or an error.
-    pub fn new(
-        client_id: &str,
-    ) -> impl trait_alias::AsyncSendSync<Result<Self, reqwest::Error>> {
+    pub fn new(client_id: &str) -> impl trait_alias::AsyncSendSync<Result<Self, reqwest::Error>> {
         println!("{}", EXPERIMENTAL_MESSAGE);
         let client_id_str = client_id.to_string();
         async move {
