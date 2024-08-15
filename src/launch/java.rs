@@ -1,6 +1,6 @@
 use std::{env, fs, path::PathBuf};
 
-use crate::{async_trait_alias::AsyncSendSync, errors::LaunchErrors};
+use crate::{errors::LaunchErrors, trait_alias::AsyncSendSync};
 use reqwest::Client;
 
 use super::download_files;

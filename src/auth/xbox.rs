@@ -1,7 +1,7 @@
 #![forbid(unsafe_code, missing_docs)]
 #![warn(clippy::pedantic)]
 
-use crate::async_trait_alias::*;
+use crate::trait_alias::*;
 use reqwest::{
     header::{self, HeaderMap, HeaderValue, ACCEPT, CONTENT_TYPE},
     Client,

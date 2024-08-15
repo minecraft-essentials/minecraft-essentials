@@ -3,7 +3,7 @@
 #![warn(clippy::pedantic)]
 
 // Modules
-pub(crate) mod async_trait_alias;
+pub(crate) mod trait_alias;
 /// Error handling module for the Minecraft-Essentials library.
 ///
 /// This module contains all the error types and related functionality
@@ -514,10 +514,10 @@ impl DeviceCode {
     ///
     /// # Returns
     ///
-    /// * `impl async_trait_alias::AsyncSendSync<Result<Self, reqwest::Error>>` - A future that resolves to a `Result` containing the `DeviceCode` instance or an error.
+    /// * `impl trait_alias::AsyncSendSync<Result<Self, reqwest::Error>>` - A future that resolves to a `Result` containing the `DeviceCode` instance or an error.
     pub fn new(
         client_id: &str,
-    ) -> impl async_trait_alias::AsyncSendSync<Result<Self, reqwest::Error>> {
+    ) -> impl trait_alias::AsyncSendSync<Result<Self, reqwest::Error>> {
         println!("{}", EXPERIMENTAL_MESSAGE);
         let client_id_str = client_id.to_string();
         async move {

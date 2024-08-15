@@ -1,7 +1,7 @@
 #![forbid(unsafe_code)]
 #![warn(clippy::pedantic)]
 
-use crate::{async_trait_alias::*, errors::AuthErrors};
+use crate::{errors::AuthErrors, trait_alias::*};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use tokio::{io::AsyncReadExt, net::TcpListener, sync::mpsc};

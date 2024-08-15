@@ -4,7 +4,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
-use crate::async_trait_alias::AsyncSendSync;
+use crate::trait_alias::AsyncSendSync;
 
 pub mod microsoft;
 pub mod xbox;
