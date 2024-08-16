@@ -1,17 +1,14 @@
-### RUST FOLDERS ###
 /target
 
 
-### ENVIROMENT VIRABLES ###
+# environment variables
 .env*
 !.env.example
 
 
-### OPERATING SYSTEM ###
+# macOS specific files
 .DS_STORE
 
-### Nix ###
+# nix
 .pre-commit-config.yaml
-.devenv
 .direnv
-!.envrc
