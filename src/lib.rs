@@ -25,6 +25,9 @@ pub mod launch;
 #[cfg(feature = "auth")]
 mod auth;
 
+#[cfg(feature = "modrinth")]
+mod modrinth;
+
 use std::path::PathBuf;
 
 use auth::microsoft::CodeResponse;
