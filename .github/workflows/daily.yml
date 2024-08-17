@@ -12,9 +12,10 @@ jobs:
     steps:
     - uses: actions/stale@v8
       with:
+        exempt-pr-labels: "release"
         stale-pr-message: 'This pull request has become stale and will be closed automatically within a period of time. Sorry about that.'
         stale-issue-message: 'This issue has become stale and will be closed automatically within a period of time. Sorry about that.'
         close-issue-message: "This pr has been closed automatically"
         close-pr-message: "This pr has been closed automatically"
-        days-before-stale: 7
-        days-before-close: 14
+        days-before-stale: 2
+        days-before-close: 7
