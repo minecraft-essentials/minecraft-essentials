@@ -10,6 +10,9 @@ permissions:
 jobs:
     test:
         name: Test for ${{ matrix.os }} on ${{ matrix.toolchain }}
+        env: 
+            Client_ID: ${{ secrets.CLIENTID }}
+            Client_Secret: ${{ secrets.CLIENTSECRET }}
         strategy:
             fail-fast: true
             matrix:
