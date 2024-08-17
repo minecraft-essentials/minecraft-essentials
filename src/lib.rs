@@ -99,14 +99,18 @@ impl Oauth {
     /// # Returns
     ///
     /// * `&str` - The authorization URL.
-    pub async fn url(&self) -> &str {
-        let builder = AuthenticationBuilder::builder();
+    pub async fn url(&self) -> String {
+        let mut builder = AuthenticationBuilder::builder();
         builder
             .port(self.port)
             .client_id(&self.client_id)
-            .auth_type(AuthType::Oauth);
-        let auth_info = builder.get_info().await._ouath_url.unwrap();
-        auth_info.as_str()
+            .of_type(AuthType::Oauth);
+        let auth_info = builder
+            .get_info()
+            .await
+            .ouath_url
+            .expect("Expected OAuth URL");
+        auth_info.clone()
     }
 
     /// Launches Minecraft using the OAuth authentication process.
@@ -220,9 +224,9 @@ pub struct AuthenticationBuilder {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AuthInfo {
     /// Device Code Info that you will recive based on AuthType::DeviceCode.
-    pub _device_code: Option<CodeResponse>,
+    pub device_code: Option<CodeResponse>,
     /// OAuth URL that you will recive based on AuthType::OAuth.
-    pub _ouath_url: Option<String>,
+    pub ouath_url: Option<String>,
 }
 
 #[cfg(feature = "auth")]
@@ -283,14 +287,14 @@ impl AuthenticationBuilder {
         if self.auth_type == AuthType::DeviceCode {
             let code = device_authentication_code(&self.client_id).await.unwrap();
             AuthInfo {
-                _device_code: Some(code),
-                _ouath_url: None,
+                device_code: Some(code),
+                ouath_url: None,
             }
         } else {
             let url = format!("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize/?clientid={}&response_type=code&redirect_uri=http://localhost:{}&response_mode=query&scope={}&state=12345", self.client_id, self.port, SCOPE);
             AuthInfo {
-                _device_code: None,
-                _ouath_url: Some(url),
+                device_code: None,
+                ouath_url: Some(url),
             }
         }
     }
