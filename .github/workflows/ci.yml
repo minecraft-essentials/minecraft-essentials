@@ -9,6 +9,7 @@ permissions:
 
 jobs:
     test:
+        timeout-minutes: 20
         name: Test for ${{ matrix.os }} on ${{ matrix.toolchain }}
         env: 
             Client_ID: ${{ secrets.CLIENTID }}
