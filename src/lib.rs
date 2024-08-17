@@ -45,6 +45,9 @@ use launch::JavaJRE;
 use serde::{Deserialize, Serialize};
 use trait_alias::Optional;
 
+#[cfg(feature = "modrinth")]
+use reqwest::Client;
+
 // Constants
 pub(crate) const EXPERIMENTAL_MESSAGE: &str =
     "\x1b[33mNOTICE: You are using an experimental feature.\x1b[0m";
@@ -611,5 +614,48 @@ impl DeviceCode {
     )]
     pub async fn refresh(&self) {
         println!("This method is deprecated and will be removed in the next minor version. Please refer to the updated documentation on using the `AuthenticationBuilder`.");
+    }
+}
+
+/// Modrinth API Implementation for your Minecraft Modpack Launcher.
+pub struct Modrinth {
+    access_token: String,
+    user_agent: String,
+}
+
+#[cfg(feature = "modrinth")]
+/// Github Repo Settings for Modrinth
+pub struct GithubModrinth {
+    /// Used as a user Agent to uniquely identify your app or something.
+    pub owner: String,
+    /// Used as a user Agent to uniquely identify your app or something.
+    pub repo: String,
+    /// Your Project/Program Version
+    pub project_version: String,
+    /// Used to authenticate with Modrinth API
+    /// Optional if you are using something that doesn't require authentication.
+    pub access_token: Option<String>,
+}
+
+#[cfg(feature = "modrinth")]
+impl Modrinth {
+    /// Create a new instance of using Modrinth API.
+    pub fn init(github: GithubModrinth, contact_email: String) -> Self {
+        let user_agent = format!(
+            "{}/{}/{} ({})",
+            github.owner, github.repo, github.project_version, contact_email
+        );
+        Self {
+            access_token: github.access_token.unwrap_or("".to_string()),
+            user_agent,
+        }
+    }
+
+    /// Get a project from Modrinth.
+    pub async fn get_project(
+        &self,
+        project: &str,
+    ) -> Result<modrinth::projects::ModrinthProject, errors::ModrinthErrors> {
+        modrinth::projects::get_project(project, &self.user_agent).await
     }
 }

@@ -6,6 +6,7 @@ use thiserror::Error;
 
 /// The `AuthErrors` represents potential errors that can occur during Authentication.
 #[derive(Display, Error, Debug)]
+#[cfg(feature = "auth")]
 pub enum AuthErrors {
     /// Authentcation Failed: {0}
     AuthenticationFailure(String),
@@ -27,6 +28,7 @@ pub enum AuthErrors {
 
 /// The `LaunchErrors` enum represents potential errors that can occur during Launch-related operations.
 #[derive(Display, Error, Debug)]
+#[cfg(feature = "launch")]
 pub enum LaunchErrors {
     /// Unsupported Device: {0}
     UnsupportedDevice(String),
@@ -42,6 +44,7 @@ pub enum LaunchErrors {
 
 /// The `XboxError` enum represents potential errors that can occur during Xbox-related operations.
 #[derive(Display, Error, Debug)]
+#[cfg(feature = "auth")]
 pub enum XboxError {
     /// Response Failed: {0}
     ResponseError(String),
@@ -49,7 +52,18 @@ pub enum XboxError {
 
 /// The `XTSError` enum represents potential errors that can occur during XTS-related operations.
 #[derive(Display, Error, Debug)]
+#[cfg(feature = "auth")]
 pub enum XTSError {
     /// Response Failed: {0}
     ResponseError(String),
+}
+
+/// Errors that can occur while interacting with the Modrinth API.
+#[derive(Display, Debug, thiserror::Error)]
+#[cfg(feature = "modrinth")]
+pub enum ModrinthErrors {
+    /// The request failed.
+    RequestError(String),
+    /// The response could not be deserialized.
+    DeserializationError(String),
 }

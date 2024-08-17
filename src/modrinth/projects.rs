@@ -1,14 +1,17 @@
 use reqwest::Client;
 
+use crate::errors::ModrinthErrors;
+
+use super::MODRINTH_API;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 pub struct ModrinthProject {
     pub title: String,
     pub description: String,
     pub categories: Vec<String>,
-    pub client_side: Side,
-    pub server_side: Side,
+    pub client_side: String,
+    pub server_side: String,
     pub body: String,
     status: String,
     pub additional_categories: Vec<String>,
@@ -45,40 +48,20 @@ pub struct License {
     pub url: String,
 }
 
-pub enum Side {
-    Required,
-    Optional,
-    Unsupported,
-}
-
-impl Side {
-    pub fn to_string(&self) -> String {
-        match self {
-            Side::Required => "required".to_owned(),
-            Side::Optional => "optional".to_owned(),
-            Side::Unsupported => "unsupported".to_owned(),
-        }
-    }
-}
-
-pub enum AppovalStatus {
-    Approved,
-    Pending,
-    Rejected,
-}
-
-impl AppovalStatus {
-    pub fn to_string(&self) -> String {
-        match self {
-            AppovalStatus::Approved => "approved".to_owned(),
-            AppovalStatus::Pending => "pending".to_owned(),
-            AppovalStatus::Rejected => "rejected".to_owned(),
-        }
-    }
-}
-
-pub async fn get_project(project: String) {
+pub async fn get_project(
+    project: &str,
+    user_agent: &str,
+) -> Result<ModrinthProject, ModrinthErrors> {
     let url = format!("{}/project/{}", MODRINTH_API, project);
-    let res = Client::new().get(url).send().await.unwrap();
-    let res_json = res.json::<ModrinthProject>().await.unwrap();
+    let res = Client::new()
+        .get(url)
+        .header("User-Agent", user_agent)
+        .send()
+        .await
+        .map_err(|err| ModrinthErrors::RequestError(err.to_string()))?;
+    let res_json: ModrinthProject = res
+        .json()
+        .await
+        .map_err(|err| ModrinthErrors::DeserializationError(err.to_string()))?;
+    Ok(res_json)
 }
