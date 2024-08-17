@@ -289,7 +289,11 @@ impl AuthenticationBuilder {
                 _ouath_url: None,
             }
         } else {
-            AuthInfo { _device_code: None, _ouath_url: Some(format!("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize/?clientid={}&response_type=code&redirect_uri=http://localhost:{}&response_mode=query&scope={}&state=12345", self.client_id, self.port, SCOPE)) }
+            let url = format!("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize/?clientid={}&response_type=code&redirect_uri=http://localhost:{}&response_mode=query&scope={}&state=12345", self.client_id, self.port, SCOPE);
+            AuthInfo {
+                _device_code: None,
+                _ouath_url: Some(url),
+            }
         }
     }
 
