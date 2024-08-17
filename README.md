@@ -1,6 +1,13 @@
 # Minecraft-Essentials
+[![Crates.io Version](https://img.shields.io/crates/v/minecraft-essentials)](https://crates.io/crates/minecraft-essentials)
+[![Crates.io Downloads](https://img.shields.io/crates/d/minecraft-essentials)](https://crates.io/crates/minecraft-essentials)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fminecraft-essentials%2Fminecraft-essentials.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fminecraft-essentials%2Fminecraft-essentials?ref=badge_shield)
+[![CI](https://github.com/minecraft-essentials/minecraft-essentials/actions/workflows/ci.yml/badge.svg)](https://github.com/minecraft-essentials/minecraft-essentials/actions/workflows/ci.yml)
+[![GitHub Repo stars](https://img.shields.io/github/stars/minecraft-essentials/minecraft-essentials)](https://github.com/minecraft-essentials/minecraft-essentials/stargazers)
+
 
 The official rust/cargo package that provides essential functionality for Minecraft client launchers.
+
 
 ## Features
 
