@@ -34,7 +34,7 @@
           ...
         }:
         let
-          inherit (pkgs.darwin.apple_sdk.frameworks) CoreFoundation;
+          inherit (pkgs.darwin.apple_sdk.frameworks) SystemConfiguration;
           toolchain = pkgs.rustPlatform;
         in
         {
@@ -50,6 +50,8 @@
               rust-analyzer-unwrapped
               darwin.libobjc
               libiconv
+            ] ++ lib.optionals stdenv.isDarwin [
+              SystemConfiguration
             ];
             RUST_SRC_PATH = "${toolchain.rustLibSrc}";
           };
