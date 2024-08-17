@@ -10,7 +10,7 @@ async fn test_oauth_url() {
     let port = 8000;
     let expected_url = format!(
         "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize/?client_id={}&response_type=code&redirect_uri=http://localhost:{}&response_mode=query&scope={}&state=12345",
-        port,client_id, SCOPE
+        client_id, port, SCOPE
     );
     let oauth = Oauth::new(&client_id, Some(port));
     let url = oauth.url().await;
@@ -49,13 +49,13 @@ async fn test_authentication_info() {
         .port(port);
 
     let assert_url = format!("https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize/?clientid={}&response_type=code&redirect_uri=http://localhost:{}&response_mode=query&scope={}&state=12345", client_id, port, SCOPE);
-    let url = builder.get_info().await._ouath_url.unwrap(); // Note: There seems to be a typo in the method name. It should likely be something like get_oauth_url()
+    let url = builder.get_info().await.ouath_url.unwrap(); // Note: There seems to be a typo in the method name. It should likely be something like get_oauth_url()
 
     assert_eq!(assert_url, url);
 
     builder.of_type(AuthType::DeviceCode).client_id(&client_id);
 
-    let device_code = builder.get_info().await._device_code.unwrap();
+    let device_code = builder.get_info().await.device_code.unwrap();
     let url = device_code.verification_uri.clone();
     let message = device_code.message.clone();
     let expires_in = device_code.expires_in.clone();
