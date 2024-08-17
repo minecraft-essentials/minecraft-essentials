@@ -58,5 +58,6 @@ auth = [
     "dep:rand",
     "dep:url",
 ]
+refresh = ["auth"]
 launch = ["dep:serde_json", "dep:serde", "dep:reqwest"]
 cli = ["dep:clap", "auth"]
