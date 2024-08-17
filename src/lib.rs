@@ -60,7 +60,6 @@ pub(crate) const MANIFEST_URL: &str =
     since = "0.2.12"
 )]
 pub struct Oauth {
-    url: String,
     port: u16,
     client_id: String,
 }
@@ -87,16 +86,9 @@ impl Oauth {
     /// * `Self` - A new instance of `Oauth` configured with the provided client ID and port.
     pub fn new(client_id: &str, port: Option<u16>) -> Self {
         let port = port.unwrap_or(8000);
-        let params = format!("client_id={}&response_type=code&redirect_uri=http://localhost:{}&response_mode=query&scope={}&state=12345", client_id, port, SCOPE);
-        let url = format!(
-            "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize/?{}",
-            params
-        );
-
         Self {
-            url,
-            port,
             client_id: client_id.to_string(),
+            port,
         }
     }
 
@@ -107,8 +99,14 @@ impl Oauth {
     /// # Returns
     ///
     /// * `&str` - The authorization URL.
-    pub fn url(&self) -> &str {
-        &self.url
+    pub async fn url(&self) -> &str {
+        let builder = AuthenticationBuilder::builder();
+        builder
+            .port(self.port)
+            .client_id(&self.client_id)
+            .auth_type(AuthType::Oauth);
+        let auth_info = builder.get_info().await._ouath_url.unwrap();
+        auth_info.as_str()
     }
 
     /// Launches Minecraft using the OAuth authentication process.

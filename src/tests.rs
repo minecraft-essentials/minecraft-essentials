@@ -13,8 +13,9 @@ async fn test_oauth_url() {
         port,client_id, SCOPE
     );
     let oauth = Oauth::new(&client_id, Some(port));
+    let url = oauth.url().await;
 
-    assert_eq!(oauth.url(), expected_url);
+    assert_eq!(url, expected_url);
 }
 
 #[cfg(feature = "auth")]
