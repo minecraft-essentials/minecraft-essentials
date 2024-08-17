@@ -1,0 +1,88 @@
+name: CI
+on:
+    push:
+    pull_request:
+    workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+    test:
+        name: Test for ${{ matrix.os }} on ${{ matrix.toolchain }}
+        strategy:
+            fail-fast: true
+            matrix:
+                os: [ubuntu-latest, macos-latest, windows-latest]
+                toolchain: [stable, beta, nightly]
+        runs-on: ${{ matrix.os }}
+        steps:
+            - uses: actions/checkout@v3
+            - run: |
+                rustup update ${{ matrix.toolchain }} && rustup default ${{ matrix.toolchain }}
+                cargo build --verbose
+                cargo test --verbose
+    deploy-crate:
+        name: Deploy to crates.io
+        needs: test
+        if: startsWith(github.ref, 'refs/tags/') && contains(github.ref, 'v[0-9]*')
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - run: cargo publish --token ${{ secrets.CRATES_IO_TOKEN }}
+    deploy-cli:
+        name: Deploy CLI to github release 
+        needs: test
+        env:
+            BUILD_CMD: cargo
+        strategy:
+            matrix:
+                include:
+                    - { target: aarch64-unknown-linux-gnu   , os: ubuntu-20.04, use-cross: true }
+                    - { target: i686-pc-windows-msvc        , os: windows-2019                  }
+                    - { target: i686-unknown-linux-gnu      , os: ubuntu-20.04, use-cross: true }
+                    - { target: i686-unknown-linux-musl     , os: ubuntu-20.04, use-cross: true }
+                    - { target: x86_64-apple-darwin         , os: macos-12                      }
+                    - { target: aarch64-apple-darwin        , os: macos-12                      }
+                    - { target: x86_64-pc-windows-msvc      , os: windows-2019                  }
+                    - { target: x86_64-unknown-linux-gnu    , os: ubuntu-20.04, use-cross: true }
+                    - { target: x86_64-unknown-linux-musl   , os: ubuntu-20.04, use-cross: true }
+        if: startsWith(github.ref, 'refs/tags/') && contains(github.ref, 'v[0-9]*')
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+
+            - if: matrix.target == 'aarch64-unknown-linux-gnu'
+              run: sudo apt-get update && sudo apt-get install gcc-multilib
+
+            - name: Install cross
+              if: matrix.use-cross
+              run: | 
+                cargo install cargo-binstall
+                cargo binstall cross
+            
+            - name: Use cross as build tool
+              if: matrix.use-cross
+              run: echo "BUILD_CMD=cross" >> $GITHUB_ENV
+            
+            - name: Build
+              run: $BUILD_CMD build --release --target ${{ matrix.target }} --bin minecraft-essentials
+            
+            - name: Determine paths
+              id: paths
+              run: |
+                EXE_suffix="" ; case ${{ matrix.target }} in *-pc-windows-*) EXE_suffix=".exe" ;; esac
+                BIN_PATH="target/${{ matrix.target }}/release/${NAME}${EXE_suffix}"
+                PKG_NAME=${NAME}-${VERSION}-${{ matrix.target }}${EXE_suffix}
+                cp ${BIN_PATH} ${PKG_NAME}
+                echo "PKG_NAME=${PKG_NAME}" >> $GITHUB_OUTPUT
+            
+            - name: Compress binary
+              run: upx ${{ steps.paths.outputs.PKG_NAME }}
+            
+            - name: Upload binary
+              uses: softprops/action-gh-release@v2
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                files: ${{ steps.paths.outputs.PKG_NAME }}
