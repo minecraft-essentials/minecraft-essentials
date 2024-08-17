@@ -35,17 +35,23 @@
         }:
         let
           inherit (pkgs.darwin.apple_sdk.frameworks) CoreFoundation;
+          toolchain = pkgs.rustPlatform;
         in
         {
           devShells.default = pkgs.mkShell {
             packages = with pkgs; [
-              rustc
-              cargo
+              (with toolchain;
+              [
+                rustc 
+                cargo
+              ])
               clippy
               rustfmt
+              rust-analyzer-unwrapped
               darwin.libobjc
               libiconv
             ];
+            RUST_SRC_PATH = "${toolchain.rustLibSrc}";
           };
         };
     };
