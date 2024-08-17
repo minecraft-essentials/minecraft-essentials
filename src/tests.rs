@@ -72,13 +72,13 @@ async fn test_authentication() {
     let _ = dotenv();
     let client_id = env::var("Client_ID").expect("Expected Client ID.");
     let client_secret = env::var("Client_Secret").expect("Expected Client Secret.");
-    let port = 8000;
+    let port: u16 = 8000;
     let mut builder = AuthenticationBuilder::builder();
     builder
         .of_type(AuthType::Oauth)
         .client_id(&client_id)
         .client_secret(&client_secret)
-        .port(Some(port.parse::<u16>().unwrap()));
+        .port(Some(port));
 
     let auth_info = builder.launch().await.unwrap();
     let access_token = auth_info.access_token.unwrap();
