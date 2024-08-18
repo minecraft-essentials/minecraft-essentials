@@ -62,8 +62,10 @@ pub enum XTSError {
 #[derive(Display, Debug, thiserror::Error)]
 #[cfg(feature = "modrinth")]
 pub enum ModrinthErrors {
-    /// The request failed.
+    /// The request failed: {0}.
     RequestError(String),
-    /// The response could not be deserialized.
+    /// The response could not be deserialized: {0}.
     DeserializationError(String),
+    /// The response could not be serialized: {0}.
+    SerializationError(String),
 }

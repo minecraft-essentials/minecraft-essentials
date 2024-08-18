@@ -66,3 +66,42 @@ async fn test_authentication_info() {
     assert_eq!(expires_in, device_code.expires_in);
     assert_eq!(user_code, device_code.user_code);
 }
+
+struct ProjcetTest {
+    name: String,
+    description: String,
+    license: String,
+}
+
+#[cfg(feature = "modrinth")]
+#[tokio::test]
+async fn test_modrinth_project() {
+    let _ = dotenv();
+
+    let project = Modrinth::init(
+        GithubModrinth {
+            owner: "modrinth".to_string(),
+            repo: "modrinth".to_string(),
+            project_version: "0.2.12".to_string(),
+            access_token: None,
+        },
+        "contact@minecraft-essentials.com".to_string(),
+    )
+    .get_project("fabric-api")
+    .await;
+
+    let project_expected = ProjcetTest {
+        name: "Fabric API".to_string(),
+        description: "Lightweight and modular API providing common hooks and intercompatibility measures utilized by mods using the Fabric toolchain.".to_string(),
+        license: "Apache License 2.0".to_string(),
+    };
+
+    // Recive a response modrnth project
+    if let Ok(project) = project {
+        assert_eq!(project.title, project_expected.name);
+        assert_eq!(project.description, project_expected.description);
+        assert_eq!(project.license.name, project_expected.license);
+    } else {
+        panic!("Failed to get project: {:?}", project);
+    }
+}
