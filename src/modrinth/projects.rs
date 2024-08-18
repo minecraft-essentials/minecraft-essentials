@@ -13,7 +13,7 @@ pub struct ModrinthProject {
     pub client_side: String,
     pub server_side: String,
     pub body: String,
-    status: String,
+    pub status: String,
     pub additional_categories: Vec<String>,
     pub issues_url: String,
     pub source_url: String,
@@ -63,5 +63,6 @@ pub async fn get_project(
         .json()
         .await
         .map_err(|err| ModrinthErrors::DeserializationError(err.to_string()))?;
+
     Ok(res_json)
 }
