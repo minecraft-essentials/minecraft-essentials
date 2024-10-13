@@ -42,26 +42,10 @@ pub enum LaunchErrors {
     Requirements(String),
 }
 
-/// The `XboxError` enum represents potential errors that can occur during Xbox-related operations.
-#[derive(Display, Error, Debug)]
-#[cfg(feature = "auth")]
-pub enum XboxError {
-    /// Response Failed: {0}
-    ResponseError(String),
-}
-
-/// The `XTSError` enum represents potential errors that can occur during XTS-related operations.
-#[derive(Display, Error, Debug)]
-#[cfg(feature = "auth")]
-pub enum XTSError {
-    /// Response Failed: {0}
-    ResponseError(String),
-}
-
 /// Errors that can occur while interacting with the Modrinth API.
 #[derive(Display, Debug, thiserror::Error)]
-#[cfg(feature = "modrinth")]
-pub enum ModrinthErrors {
+#[cfg(feature = "modplatforms")]
+pub enum ModPlatformsErrors {
     /// The request failed: {0}.
     RequestError(String),
     /// The response could not be deserialized: {0}.

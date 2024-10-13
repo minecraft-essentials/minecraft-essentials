@@ -9,7 +9,7 @@ use reqwest::{
 use serde::Deserialize;
 use serde_json::{json, Value};
 
-use crate::errors::{XTSError, XboxError};
+use crate::errors::AuthErrors;
 #[derive(Deserialize, Debug)]
 pub struct Xui {
     pub uhs: String,
@@ -29,7 +29,7 @@ pub struct XblOutput {
     pub display_claims: DisplayClaims,
 }
 
-pub fn xbl(token: &str) -> impl AsyncSendSync<Result<XblOutput, XboxError>> {
+pub fn xbl(token: &str) -> impl AsyncSendSync<Result<XblOutput, AuthErrors>> {
     let client = Client::new();
     let url = format!("https://user.auth.xboxlive.com/user/authenticate");
     let rps_ticket = format!("d={}", token);
@@ -55,7 +55,7 @@ async fn xbl_internal(
     url: String,
     headers: HeaderMap,
     body: Value,
-) -> Result<XblOutput, XboxError> {
+) -> Result<XblOutput, AuthErrors> {
     let result = client
         .post(url)
         .headers(headers)
@@ -65,18 +65,18 @@ async fn xbl_internal(
 
     let std::result::Result::Ok(response) = result else {
         println!("Part 1");
-        return Err(XboxError::ResponseError(
-            "Failed to send request".to_string(),
+        return Err(AuthErrors::ResponseError(
+            "Failed to send request to xbox".to_string(),
         ));
     };
     let text = response
         .text()
         .await
-        .map_err(|_| XboxError::ResponseError("Failed to send request".to_string()))?;
+        .map_err(|_| AuthErrors::ParseError("Failed to pass text from xbox".to_string()))?;
 
     let std::result::Result::Ok(token) = serde_json::from_str::<XblOutput>(&text) else {
-        return Err(XboxError::ResponseError(
-            "Failed to send request".to_string(),
+        return Err(AuthErrors::ParseError(
+            "Failed to pass text to json".to_string(),
         ));
     };
     std::result::Result::Ok(token)
