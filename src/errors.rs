@@ -42,9 +42,9 @@ pub enum LaunchErrors {
     Requirements(String),
 }
 
-/// Errors that can occur while interacting with the Modrinth API.
+/// Errors that can occur while interacting with the Modplatforms.
 #[derive(Display, Debug, thiserror::Error)]
-#[cfg(feature = "modplatforms")]
+#[cfg(any(feature = "modrinth", feature = "curseforge"))]
 pub enum ModPlatformsErrors {
     /// The request failed: {0}.
     RequestError(String),
