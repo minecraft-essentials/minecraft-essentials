@@ -50,6 +50,7 @@
 					rustfmt
 					rust-analyzer-unwrapped
 					libiconv
+					pkg-config
 				] ++ lib.optionals stdenv.isDarwin [
 				darwin.libobjc  
 				SystemConfiguration
