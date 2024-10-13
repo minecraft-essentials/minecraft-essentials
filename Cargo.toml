@@ -49,7 +49,7 @@ sha-1 = "0.10.1"
 dotenv = { version = "0.15.0" }
 
 [features]
-default = ["auth", "cli", "launch", "modrinth"]
+default = ["auth", "cli", "launch", "modrinth", "curseforge"]
 auth = [
     "dep:serde_urlencoded",
     "dep:serde_json",
@@ -58,7 +58,9 @@ auth = [
     "dep:rand",
     "dep:url",
 ]
-modrinth = ["dep:reqwest"]
-refresh = ["auth"]
 launch = ["dep:serde_json", "dep:serde", "dep:reqwest"]
+refresh = ["auth"]
+# Mod Platforms
+modrinth = ["dep:reqwest"]
+curseforge = []
 cli = ["dep:clap", "auth"]
