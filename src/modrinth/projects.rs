@@ -2,7 +2,7 @@ use std::fmt::format;
 
 use reqwest::Client;
 
-use crate::errors::ModrinthErrors;
+use crate::errors::ModPlatformErrors;
 
 use super::MODRINTH_API;
 use serde::{Deserialize, Serialize};
@@ -56,7 +56,7 @@ pub struct DonationUrl {
 pub async fn get_project(
     project: &str,
     user_agent: &str,
-) -> Result<ModrinthProject, ModrinthErrors> {
+) -> Result<ModrinthProject, ModPlatformErrors> {
     let url = format!("{}/project/{}", MODRINTH_API, project);
     let client = Client::new();
     let res = client
@@ -64,10 +64,15 @@ pub async fn get_project(
         .header("User-Agent", user_agent)
         .send()
         .await
-        .map_err(|err| ModrinthErrors::RequestError(err.to_string()))?;
+        .map_err(|err| {
+            ModplatformErrors::RequestError("Failed to request to modrinth: ", err.to_string())
+        })?;
 
     let modrinth_project: ModrinthProject = res.json().await.map_err(|err| {
-        ModrinthErrors::DeserializationError(format!("JSON deserialization error: {}", err))
+        ModPlatformErrors::DeserializationError(format!(
+            "Failed to deserialize modrinth error: {}",
+            err
+        ))
     })?;
 
     Ok(modrinth_project)
