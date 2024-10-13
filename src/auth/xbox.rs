@@ -91,7 +91,10 @@ pub struct XtsOutput {
     pub display_claims: DisplayClaims,
 }
 
-pub fn xsts(xbl_token: &str, bedrock_rel: bool) -> impl AsyncSendSync<Result<XtsOutput, XTSError>> {
+pub fn xsts(
+    xbl_token: &str,
+    bedrock_rel: bool,
+) -> impl AsyncSendSync<Result<XtsOutput, AuthErrors>> {
     let url = format!("https://xsts.auth.xboxlive.com/xsts/authorize");
     let bedrock_party = "https://pocket.realms.minecraft.net/";
     let java_party = "rp://api.minecraftservices.com/";
@@ -130,7 +133,7 @@ async fn xsts_internal(
     url: String,
     body: Value,
     headers: HeaderMap,
-) -> Result<XtsOutput, XTSError> {
+) -> Result<XtsOutput, AuthErrors> {
     let result = client
         .post(url)
         .body(body.to_string())
@@ -140,18 +143,18 @@ async fn xsts_internal(
 
     let std::result::Result::Ok(response) = result else {
         println!("Part  1");
-        return Err(XTSError::ResponseError(
-            "Failed to send request".to_string(),
+        return Err(AuthErrors::ResponseError(
+            "Failed to return ok for xts".to_string(),
         ));
     };
     let text = response
         .text()
         .await
-        .map_err(|_| XTSError::ResponseError("Failed to read response text".to_string()))?;
+        .map_err(|_| AuthErrors::ParseError("Failed to parse text from xts".to_string()))?;
     let std::result::Result::Ok(token) = serde_json::from_str::<XtsOutput>(&text) else {
         println!("Part  2");
-        return Err(XTSError::ResponseError(
-            "Failed to parse response".to_string(),
+        return Err(AuthErrors::ParseError(
+            "Failed to parse text to json from xts".to_string(),
         ));
     };
     Ok(token)
