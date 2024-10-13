@@ -45,9 +45,6 @@ use launch::JavaJRE;
 use serde::{Deserialize, Serialize};
 use trait_alias::Optional;
 
-#[cfg(feature = "modrinth")]
-use reqwest::Client;
-
 // Constants
 pub(crate) const EXPERIMENTAL_MESSAGE: &str =
     "\x1b[33mNOTICE: You are using an experimental feature.\x1b[0m";
