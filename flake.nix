@@ -40,6 +40,7 @@
 		{
 			devShells.default = pkgs.mkShell {
 				packages = with pkgs; [
+					openssl
 					(with toolchain;
 					[
 					 rustc 
