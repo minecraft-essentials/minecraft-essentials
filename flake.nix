@@ -51,6 +51,7 @@
 					rust-analyzer-unwrapped
 					libiconv
 					pkg-config
+					cargo-update # Util for updating packages
 				] ++ lib.optionals stdenv.isDarwin [
 				darwin.libobjc  
 				SystemConfiguration
